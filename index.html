@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ROOT 全栈工程师 · 招聘看板</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #060a14;
+    --bg-card: #0d1321;
+    --bg-card-hover: #131b2e;
+    --border: #1a2440;
+    --border-glow: #2a3a60;
+    --text: #c8d6e5;
+    --text-dim: #5a6a80;
+    --text-bright: #e8f0fa;
+    --amber: #f0b429;
+    --amber-dim: #c4941e;
+    --amber-glow: rgba(240, 180, 41, 0.15);
+    --cyan: #00d4ff;
+    --cyan-dim: #0098b8;
+    --cyan-glow: rgba(0, 212, 255, 0.12);
+    --green: #34d399;
+    --green-glow: rgba(52, 211, 153, 0.15);
+    --red: #f87171;
+    --red-glow: rgba(248, 113, 113, 0.2);
+    --red-pulse: rgba(248, 113, 113, 0.4);
+    --yellow: #fbbf24;
+    --purple: #a78bfa;
+    --purple-glow: rgba(167, 139, 250, 0.15);
+    --funnel-1: #0ea5e9;
+    --funnel-2: #6366f1;
+    --funnel-3: #8b5cf6;
+    --funnel-4: #ef4444;
+    --gray: #6b7280;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  body {
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(10, 40, 80, 0.4) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 20% 80%, rgba(99, 102, 241, 0.06) 0%, transparent 50%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(240, 180, 41, 0.04) 0%, transparent 50%),
+      var(--bg);
+  }
+
+  .dashboard {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    height: 100vh;
+    max-height: 900px;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 16px 24px 12px;
+    gap: 12px;
+  }
+
+  /* ─── Header ─── */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .header-badge {
+    background: linear-gradient(135deg, var(--amber) 0%, #e09400 100%);
+    color: #000;
+    font-family: 'Orbitron', monospace;
+    font-weight: 900;
+    font-size: 11px;
+    padding: 4px 10px;
+    letter-spacing: 2px;
+    clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 0 100%, 6px 50%);
+  }
+
+  .header h1 {
+    font-family: 'Noto Sans SC', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--text-bright);
+    letter-spacing: 2px;
+  }
+
+  .header h1 span {
+    color: var(--amber);
+    font-family: 'Orbitron', monospace;
+    font-weight: 900;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .header-right .date {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--cyan-dim);
+    font-size: 11px;
+  }
+
+  .status-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: blink 2s infinite;
+    margin-right: 6px;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* ─── Main Layout ─── */
+  .main {
+    display: grid;
+    grid-template-columns: 240px 1fr 240px;
+    gap: 16px;
+    min-height: 0;
+  }
+
+  /* ─── Left Panel: Objectives ─── */
+  .panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--amber), transparent);
+  }
+
+  .panel-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--amber);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    font-family: 'Orbitron', monospace;
+  }
+
+  .objective-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+
+  .objective-text {
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 16px;
+    line-height: 1.7;
+  }
+
+  .metric-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .metric-label {
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .metric-value {
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    font-size: 22px;
+  }
+
+  .metric-value.target { color: var(--amber); }
+  .metric-value.current { color: var(--cyan); }
+  .metric-value.gap { color: var(--red); }
+
+  .progress-bar {
+    margin-top: 16px;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    width: 60%;
+    background: linear-gradient(90deg, var(--cyan), var(--amber));
+    border-radius: 3px;
+    position: relative;
+  }
+
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: -2px;
+    width: 10px;
+    height: 10px;
+    background: var(--amber);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--amber);
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-size: 10px;
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ─── Center: Funnel ─── */
+  .funnel-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 8px 0;
+    position: relative;
+  }
+
+  .funnel-stage {
+    position: relative;
+    text-align: center;
+    transition: transform 0.2s;
+    cursor: default;
+  }
+
+  .funnel-stage:hover {
+    transform: scale(1.02);
+  }
+
+  .funnel-shape {
+    position: relative;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 12px 20px;
+    min-height: 80px;
+  }
+
+  .funnel-shape::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.85;
+    z-index: 0;
+  }
+
+  .stage-1 { width: 100%; max-width: 640px; }
+  .stage-1 .funnel-shape::before {
+    background: linear-gradient(180deg, rgba(14, 165, 233, 0.18) 0%, rgba(14, 165, 233, 0.06) 100%);
+    border: 1px solid rgba(14, 165, 233, 0.35);
+    clip-path: polygon(2% 0%, 98% 0%, 92% 100%, 8% 100%);
+  }
+
+  .stage-2 { width: 78%; max-width: 500px; }
+  .stage-2 .funnel-shape::before {
+    background: linear-gradient(180deg, rgba(99, 102, 241, 0.18) 0%, rgba(99, 102, 241, 0.06) 100%);
+    border: 1px solid rgba(99, 102, 241, 0.35);
+    clip-path: polygon(4% 0%, 96% 0%, 89% 100%, 11% 100%);
+  }
+
+  .stage-3 { width: 58%; max-width: 370px; }
+  .stage-3 .funnel-shape::before {
+    background: linear-gradient(180deg, rgba(139, 92, 246, 0.18) 0%, rgba(139, 92, 246, 0.06) 100%);
+    border: 1px solid rgba(139, 92, 246, 0.35);
+    clip-path: polygon(5% 0%, 95% 0%, 87% 100%, 13% 100%);
+  }
+
+  .stage-4 { width: 42%; max-width: 270px; }
+  .stage-4 .funnel-shape::before {
+    background: linear-gradient(180deg, rgba(239, 68, 68, 0.22) 0%, rgba(239, 68, 68, 0.08) 100%);
+    border: 1px solid rgba(239, 68, 68, 0.45);
+    clip-path: polygon(6% 0%, 94% 0%, 85% 100%, 15% 100%);
+    animation: redPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes redPulse {
+    0%, 100% { border-color: rgba(239, 68, 68, 0.45); box-shadow: 0 0 0 rgba(239, 68, 68, 0); }
+    50% { border-color: rgba(239, 68, 68, 0.8); box-shadow: 0 0 20px rgba(239, 68, 68, 0.15); }
+  }
+
+  .funnel-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .stage-tag {
+    display: inline-block;
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    margin-bottom: 4px;
+  }
+
+  .stage-1 .stage-tag { background: rgba(14, 165, 233, 0.25); color: var(--funnel-1); }
+  .stage-2 .stage-tag { background: rgba(99, 102, 241, 0.25); color: var(--funnel-2); }
+  .stage-3 .stage-tag { background: rgba(139, 92, 246, 0.25); color: var(--funnel-3); }
+  .stage-4 .stage-tag { background: rgba(239, 68, 68, 0.3); color: var(--funnel-4); }
+
+  .stage-numbers {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text-bright);
+    margin: 4px 0;
+  }
+
+  .stage-numbers .big-num {
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    font-size: 20px;
+  }
+
+  .stage-1 .big-num { color: var(--funnel-1); }
+  .stage-2 .big-num { color: var(--funnel-2); }
+  .stage-3 .big-num { color: var(--funnel-3); }
+  .stage-4 .big-num { color: var(--funnel-4); }
+
+  .stage-rate {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    display: inline-block;
+  }
+
+  .rate-normal { background: rgba(52, 211, 153, 0.15); color: var(--green); }
+  .rate-warning { background: rgba(248, 113, 113, 0.2); color: var(--red); animation: rateFlash 1.5s infinite; }
+
+  @keyframes rateFlash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  .stage-detail {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 2px;
+    line-height: 1.6;
+  }
+
+  .funnel-arrow {
+    width: 1px;
+    height: 8px;
+    background: linear-gradient(180deg, var(--border-glow), transparent);
+    margin: 2px auto;
+    position: relative;
+  }
+
+  .funnel-arrow::after {
+    content: '▾';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--border-glow);
+    font-size: 8px;
+  }
+
+  /* ─── Side branch (loss) ─── */
+  .loss-branch {
+    position: absolute;
+    right: -160px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+
+  .loss-branch-left {
+    position: absolute;
+    left: -160px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    flex-direction: row-reverse;
+  }
+
+  .loss-line {
+    width: 30px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--text-dim));
+  }
+
+  .loss-branch-left .loss-line {
+    background: linear-gradient(270deg, transparent, var(--text-dim));
+  }
+
+  .loss-tag {
+    font-size: 10px;
+    color: var(--text-dim);
+    background: rgba(107, 114, 128, 0.15);
+    padding: 3px 8px;
+    border-radius: 3px;
+    border: 1px solid rgba(107, 114, 128, 0.2);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .loss-tag .num { color: var(--yellow); font-weight: 700; }
+
+  /* ─── Anomaly Badge ─── */
+  .anomaly-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: var(--red);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-left: 6px;
+    animation: redPulse 2s ease-in-out infinite;
+    font-family: 'Orbitron', monospace;
+    letter-spacing: 1px;
+  }
+
+  /* ─── Right Panel: Exit ─── */
+  .right-panel::before {
+    background: linear-gradient(90deg, transparent, var(--green), transparent);
+  }
+
+  .candidate-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 8px;
+    transition: all 0.2s;
+    background: var(--bg-card);
+  }
+
+  .candidate-card:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-glow);
+  }
+
+  .candidate-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .icon-accept { background: rgba(52, 211, 153, 0.15); border: 1px solid rgba(52, 211, 153, 0.3); }
+  .icon-pending { background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.3); }
+  .icon-reject { background: rgba(107, 114, 128, 0.15); border: 1px solid rgba(107, 114, 128, 0.3); }
+  .icon-decline { background: rgba(248, 113, 113, 0.15); border: 1px solid rgba(248, 113, 113, 0.3); }
+
+  .candidate-info { flex: 1; min-width: 0; }
+
+  .candidate-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-bright);
+  }
+
+  .candidate-status {
+    font-size: 10px;
+    margin-top: 2px;
+  }
+
+  .status-accept { color: var(--green); }
+  .status-pending { color: var(--yellow); }
+  .status-reject { color: var(--gray); }
+  .status-decline { color: var(--red); }
+
+  .hr-summary {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .hr-summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    padding: 4px 0;
+  }
+
+  .hr-summary-row .label { color: var(--text-dim); }
+  .hr-summary-row .value {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+  }
+
+  /* ─── Links ─── */
+  a.data-link {
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+
+  a.data-link:hover {
+    color: var(--amber);
+    border-bottom-color: var(--amber);
+    text-shadow: 0 0 8px var(--amber-glow);
+  }
+
+  a.data-link.link-cyan:hover {
+    color: var(--cyan);
+    border-bottom-color: var(--cyan);
+    text-shadow: 0 0 8px var(--cyan-glow);
+  }
+
+  a.data-link.link-red:hover {
+    color: var(--red);
+    border-bottom-color: var(--red);
+  }
+
+  /* ─── Comparison tooltip ─── */
+  .compare-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 3px;
+  }
+
+  .compare-row .vs {
+    color: var(--text-dim);
+    opacity: 0.5;
+    font-style: italic;
+  }
+
+  /* ─── Scrollbar hidden ─── */
+  ::-webkit-scrollbar { display: none; }
+
+  /* ─── Noise overlay ─── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+  }
+</style>
+</head>
+<body>
+<div class="dashboard" id="app"></div>
+<script src="data.js"></script>
+<script>
+(function() {
+  const D = DASHBOARD_DATA;
+  const L = D.links;
+
+  function link(href, text, cls) {
+    cls = cls ? ' ' + cls : '';
+    return '<a class="data-link' + cls + '" href="' + href + '" target="_blank">' + text + '</a>';
+  }
+
+  function big(n, cls) {
+    return '<span class="big-num">' + n + '</span>';
+  }
+
+  // Detect anomaly: interview2 rate significantly lower than bimonth
+  const i2 = D.interview2;
+  const i2Anomaly = i2.current.rate < i2.bimonth.rate * 0.6;
+  const i2RateClass = i2Anomaly ? 'rate-warning' : 'rate-normal';
+  const i2AnomalyBadge = i2Anomaly ? '<span class="anomaly-badge">&#9888; \u5F02\u5E38</span>' : '';
+  const i2LinkClass = i2Anomaly ? 'link-red' : '';
+
+  // Detect interview1 anomaly
+  const i1 = D.interview1;
+  const i1Anomaly = i1.current.rate < i1.bimonth.rate * 0.6;
+  const i1StatusText = i1Anomaly ? '<span style="font-size:10px;color:var(--red);margin-left:4px">\u5F02\u5E38</span>' : '<span style="font-size:10px;color:var(--green);margin-left:4px">\u65E0\u5F02\u5E38</span>';
+
+  // Progress
+  const pct = Math.round(D.target.current / D.target.goal * 100);
+
+  // HR summary
+  const hrAccept = D.hrInterview.candidates.filter(c => c.status === 'accept').length;
+  const hrPending = D.hrInterview.candidates.filter(c => c.status === 'pending').length;
+  const hrOther = D.hrInterview.candidates.length - hrAccept - hrPending;
+
+  const iconMap = { accept: ['icon-accept', '\u2713'], pending: ['icon-pending', '\u23F3'], reject: ['icon-reject', '\u2014'], decline: ['icon-decline', '\u2715'] };
+  const statusColorMap = { accept: 'status-accept', pending: 'status-pending', reject: 'status-reject', decline: 'status-decline' };
+
+  const candidatesHTML = D.hrInterview.candidates.map(c => {
+    const [iconCls, iconChar] = iconMap[c.status] || ['icon-reject', '?'];
+    return '<div class="candidate-card"><div class="candidate-icon ' + iconCls + '">' + iconChar + '</div><div class="candidate-info"><div class="candidate-name">' + c.name + '</div><div class="candidate-status ' + statusColorMap[c.status] + '">' + c.label + '</div></div></div>';
+  }).join('');
+
+  // Pending breakdown text for interview2
+  const pendingTotal = i2.current.total - i2.current.passed;
+  const pendingText = i2.current.total + '\u4EBA\u901A\u8FC7' + i2.current.passed + '\u4EBA\uFF0Cpending ' + i2.current.pending;
+
+  document.getElementById('app').innerHTML = '' +
+  '<header class="header">' +
+    '<div class="header-left">' +
+      '<div class="header-badge">STRATEGIC</div>' +
+      '<h1><span>ROOT</span> \u5168\u6808\u5DE5\u7A0B\u5E08 \u00B7 \u62DB\u8058\u770B\u677F</h1>' +
+    '</div>' +
+    '<div class="header-right">' +
+      '<span><span class="status-dot"></span>\u6570\u636E\u5468\u671F ' + D.dataPeriod + '</span>' +
+      '<span class="date">\u66F4\u65B0: ' + D.updateTime + '</span>' +
+    '</div>' +
+  '</header>' +
+
+  '<main class="main">' +
+    '<aside class="panel">' +
+      '<div class="panel-title">&#9670; \u672C\u53CC\u6708\u76EE\u6807</div>' +
+      '<div class="objective-label">\u6838\u5FC3\u76EE\u6807</div>' +
+      '<div class="objective-text">Root \u8FDB\u4E00\u6B65\u6269\uFF0CROOT \u5168\u6808 / \u5DE5\u7A0B\u5168\u6808\u578B\u4EBA\u624D\u4E0D\u5C11\u4E8E <strong style="color:var(--amber);font-family:Orbitron,monospace;font-size:15px;">' + D.target.goal + '</strong> \u4EBA</div>' +
+      '<div class="metric-row"><span class="metric-label">\u76EE\u6807\u4EBA\u6570</span><span class="metric-value target">\u2265' + D.target.goal + '</span></div>' +
+      '<div class="metric-row"><span class="metric-label">\u5F53\u524D\u5728\u5C97</span><span class="metric-value current">' + D.target.current + '</span></div>' +
+      '<div class="metric-row"><span class="metric-label">HC GAP</span><span class="metric-value gap">' + D.target.gap + '</span></div>' +
+      '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
+      '<div class="progress-label"><span>' + D.target.current + '/' + D.target.goal + ' \u5728\u5C97</span><span>' + pct + '%</span></div>' +
+    '</aside>' +
+
+    '<section class="funnel-container">' +
+
+      '<div class="funnel-stage stage-1"><div class="funnel-shape"><div class="funnel-content">' +
+        '<div class="stage-tag">ENTRY \u00B7 \u5165\u53E3</div>' +
+        '<div class="stage-numbers">\u8F93\u9001 ' + link(L.hireReport, big(D.entry.resumesSent), 'link-cyan') + ' \u4EFD\u7B80\u5386\u81F3\u6B27\u9633\u8BC4\u4F30\uFF0C\u901A\u8FC7 ' + link(L.hireReport, big(D.entry.assessPassed), 'link-cyan') + ' \u4EBA</div>' +
+        '<span class="stage-rate rate-normal">\u8BC4\u4F30\u901A\u8FC7\u7387 ' + D.entry.assessRate + '%</span>' +
+      '</div></div></div>' +
+
+      '<div class="funnel-arrow"></div>' +
+
+      '<div class="funnel-stage stage-2"><div class="funnel-shape"><div class="funnel-content">' +
+        '<div class="stage-tag">WRITTEN TEST \u00B7 \u7B14\u8BD5\u56DE\u6536</div>' +
+        '<div class="stage-numbers">\u56DE\u6536 ' + link(L.wiki, big(D.writtenTest.collected)) + ' \u4EFD\uFF0C\u901A\u8FC7 ' + link(L.wiki, big(D.writtenTest.passed)) + ' \u4EBA</div>' +
+        '<div class="stage-detail">\u6298\u635F\uFF1A' + link(L.wiki, '\u7B14\u8BD5\u4E2D <span class="num" style="color:var(--yellow)">' + D.writtenTest.inProgress + '</span> \u4EBA\uFF0C\u62D2\u7EDD\u673A\u4F1A <span class="num" style="color:var(--yellow)">' + D.writtenTest.rejected + '</span> \u4EBA') + '</div>' +
+        '<div class="stage-detail" style="font-size:10px;opacity:0.7">\u9644\uFF1A' + link(L.wiki, 'Root \u5168\u6808\u3001\u5DE5\u7A0B\u5168\u6808\u7B14\u8BD5 pipeline') + '</div>' +
+      '</div>' +
+      '<div class="loss-branch"><div class="loss-line"></div><div class="loss-tag">\u7B14\u8BD5\u4E2D <span class="num">' + D.writtenTest.inProgress + '</span></div></div>' +
+      '<div class="loss-branch-left"><div class="loss-line"></div><div class="loss-tag">\u62D2\u7EDD <span class="num">' + D.writtenTest.rejected + '</span></div></div>' +
+      '</div></div>' +
+
+      '<div class="funnel-arrow"></div>' +
+
+      '<div class="funnel-stage stage-3"><div class="funnel-shape"><div class="funnel-content">' +
+        '<div class="stage-tag">1ST INTERVIEW \u00B7 \u4E00\u9762-\u5FD7\u6743</div>' +
+        '<div class="stage-numbers">\u8FDB\u884C ' + big(i1.current.total) + ' \u4EBA\uFF0C\u901A\u8FC7 ' + big(i1.current.passed) + ' \u4EBA</div>' +
+        '<span class="stage-rate rate-normal">\u4E00\u9762\u901A\u8FC7\u7387 ' + i1.current.rate + '%</span>' + i1StatusText +
+        '<div class="compare-row">' +
+          link(L.interview1_12m, '12\u53CC\u6708 ' + i1.bimonth.rate + '%-' + i1.bimonth.passed + '/' + i1.bimonth.total) +
+          '<span class="vs">vs</span>' +
+          link(L.interview1_3m, '3\u6708 ' + i1.current.rate + '%-' + i1.current.passed + '/' + i1.current.total) +
+        '</div>' +
+      '</div></div></div>' +
+
+      '<div class="funnel-arrow"></div>' +
+
+      '<div class="funnel-stage stage-4"><div class="funnel-shape"><div class="funnel-content">' +
+        '<div class="stage-tag">2ND INTERVIEW \u00B7 \u4E8C\u9762-\u6B27\u9633</div>' +
+        '<div class="stage-numbers">\u8FDB\u884C ' + big(i2.current.total) + ' \u4EBA\uFF0C\u901A\u8FC7 ' + big(i2.current.passed) + ' \u4EBA' + i2AnomalyBadge + '</div>' +
+        '<span class="stage-rate ' + i2RateClass + '">\u4E8C\u9762\u901A\u8FC7\u7387 ' + i2.current.rate + '%\uFF08' + i2.current.passed + '/' + i2.current.total + '\uFF09</span>' +
+        '<div class="stage-detail" style="margin-top:4px">' + link(L.interview2_detail, pendingText, i2LinkClass) + '</div>' +
+        '<div class="compare-row"><span class="vs">\u5BF9\u6BD4</span>' + link(L.interview2_12m, '12\u53CC\u6708 ' + i2.bimonth.total + '\u9762\u8BD5\u8FC7' + i2.bimonth.passed + '\u4E2A\uFF0Cpending ' + i2.bimonth.pending + '\u4E2A', i2LinkClass) + '</div>' +
+      '</div></div></div>' +
+
+    '</section>' +
+
+    '<aside class="panel right-panel">' +
+      '<div class="panel-title" style="color:var(--green)">&#9670; \u51FA\u53E3 \u00B7 HR\u9762</div>' +
+      '<div style="font-size:11px;color:var(--text-dim);margin-bottom:12px">HR \u9762\uFF1A' + link(L.wiki, '<strong style="color:var(--text-bright)">' + D.hrInterview.total + '</strong> \u4EBA') + '</div>' +
+      candidatesHTML +
+      '<div class="hr-summary">' +
+        '<div class="hr-summary-row"><span class="label">Offer \u63A5\u53D7</span><span class="value" style="color:var(--green)">' + hrAccept + '</span></div>' +
+        '<div class="hr-summary-row"><span class="label">\u5F85\u53CD\u9988</span><span class="value" style="color:var(--yellow)">' + hrPending + '</span></div>' +
+        '<div class="hr-summary-row"><span class="label">\u672A\u8F6C\u5316</span><span class="value" style="color:var(--gray)">' + hrOther + '</span></div>' +
+      '</div>' +
+    '</aside>' +
+
+  '</main>';
+})();
+</script>
+</body>
+</html>
