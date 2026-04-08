@@ -6,653 +6,627 @@
 <title>ROOT 全栈工程师 · 招聘看板</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;600&family=Noto+Serif+SC:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    /* Paper surface */
-    --paper: #FBFAF7;
-    --paper-2: #F5F4EF;
-    --card: #FFFFFF;
-    --rule: #E8E6DF;
-    --rule-strong: #D8D5CB;
+    --bg:          #FFFFFF;
+    --bg-subtle:   #F7F7F7;
+    --bg-hover:    #F0F1F5;
+    --surface:     #FFFFFF;
+    --border:      #E8E8EC;
+    --border-hi:    #C8C8D0;
 
-    /* Ink */
-    --ink: #2A2824;
-    --ink-soft: #4A4844;
-    --ink-dim: #7A7771;
-    --ink-faint: #A8A49C;
+    --ink:         #1A1A1A;
+    --ink-soft:    #5A5A66;
+    --ink-dim:     #9999A6;
+    --ink-faint:   #C8C8D0;
 
-    /* Single accent — Newsreader orange */
-    --accent: #B84A1F;
-    --accent-soft: rgba(184, 74, 31, 0.08);
+    /* 飞书主色 */
+    --primary:     #3F49E0;
+    --primary-soft: rgba(63, 73, 224, 0.1);
+    --primary-bg:  rgba(63, 73, 224, 0.06);
 
-    /* States — muted only */
-    --good: #2E6B3F;
-    --warn: #A22B1F;
-    --warn-bg: #FBF0EE;
-    --pending: #8C5B12;
-    --pending-bg: #FBF5E8;
-    --muted: #9B9992;
+    /* 橙黄副色 */
+    --amber:       #FF8A00;
+    --amber-soft:  rgba(255, 138, 0, 0.1);
+
+    /* 状态色 */
+    --green:       #00A856;
+    --green-soft:  rgba(0, 168, 86, 0.1);
+    --yellow:      #FFB800;
+    --yellow-soft: rgba(255, 184, 0, 0.12);
+    --red:         #E53E3E;
+    --red-soft:    rgba(229, 62, 62, 0.1);
+    --gray:        #8C8C99;
+    --gray-soft:   rgba(140, 140, 153, 0.1);
+    --purple:      #8B5CF6;
+    --purple-soft: rgba(139, 92, 246, 0.1);
   }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
   html, body {
     height: 100%;
     overflow: hidden;
-    background: var(--paper);
+    background: var(--bg);
     color: var(--ink);
     font-family: 'Inter', -apple-system, 'PingFang SC', 'Noto Sans SC', sans-serif;
     font-size: 13px;
     line-height: 1.55;
-    font-feature-settings: "cv11", "ss01", "ss03";
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
   }
 
-  body {
-    background:
-      radial-gradient(ellipse 90% 70% at 50% 0%, #FEFCF7 0%, var(--paper) 60%),
-      var(--paper);
-  }
+  body { background: var(--bg); }
 
-  /* ─── Dashboard shell ─── */
   .dashboard {
     max-width: 1320px;
     height: 100vh;
     max-height: 900px;
     margin: 0 auto;
-    padding: 36px 48px 32px;
+    padding: 28px 44px 28px;
     display: grid;
     grid-template-rows: auto 1fr;
-    gap: 28px;
+    gap: 24px;
   }
 
   /* ─── Header ─── */
-  header.masthead {
+  /* ─── Topbar (飞书 style) ─── */
+  .topbar {
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    align-items: flex-end;
-    padding-bottom: 18px;
-    border-bottom: 1px solid var(--rule);
+    height: 52px;
+    padding: 0 24px;
+    background: var(--ink);
+    color: #fff;
+    border-radius: 10px;
   }
 
-  .eyebrow {
-    font-family: 'JetBrains Mono', 'SF Mono', monospace;
-    font-size: 10px;
-    font-weight: 500;
-    color: var(--ink-dim);
-    letter-spacing: 2.4px;
-    text-transform: uppercase;
-    margin-bottom: 8px;
+  .topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
   }
 
-  h1.title {
-    font-family: 'Newsreader', 'Noto Serif SC', Georgia, serif;
-    font-weight: 500;
-    font-size: 28px;
-    line-height: 1.1;
-    letter-spacing: -0.3px;
-    color: var(--ink);
+  .brand {
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: -0.2px;
+    color: #fff;
   }
 
-  h1.title em {
-    font-style: italic;
-    font-weight: 500;
-    color: var(--accent);
+  .brand em {
+    font-style: normal;
+    color: var(--amber);
   }
 
-  .masthead-meta {
-    text-align: right;
+  .topbar-divider {
+    width: 1px;
+    height: 20px;
+    background: rgba(255,255,255,0.15);
+  }
+
+  .topbar-title {
+    font-size: 13px;
+    color: rgba(255,255,255,0.7);
+    font-weight: 400;
+  }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+  }
+
+  .topbar-right .date {
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
-    color: var(--ink-dim);
-    line-height: 1.7;
   }
 
-  .masthead-meta .live-dot {
-    display: inline-block;
-    width: 5px;
-    height: 5px;
+  .live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.6);
+  }
+
+  .live-dot {
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
-    background: var(--good);
-    margin-right: 6px;
-    vertical-align: middle;
+    background: var(--green);
+    animation: pulse 2.5s ease-in-out infinite;
   }
 
-  /* ─── Layout grid ─── */
-  main.layout {
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.4; }
+  }
+
+  /* ─── Main layout ─── */
+  .main {
     display: grid;
-    grid-template-columns: 260px 1fr 280px;
-    gap: 48px;
+    grid-template-columns: 264px 1fr 272px;
+    gap: 20px;
     min-height: 0;
   }
 
-  .col {
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* ─── Section labels ─── */
+  /* ─── Section label ─── */
   .section-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 600;
-    color: var(--ink-dim);
-    letter-spacing: 1.8px;
-    text-transform: uppercase;
+    color: var(--ink-soft);
     margin-bottom: 14px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--rule);
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
     display: flex;
     align-items: baseline;
     justify-content: space-between;
   }
 
   .section-label .tail {
-    font-family: 'Inter', sans-serif;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 400;
-    color: var(--ink-faint);
-    letter-spacing: 0;
-    text-transform: none;
-  }
-
-  /* ─── Objective (left) ─── */
-  .objective-prose {
-    font-family: 'Newsreader', 'Noto Serif SC', serif;
-    font-size: 14px;
-    line-height: 1.65;
-    color: var(--ink-soft);
-    margin-bottom: 22px;
-  }
-
-  .objective-prose strong {
-    font-style: italic;
-    font-weight: 600;
-    color: var(--accent);
-  }
-
-  .metric-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 22px;
-  }
-
-  .metric-table td {
-    padding: 10px 0;
-    border-bottom: 1px solid var(--rule);
-  }
-
-  .metric-table td:first-child {
-    font-size: 12px;
     color: var(--ink-dim);
+    text-transform: none;
+    letter-spacing: 0;
   }
 
-  .metric-table td:last-child {
-    text-align: right;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 20px;
+  /* ─── Card ─── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px;
+  }
+
+  .card:hover { border-color: var(--border-hi); }
+
+  /* ─── Metric hero: HC GAP 飞书风格 ─── */
+  .metric-hero {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 22px;
+    margin-bottom: 16px;
+  }
+
+  .metric-hero .tag {
+    font-size: 11px;
     font-weight: 600;
-    color: var(--ink);
-    font-variant-numeric: tabular-nums;
-    letter-spacing: -0.5px;
+    color: var(--primary);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
   }
 
-  .metric-table td.accent { color: var(--accent); }
-  .metric-table td.warn { color: var(--warn); }
+  .metric-hero .big-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1;
+    letter-spacing: -3px;
+    margin-bottom: 14px;
+  }
 
-  .progress-line {
-    margin-top: 4px;
+  .metric-hero .big-num .sep {
+    font-size: 28px;
+    color: var(--ink-dim);
+    margin: 0 3px;
+    letter-spacing: 0;
+    font-weight: 400;
+  }
+
+  .metric-hero .big-num .gap {
+    font-size: 24px;
+    color: var(--red);
+    margin-left: 8px;
+    letter-spacing: -0.5px;
+    font-weight: 600;
+  }
+
+  .metric-hero .pct-line {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-bottom: 12px;
   }
 
   .progress-bar {
-    height: 3px;
-    background: var(--rule);
-    position: relative;
-    border-radius: 0;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
   }
 
   .progress-fill {
     height: 100%;
-    background: var(--accent);
-    position: relative;
+    background: var(--primary);
+    border-radius: 3px;
+    transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .progress-fill::after {
-    content: '';
-    position: absolute;
-    right: -3px;
-    top: -2.5px;
-    width: 8px;
-    height: 8px;
-    background: var(--accent);
-    border-radius: 50%;
-    border: 2px solid var(--paper);
-  }
-
-  .progress-meta {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    color: var(--ink-dim);
-  }
-
-  /* ─── Funnel as table (center) ─── */
+  /* ─── Funnel table ─── */
   .funnel-table {
     width: 100%;
     border-collapse: collapse;
     font-variant-numeric: tabular-nums;
   }
 
-  .funnel-table thead th {
-    text-align: left;
-    font-size: 10px;
-    font-weight: 500;
-    color: var(--ink-faint);
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    padding: 0 12px 12px;
-    border-bottom: 1px solid var(--rule);
-  }
-
-  .funnel-table thead th.num {
-    text-align: right;
-  }
-
-  .funnel-table tbody tr {
-    border-bottom: 1px solid var(--rule);
+  .funnel-table tr {
+    border-bottom: 1px solid var(--border);
     transition: background 0.15s;
   }
 
+  .funnel-table tr:last-child { border-bottom: none; }
+
   .funnel-table tbody tr:hover {
-    background: var(--paper-2);
+    background: var(--bg-hover);
   }
 
-  .funnel-table tbody tr.anomaly {
-    background: var(--warn-bg);
+  .funnel-table tr.anomaly {
+    background: var(--red-soft);
     position: relative;
   }
 
-  .funnel-table tbody tr.anomaly::before {
+  .funnel-table tr.anomaly::before {
     content: '';
     position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: var(--warn);
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--red);
   }
 
-  .funnel-table tbody td {
-    padding: 18px 12px;
+  .funnel-table td {
+    padding: 12px 10px;
     vertical-align: middle;
   }
 
-  .stage-name {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
   .stage-name .primary {
-    font-family: 'Newsreader', 'Noto Serif SC', serif;
-    font-size: 16px;
-    font-weight: 500;
+    font-size: 13px;
+    font-weight: 600;
     color: var(--ink);
-    letter-spacing: -0.2px;
+    margin-bottom: 2px;
   }
 
   .stage-name .secondary {
     font-size: 10px;
-    color: var(--ink-faint);
-    font-family: 'JetBrains Mono', monospace;
+    color: var(--ink-dim);
     letter-spacing: 0.3px;
   }
 
-  .funnel-table td.num {
+  .funnel-table .num {
     text-align: right;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 17px;
-    font-weight: 500;
+    font-size: 14px;
+    font-weight: 600;
     color: var(--ink);
-    letter-spacing: -0.3px;
+    letter-spacing: -0.2px;
+    padding-right: 16px;
   }
 
-  .funnel-table td.num .unit {
-    font-size: 11px;
-    color: var(--ink-faint);
-    margin-left: 2px;
+  .funnel-table .num .unit {
+    font-size: 10px;
+    color: var(--ink-dim);
+    margin-left: 1px;
     font-weight: 400;
   }
 
-  .funnel-table td.rate {
+  .funnel-table .rate {
     text-align: right;
-    width: 110px;
+    width: 120px;
   }
 
-  .funnel-table td.rate .pct {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--ink);
-    letter-spacing: -0.3px;
-  }
-
-  .funnel-table tr.anomaly td.rate .pct {
-    color: var(--warn);
-  }
-
-  .rate-bar {
-    margin-top: 5px;
-    height: 2px;
-    background: var(--rule);
-    width: 100%;
-    position: relative;
-  }
-
-  .rate-bar .fill {
-    height: 100%;
-    background: var(--ink-soft);
-  }
-
-  tr.anomaly .rate-bar .fill {
-    background: var(--warn);
-  }
-
-  .warn-marker {
-    display: inline-block;
-    font-size: 10px;
-    color: var(--warn);
-    font-weight: 600;
-    margin-left: 6px;
-    font-family: 'JetBrains Mono', monospace;
-    letter-spacing: 0.5px;
-  }
-
-  /* ─── Funnel summary footnote ─── */
-  .funnel-summary {
-    margin-top: 18px;
-    padding: 14px 16px;
-    background: var(--paper-2);
-    border-left: 2px solid var(--ink-soft);
-    font-family: 'Newsreader', 'Noto Serif SC', serif;
-    font-size: 13px;
-    line-height: 1.65;
-    color: var(--ink-soft);
-  }
-
-  .funnel-summary strong {
-    color: var(--ink);
-    font-weight: 600;
-    font-style: italic;
-  }
-
-  .funnel-summary .accent-num {
-    font-family: 'JetBrains Mono', monospace;
-    font-style: normal;
-    font-weight: 600;
-    color: var(--accent);
-    font-size: 14px;
-  }
-
-  .funnel-summary .warn-num {
-    font-family: 'JetBrains Mono', monospace;
-    font-style: normal;
-    font-weight: 600;
-    color: var(--warn);
-    font-size: 14px;
-  }
-
-  /* ─── Compare table ─── */
-  .compare-section {
-    margin-top: 26px;
-  }
-
-  .compare-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .compare-table th {
-    text-align: right;
-    font-size: 10px;
-    font-weight: 500;
-    color: var(--ink-faint);
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    padding: 0 10px 10px;
-  }
-
-  .compare-table th:first-child {
-    text-align: left;
-  }
-
-  .compare-table td {
-    padding: 10px;
-    border-bottom: 1px solid var(--rule);
-    font-size: 12px;
-  }
-
-  .compare-table td:first-child {
-    color: var(--ink-soft);
-  }
-
-  .compare-table td.num {
-    text-align: right;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--ink);
-  }
-
-  .compare-table td.delta {
-    text-align: right;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    color: var(--ink-dim);
-    width: 70px;
-  }
-
-  .compare-table tr.anomaly td {
-    background: var(--warn-bg);
-  }
-
-  .compare-table tr.anomaly td.num,
-  .compare-table tr.anomaly td.delta {
-    color: var(--warn);
-    font-weight: 600;
-  }
-
-  /* ─── HR exit (right) ─── */
-  .candidate-list {
-    list-style: none;
-  }
-
-  .candidate-row {
-    display: grid;
-    grid-template-columns: 16px 1fr auto;
-    gap: 12px;
-    align-items: baseline;
-    padding: 14px 0;
-    border-bottom: 1px solid var(--rule);
-  }
-
-  .candidate-row:last-child {
-    border-bottom: 1px solid var(--rule);
-  }
-
-  .candidate-marker {
+  .funnel-table .rate .pct {
     font-family: 'JetBrains Mono', monospace;
     font-size: 13px;
-    font-weight: 600;
-    text-align: center;
-    line-height: 1;
-  }
-
-  .marker-accept { color: var(--good); }
-  .marker-pending { color: var(--pending); }
-  .marker-reject { color: var(--ink-faint); }
-  .marker-decline { color: var(--warn); }
-
-  .candidate-body {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0;
-  }
-
-  .candidate-name {
-    font-family: 'Newsreader', 'Noto Serif SC', serif;
-    font-size: 15px;
-    font-weight: 500;
-    color: var(--ink);
+    font-weight: 700;
+    color: var(--primary);
     letter-spacing: -0.2px;
   }
 
+  .funnel-table tr.anomaly .rate .pct { color: var(--red); }
+
+  .mini-bar {
+    height: 3px;
+    background: var(--border);
+    width: 100%;
+    margin-top: 5px;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .mini-bar .fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 2px;
+  }
+
+  .funnel-table tr.anomaly .mini-bar .fill { background: var(--red); }
+
+  .warn-tag {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--red);
+    background: var(--red-soft);
+    padding: 1px 6px;
+    border-radius: 10px;
+    margin-left: 6px;
+  }
+
+  /* ─── Summary prose ─── */
+  .funnel-prose {
+    margin-top: 14px;
+    padding: 14px 16px;
+    background: var(--bg-subtle);
+    border-radius: 8px;
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+  }
+
+  .funnel-prose strong { color: var(--ink); font-weight: 600; }
+  .funnel-prose .n     { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--primary); font-size: 13px; }
+  .funnel-prose .warn  { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--red); }
+
+  /* ─── Compare section ─── */
+  .compare-section { margin-top: 18px; }
+
+  .compare-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    transition: background 0.15s;
+  }
+
+  .compare-row:hover { background: var(--bg-hover); }
+
+  .compare-row .label { color: var(--ink-soft); font-weight: 500; }
+
+  .compare-row .bars {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .compare-bar {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .compare-bar-track {
+    width: 44px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .compare-bar-track .fill {
+    height: 100%;
+    border-radius: 2px;
+  }
+
+  .compare-bar-track .fill.current { background: var(--primary); }
+  .compare-bar-track .fill.base     { background: var(--ink-faint); }
+
+  .compare-bar .pct {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink);
+    width: 34px;
+    text-align: right;
+  }
+
+  .compare-bar.warn .pct { color: var(--red); }
+  .compare-bar.warn .fill.current { background: var(--red); }
+
+  .compare-row .delta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-dim);
+    min-width: 46px;
+    text-align: right;
+  }
+
+  .compare-row.anomaly { background: var(--red-soft); }
+  .compare-row.anomaly .label { color: var(--ink); }
+  .compare-row.anomaly .delta { color: var(--red); font-weight: 600; }
+
+  /* ─── Candidate list 飞书风格 ─── */
+  .candidate-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .candidate-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 11px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: background 0.15s, box-shadow 0.15s;
+    cursor: pointer;
+  }
+
+  .candidate-card:hover {
+    background: var(--bg-hover);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+
+  .candidate-card.status-accept  { border-left: 3px solid var(--green); }
+  .candidate-card.status-pending { border-left: 3px solid var(--yellow); }
+  .candidate-card.status-reject  { border-left: 3px solid var(--gray); opacity: 0.6; }
+  .candidate-card.status-decline { border-left: 3px solid var(--red);   opacity: 0.6; }
+
+  /* 圆形头像 */
+  .candidate-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--bg-subtle);
+    border: 1.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .status-accept  .candidate-avatar { border-color: var(--green); color: var(--green); }
+  .status-pending .candidate-avatar { border-color: var(--yellow); color: var(--yellow); }
+  .status-reject  .candidate-avatar { border-color: var(--gray); color: var(--gray); }
+  .status-decline .candidate-avatar { border-color: var(--red); color: var(--red); }
+
+  /* 姓名首字做头像 */
+  .candidate-avatar-inner {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .status-accept  .candidate-avatar-inner { background: var(--green-soft);  color: var(--green); }
+  .status-pending .candidate-avatar-inner { background: var(--yellow-soft); color: var(--yellow); }
+  .status-reject  .candidate-avatar-inner { background: var(--gray-soft);   color: var(--gray); }
+  .status-decline .candidate-avatar-inner { background: var(--red-soft);    color: var(--red); }
+
+  .candidate-body { flex: 1; min-width: 0; }
+
+  .candidate-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 1px;
+  }
+
+  .status-reject .candidate-name,
+  .status-decline .candidate-name { color: var(--ink-dim); }
+
   .candidate-meta {
     font-size: 10px;
-    color: var(--ink-faint);
-    font-family: 'JetBrains Mono', monospace;
+    color: var(--ink-dim);
     letter-spacing: 0.2px;
   }
 
-  .candidate-row.row-reject .candidate-name,
-  .candidate-row.row-decline .candidate-name {
-    color: var(--ink-dim);
-  }
-
-  .candidate-status-label {
-    font-size: 11px;
-    color: var(--ink-dim);
-    text-align: right;
-    align-self: center;
+  /* 状态徽章 */
+  .candidate-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
     white-space: nowrap;
+    flex-shrink: 0;
   }
 
-  .candidate-row.row-accept .candidate-status-label {
-    color: var(--good);
-    font-weight: 500;
-  }
-  .candidate-row.row-pending .candidate-status-label {
-    color: var(--pending);
-    font-weight: 500;
-  }
-  .candidate-row.row-decline .candidate-status-label {
-    color: var(--warn);
-  }
+  .status-accept  .candidate-badge { background: var(--green-soft);  color: var(--green); }
+  .status-pending .candidate-badge { background: var(--yellow-soft); color: #966600; }
+  .status-reject  .candidate-badge { background: var(--gray-soft);   color: var(--gray); }
+  .status-decline .candidate-badge { background: var(--red-soft);    color: var(--red); }
 
-  /* ─── Summary bar under candidates ─── */
+  /* ─── HR summary row ─── */
   .hr-summary {
     display: flex;
-    gap: 16px;
-    margin-top: 16px;
+    gap: 10px;
+    margin-top: 14px;
     padding: 12px 0;
-    border-top: 1px solid var(--rule);
-    border-bottom: 1px solid var(--rule);
-    font-variant-numeric: tabular-nums;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
   }
 
-  .hr-summary-item {
-    flex: 1;
-  }
-
+  .hr-summary-item { flex: 1; text-align: center; }
   .hr-summary-item .n {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--ink);
+    font-size: 20px;
+    font-weight: 700;
     line-height: 1;
   }
-
   .hr-summary-item .lbl {
     font-size: 10px;
     color: var(--ink-dim);
     margin-top: 4px;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.2px;
   }
+  .hr-summary-item.accept .n { color: var(--green); }
+  .hr-summary-item.pending .n { color: #966600; }
+  .hr-summary-item.other  .n { color: var(--ink-dim); }
 
   /* ─── Action items ─── */
-  .action-section {
-    margin-top: 26px;
-  }
-
   .action-list {
     list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 14px;
   }
 
-  .action-row {
+  .action-item {
     display: flex;
-    gap: 10px;
     align-items: flex-start;
-    padding: 10px 0;
+    gap: 8px;
     font-size: 12px;
     line-height: 1.5;
+    padding: 9px 12px;
+    background: var(--bg-subtle);
+    border-radius: 6px;
     color: var(--ink-soft);
-    border-bottom: 1px dashed var(--rule);
   }
 
-  .action-row:last-child {
-    border-bottom: none;
-  }
-
-  .action-row .bullet {
-    flex-shrink: 0;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--ink-dim);
-    font-weight: 600;
-  }
-
-  .action-row.warn .bullet { color: var(--warn); }
-  .action-row.warn { color: var(--ink); }
-
-  .action-row strong {
+  .action-item.warn {
+    background: var(--red-soft);
     color: var(--ink);
-    font-weight: 600;
   }
 
-  .action-row.empty {
-    color: var(--ink-faint);
-    font-style: italic;
+  .action-item .bullet {
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
   }
+
+  .action-item.warn .bullet { color: var(--red); }
+  .action-item:not(.warn) .bullet { color: var(--primary); }
+
+  .action-item strong { color: var(--ink); font-weight: 600; }
 
   /* ─── Links ─── */
   a.link {
     color: inherit;
     text-decoration: none;
-    border-bottom: 1px solid var(--rule-strong);
-    padding-bottom: 1px;
-    transition: color 0.15s, border-color 0.15s;
   }
 
-  a.link:hover {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
-  }
+  a.link:hover { color: var(--primary); }
 
-  a.link.subtle {
-    border-bottom-color: transparent;
-  }
-
-  a.link.subtle:hover {
-    border-bottom-color: var(--accent);
-  }
-
-  /* ─── Tiny entrance fade ─── */
+  /* ─── Entrance ─── */
   .fade-in {
-    animation: fadeIn 0.6s ease-out backwards;
+    animation: fadeIn 0.4s ease-out backwards;
   }
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(4px); }
-    to { opacity: 1; transform: translateY(0); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 
-  /* ─── Scrollbar hidden ─── */
   ::-webkit-scrollbar { display: none; }
   * { scrollbar-width: none; }
 </style>
@@ -662,220 +636,221 @@
 <script src="data.js"></script>
 <script>
 (function() {
-  const D = DASHBOARD_DATA;
-  const L = D.links;
+  var D = DASHBOARD_DATA;
+  var L = D.links;
 
-  function link(href, text, subtle) {
-    return '<a class="link' + (subtle ? ' subtle' : '') + '" href="' + href + '" target="_blank">' + text + '</a>';
+  function link(href, text) {
+    return '<a class="link" href="' + href + '" target="_blank">' + text + '</a>';
   }
 
-  const i1 = D.interview1;
-  const i2 = D.interview2;
-  const i1Anomaly = i1.current.rate < i1.bimonth.rate * 0.6;
-  const i2Anomaly = i2.current.rate < i2.bimonth.rate * 0.6;
+  var i1 = D.interview1;
+  var i2 = D.interview2;
+  var i1Anomaly = i1.current.rate < i1.bimonth.rate * 0.6;
+  var i2Anomaly = i2.current.rate < i2.bimonth.rate * 0.6;
 
-  const pct = Math.round(D.target.current / D.target.goal * 100);
+  var pct = Math.round(D.target.current / D.target.goal * 100);
 
-  // Funnel rows — each stage has pass rate within the stage
-  const stages = [
+  /* ── Funnel stages ── */
+  var stages = [
     {
-      name: '入口 · 欧阳评估',
-      sub: 'ENTRY · ASSESSMENT',
-      entered: D.entry.resumesSent,
-      passed: D.entry.assessPassed,
-      rate: D.entry.assessRate,
-      link: L.hireReport,
-      unit: '份',
-      anomaly: false
+      name: '入口 · 欧阳评估', sub: 'ENTRY · ASSESSMENT',
+      entered: D.entry.resumesSent, passed: D.entry.assessPassed,
+      rate: D.entry.assessRate, link: L.hireReport, unit: '份', anomaly: false
     },
     {
-      name: '笔试 · 已回收',
-      sub: 'WRITTEN TEST',
-      entered: D.writtenTest.collected,
-      passed: D.writtenTest.passed,
+      name: '笔试 · 已回收', sub: 'WRITTEN TEST',
+      entered: D.writtenTest.collected, passed: D.writtenTest.passed,
       rate: Math.round(D.writtenTest.passed / D.writtenTest.collected * 100),
-      link: L.wiki,
-      unit: '份',
-      anomaly: false
+      link: L.wiki, unit: '份', anomaly: false
     },
     {
-      name: '一面 · 志权',
-      sub: '1ST INTERVIEW',
-      entered: i1.current.total,
-      passed: i1.current.passed,
-      rate: i1.current.rate,
-      link: L.interview1_3m,
-      unit: '人',
-      anomaly: i1Anomaly
+      name: '一面 · 志权', sub: '1ST INTERVIEW',
+      entered: i1.current.total, passed: i1.current.passed,
+      rate: i1.current.rate, link: L.interview1_3m, unit: '人', anomaly: i1Anomaly
     },
     {
-      name: '二面 · 欧阳',
-      sub: '2ND INTERVIEW',
-      entered: i2.current.total,
-      passed: i2.current.passed,
-      rate: i2.current.rate,
-      link: L.interview2_detail,
-      unit: '人',
-      anomaly: i2Anomaly
+      name: '二面 · 欧阳', sub: '2ND INTERVIEW',
+      entered: i2.current.total, passed: i2.current.passed,
+      rate: i2.current.rate, link: L.interview2_detail, unit: '人', anomaly: i2Anomaly
     }
   ];
 
-  const funnelRowsHTML = stages.map(s => {
+  var funnelRowsHTML = stages.map(function(s) {
     return '<tr class="' + (s.anomaly ? 'anomaly' : '') + '">' +
       '<td>' +
         '<div class="stage-name">' +
-          '<span class="primary">' + link(s.link, s.name, true) + '</span>' +
-          '<span class="secondary">' + s.sub + '</span>' +
+          '<div class="primary">' + link(s.link, s.name) + '</div>' +
+          '<div class="secondary">' + s.sub + '</div>' +
         '</div>' +
       '</td>' +
       '<td class="num">' + s.entered + '<span class="unit">' + s.unit + '</span></td>' +
       '<td class="num">' + s.passed + '<span class="unit">' + s.unit + '</span></td>' +
       '<td class="rate">' +
-        '<div class="pct">' + s.rate + '%' + (s.anomaly ? '<span class="warn-marker">⚠ 异常</span>' : '') + '</div>' +
-        '<div class="rate-bar"><div class="fill" style="width:' + Math.min(s.rate, 100) + '%"></div></div>' +
+        '<span class="pct">' + s.rate + '%' + (s.anomaly ? '<span class="warn-tag">⚠ 异常</span>' : '') + '</span>' +
+        '<div class="mini-bar"><div class="fill" style="width:' + Math.min(s.rate, 100) + '%"></div></div>' +
       '</td>' +
     '</tr>';
   }).join('');
 
-  // Funnel summary — cumulative conversion
-  const cumulativePct = (D.entry.assessPassed * 0 + (i2.current.passed / D.entry.resumesSent * 100)).toFixed(1);
-  const summaryHTML =
-    '<div class="funnel-summary">' +
-      '本期共 <span class="accent-num">' + D.entry.resumesSent + '</span> 份简历进入漏斗，最终 <span class="accent-num">' + i2.current.passed + '</span> 人通过二面，累计转化率 <span class="accent-num">' + cumulativePct + '%</span>。' +
-      (i2Anomaly
-        ? '二面通过率 <span class="warn-num">' + i2.current.rate + '%</span> 显著低于 12 双月基线 <strong>' + i2.bimonth.rate + '%</strong>，<em>值得关注 pending ' + i2.current.pending + ' 人的最终走向</em>。'
-        : '') +
+  /* ── Prose summary ── */
+  var cumRate = (i2.current.passed / D.entry.resumesSent * 100).toFixed(1);
+  var proseHTML =
+    '<div class="funnel-prose">' +
+      '本期 <span class="n">' + D.entry.resumesSent + '</span> 份简历进漏斗，最终 <span class="n">' + i2.current.passed + '</span> 人通过二面，累计 <span class="n">' + cumRate + '%</span>。' +
+      (i2Anomaly ? '二面通过率 <span class="warn">' + i2.current.rate + '%</span> 低于基线 <strong>' + i2.bimonth.rate + '%</strong>，关注 pending <strong>' + i2.current.pending + '</strong> 人。' : '') +
     '</div>';
 
-  // Compare table
-  const i1Delta = i1.current.rate - i1.bimonth.rate;
-  const i2Delta = i2.current.rate - i2.bimonth.rate;
-  const fmtDelta = d => (d >= 0 ? '+' : '') + d + 'pt';
+  /* ── Compare ── */
+  var i1Delta = i1.current.rate - i1.bimonth.rate;
+  var i2Delta = i2.current.rate - i2.bimonth.rate;
+  var maxRate = Math.max(i1.current.rate, i1.bimonth.rate, i2.current.rate, i2.bimonth.rate, 1);
 
-  const compareHTML =
+  function bar(w) { return Math.round(w / maxRate * 100); }
+  var fmtDelta = function(d) { return (d >= 0 ? '+' : '') + d + 'pt'; };
+
+  var compareHTML =
     '<div class="compare-section">' +
-      '<div class="section-label">本期 vs 12 双月基线 <span class="tail">baseline comparison</span></div>' +
-      '<table class="compare-table">' +
-        '<thead><tr><th></th><th>本期</th><th>12 双月</th><th>差异</th></tr></thead>' +
-        '<tbody>' +
-          '<tr class="' + (i1Anomaly ? 'anomaly' : '') + '">' +
-            '<td>一面通过率</td>' +
-            '<td class="num">' + link(L.interview1_3m, i1.current.rate + '%', true) + '</td>' +
-            '<td class="num">' + link(L.interview1_12m, i1.bimonth.rate + '%', true) + '</td>' +
-            '<td class="delta">' + fmtDelta(i1Delta) + '</td>' +
-          '</tr>' +
-          '<tr class="' + (i2Anomaly ? 'anomaly' : '') + '">' +
-            '<td>二面通过率</td>' +
-            '<td class="num">' + link(L.interview2_detail, i2.current.rate + '%', true) + '</td>' +
-            '<td class="num">' + link(L.interview2_12m, i2.bimonth.rate + '%', true) + '</td>' +
-            '<td class="delta">' + fmtDelta(i2Delta) + (i2Anomaly ? ' ⚠' : '') + '</td>' +
-          '</tr>' +
-        '</tbody>' +
-      '</table>' +
+      '<div class="section-label">本期 vs 12双月 <span class="tail">baseline</span></div>' +
+      '<div class="compare-row' + (i1Anomaly ? ' anomaly' : '') + '">' +
+        '<span class="label">一面通过率</span>' +
+        '<div class="bars">' +
+          '<div class="compare-bar' + (i1Anomaly ? ' warn' : '') + '">' +
+            '<div class="compare-bar-track"><div class="fill current" style="width:' + bar(i1.current.rate) + '%"></div></div>' +
+            '<span class="pct">' + link(L.interview1_3m, i1.current.rate + '%') + '</span>' +
+          '</div>' +
+          '<div class="compare-bar">' +
+            '<div class="compare-bar-track"><div class="fill base" style="width:' + bar(i1.bimonth.rate) + '%"></div></div>' +
+            '<span class="pct" style="color:var(--ink-dim)">' + link(L.interview1_12m, i1.bimonth.rate + '%') + '</span>' +
+          '</div>' +
+          '<span class="delta">' + fmtDelta(i1Delta) + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="compare-row' + (i2Anomaly ? ' anomaly' : '') + '">' +
+        '<span class="label">二面通过率</span>' +
+        '<div class="bars">' +
+          '<div class="compare-bar' + (i2Anomaly ? ' warn' : '') + '">' +
+            '<div class="compare-bar-track"><div class="fill current" style="width:' + bar(i2.current.rate) + '%"></div></div>' +
+            '<span class="pct">' + link(L.interview2_detail, i2.current.rate + '%') + '</span>' +
+          '</div>' +
+          '<div class="compare-bar">' +
+            '<div class="compare-bar-track"><div class="fill base" style="width:' + bar(i2.bimonth.rate) + '%"></div></div>' +
+            '<span class="pct" style="color:var(--ink-dim)">' + link(L.interview2_12m, i2.bimonth.rate + '%') + '</span>' +
+          '</div>' +
+          '<span class="delta">' + fmtDelta(i2Delta) + (i2Anomaly ? ' ⚠' : '') + '</span>' +
+        '</div>' +
+      '</div>' +
     '</div>';
 
-  // HR candidates
-  const markerMap = {
-    accept:  ['●', 'marker-accept',  'row-accept'],
-    pending: ['○', 'marker-pending', 'row-pending'],
-    reject:  ['−', 'marker-reject',  'row-reject'],
-    decline: ['×', 'marker-decline', 'row-decline']
-  };
+  /* ── Candidates: 飞书风格圆形头像 ── */
+  function getInitial(name) {
+    return name.charAt(0);
+  }
 
-  const candidatesHTML = D.hrInterview.candidates.map(c => {
-    const [glyph, markerCls, rowCls] = markerMap[c.status] || ['·', 'marker-reject', 'row-reject'];
-    const meta = [c.role, c.date].filter(Boolean).join(' · ');
-    return '<li class="candidate-row ' + rowCls + '">' +
-      '<span class="candidate-marker ' + markerCls + '">' + glyph + '</span>' +
+  var candidatesHTML = D.hrInterview.candidates.map(function(c) {
+    var initial = getInitial(c.name);
+    var meta = [c.role, c.date].filter(Boolean).join(' · ');
+    return '<li class="candidate-card status-' + c.status + '">' +
+      '<div class="candidate-avatar-inner">' + initial + '</div>' +
       '<div class="candidate-body">' +
-        '<span class="candidate-name">' + c.name + '</span>' +
-        (meta ? '<span class="candidate-meta">' + meta + '</span>' : '') +
+        '<div class="candidate-name">' + link(L.wiki, c.name) + '</div>' +
+        (meta ? '<div class="candidate-meta">' + meta + '</div>' : '') +
       '</div>' +
-      '<span class="candidate-status-label">' + c.label + '</span>' +
+      '<span class="candidate-badge">' + c.label + '</span>' +
     '</li>';
   }).join('');
 
-  const hrAccept = D.hrInterview.candidates.filter(c => c.status === 'accept').length;
-  const hrPending = D.hrInterview.candidates.filter(c => c.status === 'pending').length;
-  const hrOther = D.hrInterview.candidates.length - hrAccept - hrPending;
+  var hrAccept  = D.hrInterview.candidates.filter(function(c) { return c.status === 'accept';  }).length;
+  var hrPending = D.hrInterview.candidates.filter(function(c) { return c.status === 'pending'; }).length;
+  var hrOther   = D.hrInterview.candidates.length - hrAccept - hrPending;
 
-  // Action items
-  const actionItems = [];
-  D.hrInterview.candidates.forEach(c => {
+  /* ── Action items ── */
+  var actions = [];
+  D.hrInterview.candidates.forEach(function(c) {
     if (c.status === 'pending' && c.nextAction) {
-      actionItems.push({ warn: false, text: '跟进 <strong>' + c.name + '</strong> · ' + c.nextAction });
+      actions.push({ warn: false, text: '跟进 <strong>' + c.name + '</strong> · ' + c.nextAction });
     }
   });
   if (i2Anomaly) {
-    actionItems.push({ warn: true, text: '二面通过率 <strong>' + i2.current.rate + '%</strong> 异常，关注 pending <strong>' + i2.current.pending + '</strong> 人' });
+    actions.push({ warn: true, text: '二面通过率 <strong>' + i2.current.rate + '%</strong> 异常，关注 pending <strong>' + i2.current.pending + '</strong> 人' });
   }
 
-  const actionItemsHTML =
-    '<div class="action-section">' +
-      '<div class="section-label">待办 <span class="tail">action items</span></div>' +
-      '<ul class="action-list">' +
-        (actionItems.length === 0
-          ? '<li class="action-row empty"><span class="bullet">✓</span><span>暂无待办</span></li>'
-          : actionItems.map(a =>
-              '<li class="action-row ' + (a.warn ? 'warn' : '') + '">' +
-                '<span class="bullet">' + (a.warn ? '⚠' : '→') + '</span>' +
-                '<span>' + a.text + '</span>' +
-              '</li>'
-            ).join('')) +
-      '</ul>' +
-    '</div>';
+  var actionItemsHTML =
+    '<ul class="action-list">' +
+      (actions.length === 0
+        ? '<li class="action-item" style="color:var(--ink-dim);font-style:italic">暂无待办</li>'
+        : actions.map(function(a) {
+            return '<li class="action-item' + (a.warn ? ' warn' : '') + '">' +
+              '<span class="bullet">' + (a.warn ? '!' : '→') + '</span>' +
+              '<span>' + a.text + '</span>' +
+            '</li>';
+          }).join('')) +
+    '</ul>';
 
-  // Assemble
+  /* ── Assemble ── */
   document.getElementById('app').innerHTML = '' +
-    '<header class="masthead fade-in">' +
-      '<div>' +
-        '<div class="eyebrow">Strategic Hire · Bimonthly</div>' +
-        '<h1 class="title">ROOT <em>全栈工程师</em> 招聘看板</h1>' +
-      '</div>' +
-      '<div class="masthead-meta">' +
-        '<div><span class="live-dot"></span>数据周期 ' + D.dataPeriod + '</div>' +
-        '<div>更新 ' + D.updateTime + '</div>' +
-      '</div>' +
-    '</header>' +
+    '<div class="dashboard">' +
 
-    '<main class="layout">' +
+    /* 飞书风格深色顶栏 */
+    '<div class="topbar fade-in">' +
+      '<div class="topbar-left">' +
+        '<div class="brand">ROOT <em>Hire</em></div>' +
+        '<div class="topbar-divider"></div>' +
+        '<div class="topbar-title">全栈工程师 · 招聘看板</div>' +
+      '</div>' +
+      '<div class="topbar-right">' +
+        '<span class="live-badge"><span class="live-dot"></span>数据 ' + D.dataPeriod + '</span>' +
+        '<span class="date">更新 ' + D.updateTime + '</span>' +
+      '</div>' +
+    '</div>' +
 
-      '<aside class="col fade-in" style="animation-delay:0.05s">' +
+    '<main class="main">' +
+
+      /* Left */
+      '<aside class="fade-in" style="animation-delay:0.06s;display:flex;flex-direction:column;gap:16px">' +
         '<div class="section-label">本双月目标 <span class="tail">objective</span></div>' +
-        '<p class="objective-prose">Root 进一步扩，ROOT 全栈 / 工程全栈型人才不少于 <strong>' + D.target.goal + '</strong> 人。</p>' +
-        '<table class="metric-table">' +
-          '<tr><td>目标人数</td><td>≥' + D.target.goal + '</td></tr>' +
-          '<tr><td>当前在岗</td><td class="accent">' + D.target.current + '</td></tr>' +
-          '<tr><td>HC Gap</td><td class="warn">−' + D.target.gap + '</td></tr>' +
-        '</table>' +
-        '<div class="progress-line">' +
+        '<div class="metric-hero">' +
+          '<div class="tag">HC GAP</div>' +
+          '<div class="big-num">' +
+            '<span>' + D.target.current + '</span>' +
+            '<span class="sep">/</span>' +
+            '<span>' + D.target.goal + '</span>' +
+            '<span class="gap">−' + D.target.gap + '</span>' +
+          '</div>' +
+          '<div class="pct-line">' + D.target.current + ' / ' + D.target.goal + ' 在岗 · ' + pct + '%</div>' +
           '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
-          '<div class="progress-meta"><span>' + D.target.current + ' / ' + D.target.goal + ' 在岗</span><span>' + pct + '%</span></div>' +
+        '</div>' +
+        '<div class="card" style="font-size:13px;line-height:1.7;color:var(--ink-soft)">' +
+          '目标：<strong style="color:var(--ink)">Root 全栈 / 工程全栈</strong> 人才不少于 <strong style="color:var(--primary)">' + D.target.goal + '</strong> 人，当前在岗 <strong style="color:var(--ink)">' + D.target.current + '</strong> 人，还需 <strong style="color:var(--red)">' + D.target.gap + '</strong> 人。' +
         '</div>' +
       '</aside>' +
 
-      '<section class="col fade-in" style="animation-delay:0.1s">' +
-        '<div class="section-label">招聘漏斗 <span class="tail">recruitment funnel · ' + D.dataPeriod + '</span></div>' +
-        '<table class="funnel-table">' +
-          '<thead><tr><th>阶段</th><th class="num">进入</th><th class="num">通过</th><th class="num">通过率</th></tr></thead>' +
-          '<tbody>' + funnelRowsHTML + '</tbody>' +
-        '</table>' +
-        summaryHTML +
+      /* Center */
+      '<section class="fade-in" style="animation-delay:0.1s;display:flex;flex-direction:column;gap:0">' +
+        '<div class="section-label">招聘漏斗 <span class="tail">funnel · ' + D.dataPeriod + '</span></div>' +
+        '<div class="card" style="padding:0;overflow:hidden">' +
+          '<table class="funnel-table">' +
+            '<tbody>' + funnelRowsHTML + '</tbody>' +
+          '</table>' +
+        '</div>' +
+        proseHTML +
         compareHTML +
       '</section>' +
 
-      '<aside class="col fade-in" style="animation-delay:0.15s">' +
-        '<div class="section-label">HR 面 · 出口 <span class="tail">' + D.hrInterview.total + ' candidates</span></div>' +
+      /* Right */
+      '<aside class="fade-in" style="animation-delay:0.14s;display:flex;flex-direction:column;gap:0">' +
+        '<div class="section-label">HR 面 · 出口 <span class="tail">' + D.hrInterview.total + ' 人</span></div>' +
         '<ul class="candidate-list">' + candidatesHTML + '</ul>' +
         '<div class="hr-summary">' +
-          '<div class="hr-summary-item"><div class="n" style="color:var(--good)">' + hrAccept + '</div><div class="lbl">Offer 接受</div></div>' +
-          '<div class="hr-summary-item"><div class="n" style="color:var(--pending)">' + hrPending + '</div><div class="lbl">待反馈</div></div>' +
-          '<div class="hr-summary-item"><div class="n" style="color:var(--ink-dim)">' + hrOther + '</div><div class="lbl">未转化</div></div>' +
+          '<div class="hr-summary-item accept"><div class="n">' + hrAccept + '</div><div class="lbl">Offer 接受</div></div>' +
+          '<div class="hr-summary-item pending"><div class="n">' + hrPending + '</div><div class="lbl">待反馈</div></div>' +
+          '<div class="hr-summary-item other"><div class="n">' + hrOther + '</div><div class="lbl">未转化</div></div>' +
         '</div>' +
+        '<div class="section-label" style="margin-top:16px">待办 <span class="tail">action items</span></div>' +
         actionItemsHTML +
       '</aside>' +
 
-    '</main>';
+    '</main>' +
+    '</div>';
 })();
 </script>
 </body>
