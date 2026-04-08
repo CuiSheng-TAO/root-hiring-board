@@ -4,36 +4,35 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ROOT 全栈工程师 · 招聘看板</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;600&family=Noto+Serif+SC:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #060a14;
-    --bg-card: #0d1321;
-    --bg-card-hover: #131b2e;
-    --border: #1a2440;
-    --border-glow: #2a3a60;
-    --text: #c8d6e5;
-    --text-dim: #5a6a80;
-    --text-bright: #e8f0fa;
-    --amber: #f0b429;
-    --amber-dim: #c4941e;
-    --amber-glow: rgba(240, 180, 41, 0.15);
-    --cyan: #00d4ff;
-    --cyan-dim: #0098b8;
-    --cyan-glow: rgba(0, 212, 255, 0.12);
-    --green: #34d399;
-    --green-glow: rgba(52, 211, 153, 0.15);
-    --red: #f87171;
-    --red-glow: rgba(248, 113, 113, 0.2);
-    --red-pulse: rgba(248, 113, 113, 0.4);
-    --yellow: #fbbf24;
-    --purple: #a78bfa;
-    --purple-glow: rgba(167, 139, 250, 0.15);
-    --funnel-1: #0ea5e9;
-    --funnel-2: #6366f1;
-    --funnel-3: #8b5cf6;
-    --funnel-4: #ef4444;
-    --gray: #6b7280;
+    /* Paper surface */
+    --paper: #FBFAF7;
+    --paper-2: #F5F4EF;
+    --card: #FFFFFF;
+    --rule: #E8E6DF;
+    --rule-strong: #D8D5CB;
+
+    /* Ink */
+    --ink: #2A2824;
+    --ink-soft: #4A4844;
+    --ink-dim: #7A7771;
+    --ink-faint: #A8A49C;
+
+    /* Single accent — Newsreader orange */
+    --accent: #B84A1F;
+    --accent-soft: rgba(184, 74, 31, 0.08);
+
+    /* States — muted only */
+    --good: #2E6B3F;
+    --warn: #A22B1F;
+    --warn-bg: #FBF0EE;
+    --pending: #8C5B12;
+    --pending-bg: #FBF5E8;
+    --muted: #9B9992;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -41,759 +40,621 @@
   html, body {
     height: 100%;
     overflow: hidden;
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Noto Sans SC', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', -apple-system, 'PingFang SC', 'Noto Sans SC', sans-serif;
     font-size: 13px;
-    line-height: 1.5;
+    line-height: 1.55;
+    font-feature-settings: "cv11", "ss01", "ss03";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   body {
     background:
-      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(10, 40, 80, 0.4) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 40% at 20% 80%, rgba(99, 102, 241, 0.06) 0%, transparent 50%),
-      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(240, 180, 41, 0.04) 0%, transparent 50%),
-      var(--bg);
+      radial-gradient(ellipse 90% 70% at 50% 0%, #FEFCF7 0%, var(--paper) 60%),
+      var(--paper);
   }
 
+  /* ─── Dashboard shell ─── */
   .dashboard {
-    display: grid;
-    grid-template-rows: auto 1fr;
+    max-width: 1320px;
     height: 100vh;
     max-height: 900px;
-    max-width: 1440px;
     margin: 0 auto;
-    padding: 16px 24px 12px;
-    gap: 12px;
+    padding: 36px 48px 32px;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 28px;
   }
 
   /* ─── Header ─── */
-  .header {
+  header.masthead {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--border);
+    align-items: flex-end;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--rule);
   }
 
-  .header-left {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .header-badge {
-    background: linear-gradient(135deg, var(--amber) 0%, #e09400 100%);
-    color: #000;
-    font-family: 'Orbitron', monospace;
-    font-weight: 900;
-    font-size: 11px;
-    padding: 4px 10px;
-    letter-spacing: 2px;
-    clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 0 100%, 6px 50%);
-  }
-
-  .header h1 {
-    font-family: 'Noto Sans SC', sans-serif;
-    font-weight: 700;
-    font-size: 18px;
-    color: var(--text-bright);
-    letter-spacing: 2px;
-  }
-
-  .header h1 span {
-    color: var(--amber);
-    font-family: 'Orbitron', monospace;
-    font-weight: 900;
-  }
-
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    font-size: 12px;
-    color: var(--text-dim);
-  }
-
-  .header-right .date {
-    font-family: 'JetBrains Mono', monospace;
-    color: var(--cyan-dim);
-    font-size: 11px;
-  }
-
-  .status-dot {
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--green);
-    animation: blink 2s infinite;
-    margin-right: 6px;
-  }
-
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
-
-  /* ─── Main Layout ─── */
-  .main {
-    display: grid;
-    grid-template-columns: 240px 1fr 240px;
-    gap: 16px;
-    min-height: 0;
-  }
-
-  /* ─── Left Panel: Objectives ─── */
-  .panel {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .panel::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--amber), transparent);
-  }
-
-  .panel-title {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--amber);
-    letter-spacing: 3px;
+  .eyebrow {
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--ink-dim);
+    letter-spacing: 2.4px;
     text-transform: uppercase;
-    margin-bottom: 16px;
-    font-family: 'Orbitron', monospace;
+    margin-bottom: 8px;
   }
 
-  .objective-label {
+  h1.title {
+    font-family: 'Newsreader', 'Noto Serif SC', Georgia, serif;
+    font-weight: 500;
+    font-size: 28px;
+    line-height: 1.1;
+    letter-spacing: -0.3px;
+    color: var(--ink);
+  }
+
+  h1.title em {
+    font-style: italic;
+    font-weight: 500;
+    color: var(--accent);
+  }
+
+  .masthead-meta {
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
-    color: var(--text-dim);
-    margin-bottom: 4px;
-  }
-
-  .objective-text {
-    font-size: 13px;
-    color: var(--text);
-    margin-bottom: 16px;
+    color: var(--ink-dim);
     line-height: 1.7;
   }
 
-  .metric-row {
+  .masthead-meta .live-dot {
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--good);
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
+  /* ─── Layout grid ─── */
+  main.layout {
+    display: grid;
+    grid-template-columns: 260px 1fr 280px;
+    gap: 48px;
+    min-height: 0;
+  }
+
+  .col {
+    min-width: 0;
     display: flex;
+    flex-direction: column;
+  }
+
+  /* ─── Section labels ─── */
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--ink-dim);
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    align-items: baseline;
     justify-content: space-between;
-    align-items: center;
+  }
+
+  .section-label .tail {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--ink-faint);
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  /* ─── Objective (left) ─── */
+  .objective-prose {
+    font-family: 'Newsreader', 'Noto Serif SC', serif;
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+    margin-bottom: 22px;
+  }
+
+  .objective-prose strong {
+    font-style: italic;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .metric-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 22px;
+  }
+
+  .metric-table td {
     padding: 10px 0;
-    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--rule);
   }
 
-  .metric-label {
+  .metric-table td:first-child {
     font-size: 12px;
-    color: var(--text-dim);
+    color: var(--ink-dim);
   }
 
-  .metric-value {
-    font-family: 'Orbitron', monospace;
-    font-weight: 700;
-    font-size: 22px;
+  .metric-table td:last-child {
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.5px;
   }
 
-  .metric-value.target { color: var(--amber); }
-  .metric-value.current { color: var(--cyan); }
-  .metric-value.gap { color: var(--red); }
+  .metric-table td.accent { color: var(--accent); }
+  .metric-table td.warn { color: var(--warn); }
+
+  .progress-line {
+    margin-top: 4px;
+  }
 
   .progress-bar {
-    margin-top: 16px;
-    height: 6px;
-    background: var(--border);
-    border-radius: 3px;
-    overflow: hidden;
+    height: 3px;
+    background: var(--rule);
+    position: relative;
+    border-radius: 0;
   }
 
   .progress-fill {
     height: 100%;
-    width: 60%;
-    background: linear-gradient(90deg, var(--cyan), var(--amber));
-    border-radius: 3px;
+    background: var(--accent);
     position: relative;
   }
 
   .progress-fill::after {
     content: '';
     position: absolute;
-    right: 0;
-    top: -2px;
-    width: 10px;
-    height: 10px;
-    background: var(--amber);
+    right: -3px;
+    top: -2.5px;
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
     border-radius: 50%;
-    box-shadow: 0 0 8px var(--amber);
+    border: 2px solid var(--paper);
   }
 
-  .progress-label {
+  .progress-meta {
     display: flex;
     justify-content: space-between;
-    margin-top: 6px;
-    font-size: 10px;
-    color: var(--text-dim);
+    margin-top: 10px;
     font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-dim);
   }
 
-  /* ─── Center: Funnel ─── */
-  .funnel-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0;
-    padding: 8px 0;
+  /* ─── Funnel as table (center) ─── */
+  .funnel-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .funnel-table thead th {
+    text-align: left;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--ink-faint);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    padding: 0 12px 12px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .funnel-table thead th.num {
+    text-align: right;
+  }
+
+  .funnel-table tbody tr {
+    border-bottom: 1px solid var(--rule);
+    transition: background 0.15s;
+  }
+
+  .funnel-table tbody tr:hover {
+    background: var(--paper-2);
+  }
+
+  .funnel-table tbody tr.anomaly {
+    background: var(--warn-bg);
     position: relative;
   }
 
-  .funnel-stage {
-    position: relative;
-    text-align: center;
-    transition: transform 0.2s;
-    cursor: default;
-  }
-
-  .funnel-stage:hover {
-    transform: scale(1.02);
-  }
-
-  .funnel-shape {
-    position: relative;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    padding: 12px 20px;
-    min-height: 80px;
-  }
-
-  .funnel-shape::before {
+  .funnel-table tbody tr.anomaly::before {
     content: '';
     position: absolute;
-    inset: 0;
-    opacity: 0.85;
-    z-index: 0;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--warn);
   }
 
-  .stage-1 { width: 100%; max-width: 640px; }
-  .stage-1 .funnel-shape::before {
-    background: linear-gradient(180deg, rgba(14, 165, 233, 0.18) 0%, rgba(14, 165, 233, 0.06) 100%);
-    border: 1px solid rgba(14, 165, 233, 0.35);
-    clip-path: polygon(2% 0%, 98% 0%, 92% 100%, 8% 100%);
+  .funnel-table tbody td {
+    padding: 18px 12px;
+    vertical-align: middle;
   }
 
-  .stage-2 { width: 78%; max-width: 500px; }
-  .stage-2 .funnel-shape::before {
-    background: linear-gradient(180deg, rgba(99, 102, 241, 0.18) 0%, rgba(99, 102, 241, 0.06) 100%);
-    border: 1px solid rgba(99, 102, 241, 0.35);
-    clip-path: polygon(4% 0%, 96% 0%, 89% 100%, 11% 100%);
+  .stage-name {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
   }
 
-  .stage-3 { width: 58%; max-width: 370px; }
-  .stage-3 .funnel-shape::before {
-    background: linear-gradient(180deg, rgba(139, 92, 246, 0.18) 0%, rgba(139, 92, 246, 0.06) 100%);
-    border: 1px solid rgba(139, 92, 246, 0.35);
-    clip-path: polygon(5% 0%, 95% 0%, 87% 100%, 13% 100%);
+  .stage-name .primary {
+    font-family: 'Newsreader', 'Noto Serif SC', serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--ink);
+    letter-spacing: -0.2px;
   }
 
-  .stage-4 { width: 42%; max-width: 270px; }
-  .stage-4 .funnel-shape::before {
-    background: linear-gradient(180deg, rgba(239, 68, 68, 0.22) 0%, rgba(239, 68, 68, 0.08) 100%);
-    border: 1px solid rgba(239, 68, 68, 0.45);
-    clip-path: polygon(6% 0%, 94% 0%, 85% 100%, 15% 100%);
-    animation: redPulse 2s ease-in-out infinite;
+  .stage-name .secondary {
+    font-size: 10px;
+    color: var(--ink-faint);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.3px;
   }
 
-  @keyframes redPulse {
-    0%, 100% { border-color: rgba(239, 68, 68, 0.45); box-shadow: 0 0 0 rgba(239, 68, 68, 0); }
-    50% { border-color: rgba(239, 68, 68, 0.8); box-shadow: 0 0 20px rgba(239, 68, 68, 0.15); }
+  .funnel-table td.num {
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--ink);
+    letter-spacing: -0.3px;
   }
 
-  .funnel-content {
+  .funnel-table td.num .unit {
+    font-size: 11px;
+    color: var(--ink-faint);
+    margin-left: 2px;
+    font-weight: 400;
+  }
+
+  .funnel-table td.rate {
+    text-align: right;
+    width: 110px;
+  }
+
+  .funnel-table td.rate .pct {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.3px;
+  }
+
+  .funnel-table tr.anomaly td.rate .pct {
+    color: var(--warn);
+  }
+
+  .rate-bar {
+    margin-top: 5px;
+    height: 2px;
+    background: var(--rule);
+    width: 100%;
     position: relative;
-    z-index: 1;
   }
 
-  .stage-tag {
+  .rate-bar .fill {
+    height: 100%;
+    background: var(--ink-soft);
+  }
+
+  tr.anomaly .rate-bar .fill {
+    background: var(--warn);
+  }
+
+  .warn-marker {
     display: inline-block;
-    font-family: 'Orbitron', monospace;
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    padding: 2px 8px;
-    border-radius: 2px;
-    margin-bottom: 4px;
+    font-size: 10px;
+    color: var(--warn);
+    font-weight: 600;
+    margin-left: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.5px;
   }
 
-  .stage-1 .stage-tag { background: rgba(14, 165, 233, 0.25); color: var(--funnel-1); }
-  .stage-2 .stage-tag { background: rgba(99, 102, 241, 0.25); color: var(--funnel-2); }
-  .stage-3 .stage-tag { background: rgba(139, 92, 246, 0.25); color: var(--funnel-3); }
-  .stage-4 .stage-tag { background: rgba(239, 68, 68, 0.3); color: var(--funnel-4); }
+  /* ─── Funnel summary footnote ─── */
+  .funnel-summary {
+    margin-top: 18px;
+    padding: 14px 16px;
+    background: var(--paper-2);
+    border-left: 2px solid var(--ink-soft);
+    font-family: 'Newsreader', 'Noto Serif SC', serif;
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+  }
 
-  .stage-numbers {
+  .funnel-summary strong {
+    color: var(--ink);
+    font-weight: 600;
+    font-style: italic;
+  }
+
+  .funnel-summary .accent-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-style: normal;
+    font-weight: 600;
+    color: var(--accent);
+    font-size: 14px;
+  }
+
+  .funnel-summary .warn-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-style: normal;
+    font-weight: 600;
+    color: var(--warn);
+    font-size: 14px;
+  }
+
+  /* ─── Compare table ─── */
+  .compare-section {
+    margin-top: 26px;
+  }
+
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .compare-table th {
+    text-align: right;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--ink-faint);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    padding: 0 10px 10px;
+  }
+
+  .compare-table th:first-child {
+    text-align: left;
+  }
+
+  .compare-table td {
+    padding: 10px;
+    border-bottom: 1px solid var(--rule);
+    font-size: 12px;
+  }
+
+  .compare-table td:first-child {
+    color: var(--ink-soft);
+  }
+
+  .compare-table td.num {
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .compare-table td.delta {
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-dim);
+    width: 70px;
+  }
+
+  .compare-table tr.anomaly td {
+    background: var(--warn-bg);
+  }
+
+  .compare-table tr.anomaly td.num,
+  .compare-table tr.anomaly td.delta {
+    color: var(--warn);
+    font-weight: 600;
+  }
+
+  /* ─── HR exit (right) ─── */
+  .candidate-list {
+    list-style: none;
+  }
+
+  .candidate-row {
+    display: grid;
+    grid-template-columns: 16px 1fr auto;
+    gap: 12px;
+    align-items: baseline;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .candidate-row:last-child {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .candidate-marker {
     font-family: 'JetBrains Mono', monospace;
     font-size: 13px;
-    color: var(--text-bright);
-    margin: 4px 0;
+    font-weight: 600;
+    text-align: center;
+    line-height: 1;
   }
 
-  .stage-numbers .big-num {
-    font-family: 'Orbitron', monospace;
-    font-weight: 700;
-    font-size: 20px;
-  }
+  .marker-accept { color: var(--good); }
+  .marker-pending { color: var(--pending); }
+  .marker-reject { color: var(--ink-faint); }
+  .marker-decline { color: var(--warn); }
 
-  .stage-1 .big-num { color: var(--funnel-1); }
-  .stage-2 .big-num { color: var(--funnel-2); }
-  .stage-3 .big-num { color: var(--funnel-3); }
-  .stage-4 .big-num { color: var(--funnel-4); }
-
-  .stage-rate {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    padding: 1px 6px;
-    border-radius: 3px;
-    display: inline-block;
-  }
-
-  .rate-normal { background: rgba(52, 211, 153, 0.15); color: var(--green); }
-  .rate-warning { background: rgba(248, 113, 113, 0.2); color: var(--red); animation: rateFlash 1.5s infinite; }
-
-  @keyframes rateFlash {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
-  }
-
-  .stage-detail {
-    font-size: 11px;
-    color: var(--text-dim);
-    margin-top: 2px;
-    line-height: 1.6;
-  }
-
-  .funnel-arrow {
-    width: 1px;
-    height: 8px;
-    background: linear-gradient(180deg, var(--border-glow), transparent);
-    margin: 2px auto;
-    position: relative;
-  }
-
-  .funnel-arrow::after {
-    content: '▾';
-    position: absolute;
-    bottom: -8px;
-    left: 50%;
-    transform: translateX(-50%);
-    color: var(--border-glow);
-    font-size: 8px;
-  }
-
-  /* ─── Side branch (loss) ─── */
-  .loss-branch {
-    position: absolute;
-    right: -160px;
-    top: 50%;
-    transform: translateY(-50%);
+  .candidate-body {
     display: flex;
-    align-items: center;
-    gap: 8px;
-    white-space: nowrap;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
   }
-
-  .loss-branch-left {
-    position: absolute;
-    left: -160px;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    white-space: nowrap;
-    flex-direction: row-reverse;
-  }
-
-  .loss-line {
-    width: 30px;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--text-dim));
-  }
-
-  .loss-branch-left .loss-line {
-    background: linear-gradient(270deg, transparent, var(--text-dim));
-  }
-
-  .loss-tag {
-    font-size: 10px;
-    color: var(--text-dim);
-    background: rgba(107, 114, 128, 0.15);
-    padding: 3px 8px;
-    border-radius: 3px;
-    border: 1px solid rgba(107, 114, 128, 0.2);
-    font-family: 'JetBrains Mono', monospace;
-  }
-
-  .loss-tag .num { color: var(--yellow); font-weight: 700; }
-
-  /* ─── Anomaly Badge ─── */
-  .anomaly-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    background: rgba(239, 68, 68, 0.2);
-    border: 1px solid rgba(239, 68, 68, 0.4);
-    color: var(--red);
-    font-size: 10px;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 3px;
-    margin-left: 6px;
-    animation: redPulse 2s ease-in-out infinite;
-    font-family: 'Orbitron', monospace;
-    letter-spacing: 1px;
-  }
-
-  /* ─── Right Panel: Exit ─── */
-  .right-panel::before {
-    background: linear-gradient(90deg, transparent, var(--green), transparent);
-  }
-
-  .candidate-card {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    margin-bottom: 8px;
-    transition: all 0.2s;
-    background: var(--bg-card);
-  }
-
-  .candidate-card:hover {
-    background: var(--bg-card-hover);
-    border-color: var(--border-glow);
-  }
-
-  .candidate-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    flex-shrink: 0;
-  }
-
-  .icon-accept { background: rgba(52, 211, 153, 0.15); border: 1px solid rgba(52, 211, 153, 0.3); }
-  .icon-pending { background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.3); }
-  .icon-reject { background: rgba(107, 114, 128, 0.15); border: 1px solid rgba(107, 114, 128, 0.3); }
-  .icon-decline { background: rgba(248, 113, 113, 0.15); border: 1px solid rgba(248, 113, 113, 0.3); }
-
-  .candidate-info { flex: 1; min-width: 0; }
 
   .candidate-name {
-    font-size: 13px;
+    font-family: 'Newsreader', 'Noto Serif SC', serif;
+    font-size: 15px;
     font-weight: 500;
-    color: var(--text-bright);
+    color: var(--ink);
+    letter-spacing: -0.2px;
   }
 
-  .candidate-status {
+  .candidate-meta {
     font-size: 10px;
-    margin-top: 2px;
-  }
-
-  .status-accept { color: var(--green); }
-  .status-pending { color: var(--yellow); }
-  .status-reject { color: var(--gray); }
-  .status-decline { color: var(--red); }
-
-  .hr-summary {
-    margin-top: 16px;
-    padding-top: 12px;
-    border-top: 1px solid var(--border);
-  }
-
-  .hr-summary-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 11px;
-    padding: 4px 0;
-  }
-
-  .hr-summary-row .label { color: var(--text-dim); }
-  .hr-summary-row .value {
+    color: var(--ink-faint);
     font-family: 'JetBrains Mono', monospace;
-    font-weight: 700;
+    letter-spacing: 0.2px;
+  }
+
+  .candidate-row.row-reject .candidate-name,
+  .candidate-row.row-decline .candidate-name {
+    color: var(--ink-dim);
+  }
+
+  .candidate-status-label {
+    font-size: 11px;
+    color: var(--ink-dim);
+    text-align: right;
+    align-self: center;
+    white-space: nowrap;
+  }
+
+  .candidate-row.row-accept .candidate-status-label {
+    color: var(--good);
+    font-weight: 500;
+  }
+  .candidate-row.row-pending .candidate-status-label {
+    color: var(--pending);
+    font-weight: 500;
+  }
+  .candidate-row.row-decline .candidate-status-label {
+    color: var(--warn);
+  }
+
+  /* ─── Summary bar under candidates ─── */
+  .hr-summary {
+    display: flex;
+    gap: 16px;
+    margin-top: 16px;
+    padding: 12px 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .hr-summary-item {
+    flex: 1;
+  }
+
+  .hr-summary-item .n {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1;
+  }
+
+  .hr-summary-item .lbl {
+    font-size: 10px;
+    color: var(--ink-dim);
+    margin-top: 4px;
+    letter-spacing: 0.3px;
+  }
+
+  /* ─── Action items ─── */
+  .action-section {
+    margin-top: 26px;
+  }
+
+  .action-list {
+    list-style: none;
+  }
+
+  .action-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 10px 0;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    border-bottom: 1px dashed var(--rule);
+  }
+
+  .action-row:last-child {
+    border-bottom: none;
+  }
+
+  .action-row .bullet {
+    flex-shrink: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-dim);
+    font-weight: 600;
+  }
+
+  .action-row.warn .bullet { color: var(--warn); }
+  .action-row.warn { color: var(--ink); }
+
+  .action-row strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .action-row.empty {
+    color: var(--ink-faint);
+    font-style: italic;
   }
 
   /* ─── Links ─── */
-  a.data-link {
+  a.link {
     color: inherit;
     text-decoration: none;
-    border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
-    transition: all 0.2s;
-    cursor: pointer;
+    border-bottom: 1px solid var(--rule-strong);
+    padding-bottom: 1px;
+    transition: color 0.15s, border-color 0.15s;
   }
 
-  a.data-link:hover {
-    color: var(--amber);
-    border-bottom-color: var(--amber);
-    text-shadow: 0 0 8px var(--amber-glow);
+  a.link:hover {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
   }
 
-  a.data-link.link-cyan:hover {
-    color: var(--cyan);
-    border-bottom-color: var(--cyan);
-    text-shadow: 0 0 8px var(--cyan-glow);
+  a.link.subtle {
+    border-bottom-color: transparent;
   }
 
-  a.data-link.link-red:hover {
-    color: var(--red);
-    border-bottom-color: var(--red);
+  a.link.subtle:hover {
+    border-bottom-color: var(--accent);
   }
 
-  /* ─── Comparison tooltip ─── */
-  .compare-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 10px;
-    color: var(--text-dim);
-    margin-top: 3px;
+  /* ─── Tiny entrance fade ─── */
+  .fade-in {
+    animation: fadeIn 0.6s ease-out backwards;
   }
-
-  .compare-row .vs {
-    color: var(--text-dim);
-    opacity: 0.5;
-    font-style: italic;
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   /* ─── Scrollbar hidden ─── */
   ::-webkit-scrollbar { display: none; }
-
-  /* ─── Candidate card v2: status differentiation ─── */
-  .candidate-card {
-    position: relative;
-    overflow: hidden;
-  }
-  .candidate-card::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 3px;
-    background: var(--gray);
-    border-radius: 6px 0 0 6px;
-  }
-  .card-accept::before  { background: var(--green); box-shadow: 0 0 8px var(--green-glow); }
-  .card-pending::before { background: var(--yellow); animation: barPulse 2.4s ease-in-out infinite; }
-  .card-reject::before  { background: var(--gray); }
-  .card-decline::before { background: var(--red);  opacity: 0.7; }
-
-  .card-accept  { background: linear-gradient(90deg, rgba(52,211,153,0.06) 0%, var(--bg-card) 60%); }
-  .card-pending { background: linear-gradient(90deg, rgba(251,191,36,0.06) 0%, var(--bg-card) 60%); }
-  .card-reject, .card-decline { opacity: 0.72; }
-
-  @keyframes barPulse {
-    0%, 100% { box-shadow: 0 0 4px rgba(251,191,36,0.3); }
-    50%      { box-shadow: 0 0 12px rgba(251,191,36,0.6); }
-  }
-
-  .candidate-info { display: flex; flex-direction: column; gap: 2px; }
-  .candidate-meta {
-    font-size: 10px;
-    color: var(--text-dim);
-    font-family: 'JetBrains Mono', monospace;
-    letter-spacing: 0.3px;
-  }
-  .candidate-meta .dot { opacity: 0.4; margin: 0 4px; }
-
-  .candidate-name-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 6px;
-  }
-
-  .followup-tag {
-    font-size: 9px;
-    font-family: 'Orbitron', monospace;
-    font-weight: 700;
-    letter-spacing: 1px;
-    padding: 1px 6px;
-    border-radius: 2px;
-    background: rgba(251,191,36,0.18);
-    color: var(--yellow);
-    border: 1px solid rgba(251,191,36,0.35);
-    flex-shrink: 0;
-  }
-
-  .candidate-icon svg { width: 16px; height: 16px; }
-  .icon-accept  svg { stroke: var(--green); }
-  .icon-pending svg { stroke: var(--yellow); }
-  .icon-reject  svg { stroke: var(--gray); }
-  .icon-decline svg { stroke: var(--red); }
-
-  /* ─── Action items ─── */
-  .action-items {
-    margin-top: 12px;
-    padding-top: 10px;
-    border-top: 1px dashed var(--border);
-  }
-  .action-title {
-    font-size: 9px;
-    font-family: 'Orbitron', monospace;
-    font-weight: 700;
-    letter-spacing: 2px;
-    color: var(--green);
-    margin-bottom: 8px;
-  }
-  .action-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 6px;
-    font-size: 11px;
-    line-height: 1.55;
-    color: var(--text);
-    padding: 4px 0;
-  }
-  .action-item .marker {
-    flex-shrink: 0;
-    font-family: 'JetBrains Mono', monospace;
-    color: var(--yellow);
-    font-weight: 700;
-  }
-  .action-item.warn .marker { color: var(--red); }
-  .action-item.empty {
-    color: var(--text-dim);
-    font-style: italic;
-  }
-  .action-item.empty .marker { color: var(--green); }
-
-  /* ─── Funnel conversion badge ─── */
-  .funnel-arrow { position: relative; }
-  .conversion-badge {
-    position: absolute;
-    left: calc(50% + 16px);
-    top: 50%;
-    transform: translateY(-55%);
-    font-family: 'Orbitron', monospace;
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    color: var(--text-dim);
-    background: rgba(26, 36, 64, 0.6);
-    padding: 1px 6px;
-    border-radius: 2px;
-    border: 1px solid var(--border);
-    white-space: nowrap;
-  }
-  .conversion-badge .arrow { color: var(--text-dim); opacity: 0.6; margin-right: 3px; }
-  .conversion-badge .pct   { color: var(--cyan-dim); }
-
-  /* ─── Mini bar compare ─── */
-  .mini-compare {
-    display: flex;
-    align-items: flex-end;
-    gap: 14px;
-    margin-top: 6px;
-    padding: 6px 4px 4px;
-    height: 38px;
-  }
-  .mini-bar-group {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-    flex-shrink: 0;
-  }
-  .mini-bar-stack {
-    display: flex;
-    align-items: flex-end;
-    gap: 3px;
-    height: 22px;
-  }
-  .mini-bar {
-    width: 5px;
-    border-radius: 1px 1px 0 0;
-    transition: filter 0.2s;
-    cursor: pointer;
-  }
-  .mini-bar.base    { background: rgba(255,255,255,0.18); }
-  .mini-bar.current { background: var(--cyan); }
-  .mini-bar-group.warn .mini-bar.current { background: var(--red); }
-  .mini-bar:hover { filter: brightness(1.4); }
-  .mini-bar-label {
-    font-size: 9px;
-    font-family: 'JetBrains Mono', monospace;
-    color: var(--text-dim);
-    line-height: 1;
-  }
-  .mini-bar-pct {
-    font-size: 10px;
-    font-family: 'Orbitron', monospace;
-    font-weight: 700;
-    color: var(--text-bright);
-    line-height: 1;
-  }
-  .mini-bar-group.warn .mini-bar-pct { color: var(--red); }
-
-  /* ─── Live clock ─── */
-  .live-clock {
-    font-family: 'JetBrains Mono', monospace;
-    color: var(--cyan);
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-shadow: 0 0 8px var(--cyan-glow);
-  }
-
-  /* ─── Entrance animation ─── */
-  @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  .anim-in {
-    animation: fadeInUp 0.55s ease-out backwards;
-  }
-
-  /* ─── Progress dot pulse upgrade ─── */
-  .progress-fill::after {
-    box-shadow: 0 0 8px var(--amber), 0 0 16px rgba(240,180,41,0.4);
-    animation: dotPulse 2.4s ease-in-out infinite;
-  }
-  @keyframes dotPulse {
-    0%, 100% { box-shadow: 0 0 6px var(--amber), 0 0 10px rgba(240,180,41,0.3); }
-    50%      { box-shadow: 0 0 12px var(--amber), 0 0 24px rgba(240,180,41,0.6); }
-  }
-
-  /* ─── Typography micro-tune ─── */
-  .stage-numbers { font-size: 13.5px; line-height: 1.55; }
-  .candidate-name { font-size: 13.5px; }
-
-  /* ─── Noise overlay ─── */
-  body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 9999;
-  }
+  * { scrollbar-width: none; }
 </style>
 </head>
 <body>
@@ -804,224 +665,217 @@
   const D = DASHBOARD_DATA;
   const L = D.links;
 
-  function link(href, text, cls) {
-    cls = cls ? ' ' + cls : '';
-    return '<a class="data-link' + cls + '" href="' + href + '" target="_blank">' + text + '</a>';
+  function link(href, text, subtle) {
+    return '<a class="link' + (subtle ? ' subtle' : '') + '" href="' + href + '" target="_blank">' + text + '</a>';
   }
 
-  function big(n, cls) {
-    return '<span class="big-num" data-countup="' + n + '">' + n + '</span>';
-  }
-
-  // Mini bar comparison: current period vs 12-bimonth baseline
-  function miniCompare(stage, currentLink, baseLink, isWarn) {
-    const cur = stage.current.rate;
-    const base = stage.bimonth.rate;
-    const maxR = Math.max(cur, base, 1);
-    const curH = Math.round(cur / maxR * 22);
-    const baseH = Math.round(base / maxR * 22);
-    const warnCls = isWarn ? ' warn' : '';
-    return '<div class="mini-compare">' +
-      '<div class="mini-bar-group' + warnCls + '" title="\u672C\u671F ' + stage.current.passed + '/' + stage.current.total + '">' +
-        '<div class="mini-bar-pct">' + cur + '%</div>' +
-        '<div class="mini-bar-stack"><div class="mini-bar current" style="height:' + curH + 'px"></div></div>' +
-        '<div class="mini-bar-label">' + link(currentLink, '\u672C\u671F') + '</div>' +
-      '</div>' +
-      '<div class="mini-bar-group" title="12\u53CC\u6708 ' + stage.bimonth.passed + '/' + stage.bimonth.total + '">' +
-        '<div class="mini-bar-pct" style="color:var(--text-dim)">' + base + '%</div>' +
-        '<div class="mini-bar-stack"><div class="mini-bar base" style="height:' + baseH + 'px"></div></div>' +
-        '<div class="mini-bar-label">' + link(baseLink, '12\u53CC\u6708') + '</div>' +
-      '</div>' +
-    '</div>';
-  }
-
-  // Detect anomaly: interview2 rate significantly lower than bimonth
-  const i2 = D.interview2;
-  const i2Anomaly = i2.current.rate < i2.bimonth.rate * 0.6;
-  const i2RateClass = i2Anomaly ? 'rate-warning' : 'rate-normal';
-  const i2AnomalyBadge = i2Anomaly ? '<span class="anomaly-badge">&#9888; \u5F02\u5E38</span>' : '';
-  const i2LinkClass = i2Anomaly ? 'link-red' : '';
-
-  // Detect interview1 anomaly
   const i1 = D.interview1;
+  const i2 = D.interview2;
   const i1Anomaly = i1.current.rate < i1.bimonth.rate * 0.6;
-  const i1StatusText = i1Anomaly ? '<span style="font-size:10px;color:var(--red);margin-left:4px">\u5F02\u5E38</span>' : '<span style="font-size:10px;color:var(--green);margin-left:4px">\u65E0\u5F02\u5E38</span>';
+  const i2Anomaly = i2.current.rate < i2.bimonth.rate * 0.6;
 
-  // Progress
   const pct = Math.round(D.target.current / D.target.goal * 100);
 
-  // HR summary
+  // Funnel rows — each stage has pass rate within the stage
+  const stages = [
+    {
+      name: '入口 · 欧阳评估',
+      sub: 'ENTRY · ASSESSMENT',
+      entered: D.entry.resumesSent,
+      passed: D.entry.assessPassed,
+      rate: D.entry.assessRate,
+      link: L.hireReport,
+      unit: '份',
+      anomaly: false
+    },
+    {
+      name: '笔试 · 已回收',
+      sub: 'WRITTEN TEST',
+      entered: D.writtenTest.collected,
+      passed: D.writtenTest.passed,
+      rate: Math.round(D.writtenTest.passed / D.writtenTest.collected * 100),
+      link: L.wiki,
+      unit: '份',
+      anomaly: false
+    },
+    {
+      name: '一面 · 志权',
+      sub: '1ST INTERVIEW',
+      entered: i1.current.total,
+      passed: i1.current.passed,
+      rate: i1.current.rate,
+      link: L.interview1_3m,
+      unit: '人',
+      anomaly: i1Anomaly
+    },
+    {
+      name: '二面 · 欧阳',
+      sub: '2ND INTERVIEW',
+      entered: i2.current.total,
+      passed: i2.current.passed,
+      rate: i2.current.rate,
+      link: L.interview2_detail,
+      unit: '人',
+      anomaly: i2Anomaly
+    }
+  ];
+
+  const funnelRowsHTML = stages.map(s => {
+    return '<tr class="' + (s.anomaly ? 'anomaly' : '') + '">' +
+      '<td>' +
+        '<div class="stage-name">' +
+          '<span class="primary">' + link(s.link, s.name, true) + '</span>' +
+          '<span class="secondary">' + s.sub + '</span>' +
+        '</div>' +
+      '</td>' +
+      '<td class="num">' + s.entered + '<span class="unit">' + s.unit + '</span></td>' +
+      '<td class="num">' + s.passed + '<span class="unit">' + s.unit + '</span></td>' +
+      '<td class="rate">' +
+        '<div class="pct">' + s.rate + '%' + (s.anomaly ? '<span class="warn-marker">⚠ 异常</span>' : '') + '</div>' +
+        '<div class="rate-bar"><div class="fill" style="width:' + Math.min(s.rate, 100) + '%"></div></div>' +
+      '</td>' +
+    '</tr>';
+  }).join('');
+
+  // Funnel summary — cumulative conversion
+  const cumulativePct = (D.entry.assessPassed * 0 + (i2.current.passed / D.entry.resumesSent * 100)).toFixed(1);
+  const summaryHTML =
+    '<div class="funnel-summary">' +
+      '本期共 <span class="accent-num">' + D.entry.resumesSent + '</span> 份简历进入漏斗，最终 <span class="accent-num">' + i2.current.passed + '</span> 人通过二面，累计转化率 <span class="accent-num">' + cumulativePct + '%</span>。' +
+      (i2Anomaly
+        ? '二面通过率 <span class="warn-num">' + i2.current.rate + '%</span> 显著低于 12 双月基线 <strong>' + i2.bimonth.rate + '%</strong>，<em>值得关注 pending ' + i2.current.pending + ' 人的最终走向</em>。'
+        : '') +
+    '</div>';
+
+  // Compare table
+  const i1Delta = i1.current.rate - i1.bimonth.rate;
+  const i2Delta = i2.current.rate - i2.bimonth.rate;
+  const fmtDelta = d => (d >= 0 ? '+' : '') + d + 'pt';
+
+  const compareHTML =
+    '<div class="compare-section">' +
+      '<div class="section-label">本期 vs 12 双月基线 <span class="tail">baseline comparison</span></div>' +
+      '<table class="compare-table">' +
+        '<thead><tr><th></th><th>本期</th><th>12 双月</th><th>差异</th></tr></thead>' +
+        '<tbody>' +
+          '<tr class="' + (i1Anomaly ? 'anomaly' : '') + '">' +
+            '<td>一面通过率</td>' +
+            '<td class="num">' + link(L.interview1_3m, i1.current.rate + '%', true) + '</td>' +
+            '<td class="num">' + link(L.interview1_12m, i1.bimonth.rate + '%', true) + '</td>' +
+            '<td class="delta">' + fmtDelta(i1Delta) + '</td>' +
+          '</tr>' +
+          '<tr class="' + (i2Anomaly ? 'anomaly' : '') + '">' +
+            '<td>二面通过率</td>' +
+            '<td class="num">' + link(L.interview2_detail, i2.current.rate + '%', true) + '</td>' +
+            '<td class="num">' + link(L.interview2_12m, i2.bimonth.rate + '%', true) + '</td>' +
+            '<td class="delta">' + fmtDelta(i2Delta) + (i2Anomaly ? ' ⚠' : '') + '</td>' +
+          '</tr>' +
+        '</tbody>' +
+      '</table>' +
+    '</div>';
+
+  // HR candidates
+  const markerMap = {
+    accept:  ['●', 'marker-accept',  'row-accept'],
+    pending: ['○', 'marker-pending', 'row-pending'],
+    reject:  ['−', 'marker-reject',  'row-reject'],
+    decline: ['×', 'marker-decline', 'row-decline']
+  };
+
+  const candidatesHTML = D.hrInterview.candidates.map(c => {
+    const [glyph, markerCls, rowCls] = markerMap[c.status] || ['·', 'marker-reject', 'row-reject'];
+    const meta = [c.role, c.date].filter(Boolean).join(' · ');
+    return '<li class="candidate-row ' + rowCls + '">' +
+      '<span class="candidate-marker ' + markerCls + '">' + glyph + '</span>' +
+      '<div class="candidate-body">' +
+        '<span class="candidate-name">' + c.name + '</span>' +
+        (meta ? '<span class="candidate-meta">' + meta + '</span>' : '') +
+      '</div>' +
+      '<span class="candidate-status-label">' + c.label + '</span>' +
+    '</li>';
+  }).join('');
+
   const hrAccept = D.hrInterview.candidates.filter(c => c.status === 'accept').length;
   const hrPending = D.hrInterview.candidates.filter(c => c.status === 'pending').length;
   const hrOther = D.hrInterview.candidates.length - hrAccept - hrPending;
 
-  // Inline SVG icons (lucide-style, 14×14, stroke 1.6)
-  const SVG = {
-    accept:  '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
-    pending: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
-    reject:  '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>',
-    decline: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>'
-  };
-  const iconClsMap = { accept: 'icon-accept', pending: 'icon-pending', reject: 'icon-reject', decline: 'icon-decline' };
-  const cardClsMap = { accept: 'card-accept', pending: 'card-pending', reject: 'card-reject', decline: 'card-decline' };
-  const statusColorMap = { accept: 'status-accept', pending: 'status-pending', reject: 'status-reject', decline: 'status-decline' };
-
-  const candidatesHTML = D.hrInterview.candidates.map((c, idx) => {
-    const cardCls = cardClsMap[c.status] || 'card-reject';
-    const iconCls = iconClsMap[c.status] || 'icon-reject';
-    const iconSvg = SVG[c.status] || SVG.reject;
-    const role = c.role || '';
-    const date = c.date || '';
-    const meta = [role, date].filter(Boolean).join(' \u00B7 ');
-    const tag = c.status === 'pending' ? '<span class="followup-tag">\u8DDF\u8FDB</span>' : '';
-    const delay = (0.15 + idx * 0.06).toFixed(2);
-    return '<div class="candidate-card anim-in ' + cardCls + '" style="animation-delay:' + delay + 's">' +
-      '<div class="candidate-icon ' + iconCls + '">' + iconSvg + '</div>' +
-      '<div class="candidate-info">' +
-        '<div class="candidate-name-row">' +
-          '<span class="candidate-name">' + c.name + '</span>' + tag +
-        '</div>' +
-        (meta ? '<div class="candidate-meta">' + meta + '</div>' : '') +
-        '<div class="candidate-status ' + statusColorMap[c.status] + '">' + c.label + '</div>' +
-      '</div>' +
-    '</div>';
-  }).join('');
-
-  // Action items derived from data
-  const actionList = [];
+  // Action items
+  const actionItems = [];
   D.hrInterview.candidates.forEach(c => {
     if (c.status === 'pending' && c.nextAction) {
-      actionList.push({ kind: 'todo', text: '\u8DDF\u8FDB <strong>' + c.name + '</strong> \u00B7 ' + c.nextAction });
+      actionItems.push({ warn: false, text: '跟进 <strong>' + c.name + '</strong> · ' + c.nextAction });
     }
   });
   if (i2Anomaly) {
-    actionList.push({ kind: 'warn', text: '\u4E8C\u9762\u901A\u8FC7\u7387\u5F02\u5E38\uFF0C\u5173\u6CE8 pending <strong>' + i2.current.pending + '</strong> \u4EBA' });
+    actionItems.push({ warn: true, text: '二面通过率 <strong>' + i2.current.rate + '%</strong> 异常，关注 pending <strong>' + i2.current.pending + '</strong> 人' });
   }
+
   const actionItemsHTML =
-    '<div class="action-items">' +
-      '<div class="action-title">\u25C6 ACTION ITEMS \u00B7 \u5F85\u529E</div>' +
-      (actionList.length === 0
-        ? '<div class="action-item empty"><span class="marker">\u2713</span><span>\u6682\u65E0\u5F85\u529E</span></div>'
-        : actionList.slice(0, 3).map(a =>
-            '<div class="action-item ' + (a.kind === 'warn' ? 'warn' : '') + '">' +
-              '<span class="marker">' + (a.kind === 'warn' ? '\u26A0' : '\u25B8') + '</span>' +
-              '<span>' + a.text + '</span>' +
-            '</div>'
-          ).join('')) +
+    '<div class="action-section">' +
+      '<div class="section-label">待办 <span class="tail">action items</span></div>' +
+      '<ul class="action-list">' +
+        (actionItems.length === 0
+          ? '<li class="action-row empty"><span class="bullet">✓</span><span>暂无待办</span></li>'
+          : actionItems.map(a =>
+              '<li class="action-row ' + (a.warn ? 'warn' : '') + '">' +
+                '<span class="bullet">' + (a.warn ? '⚠' : '→') + '</span>' +
+                '<span>' + a.text + '</span>' +
+              '</li>'
+            ).join('')) +
+      '</ul>' +
     '</div>';
 
-  // Pending breakdown text for interview2
-  const pendingTotal = i2.current.total - i2.current.passed;
-  const pendingText = i2.current.total + '\u4EBA\u901A\u8FC7' + i2.current.passed + '\u4EBA\uFF0Cpending ' + i2.current.pending;
-
+  // Assemble
   document.getElementById('app').innerHTML = '' +
-  '<header class="header">' +
-    '<div class="header-left">' +
-      '<div class="header-badge">STRATEGIC</div>' +
-      '<h1><span>ROOT</span> \u5168\u6808\u5DE5\u7A0B\u5E08 \u00B7 \u62DB\u8058\u770B\u677F</h1>' +
-    '</div>' +
-    '<div class="header-right">' +
-      '<span><span class="status-dot"></span>\u6570\u636E\u5468\u671F ' + D.dataPeriod + '</span>' +
-      '<span class="date">\u66F4\u65B0: ' + D.updateTime + '</span>' +
-      '<span class="live-clock" id="liveClock">--:--:--</span>' +
-    '</div>' +
-  '</header>' +
-
-  '<main class="main">' +
-    '<aside class="panel anim-in" style="animation-delay:0s">' +
-      '<div class="panel-title">&#9670; \u672C\u53CC\u6708\u76EE\u6807</div>' +
-      '<div class="objective-label">\u6838\u5FC3\u76EE\u6807</div>' +
-      '<div class="objective-text">Root \u8FDB\u4E00\u6B65\u6269\uFF0CROOT \u5168\u6808 / \u5DE5\u7A0B\u5168\u6808\u578B\u4EBA\u624D\u4E0D\u5C11\u4E8E <strong style="color:var(--amber);font-family:Orbitron,monospace;font-size:15px;">' + D.target.goal + '</strong> \u4EBA</div>' +
-      '<div class="metric-row"><span class="metric-label">\u76EE\u6807\u4EBA\u6570</span><span class="metric-value target">\u2265' + D.target.goal + '</span></div>' +
-      '<div class="metric-row"><span class="metric-label">\u5F53\u524D\u5728\u5C97</span><span class="metric-value current">' + D.target.current + '</span></div>' +
-      '<div class="metric-row"><span class="metric-label">HC GAP</span><span class="metric-value gap">' + D.target.gap + '</span></div>' +
-      '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
-      '<div class="progress-label"><span>' + D.target.current + '/' + D.target.goal + ' \u5728\u5C97</span><span>' + pct + '%</span></div>' +
-    '</aside>' +
-
-    '<section class="funnel-container">' +
-
-      '<div class="funnel-stage stage-1 anim-in" style="animation-delay:0.05s"><div class="funnel-shape"><div class="funnel-content">' +
-        '<div class="stage-tag">ENTRY \u00B7 \u5165\u53E3</div>' +
-        '<div class="stage-numbers">\u8F93\u9001 ' + link(L.hireReport, big(D.entry.resumesSent), 'link-cyan') + ' \u4EFD\u7B80\u5386\u81F3\u6B27\u9633\u8BC4\u4F30\uFF0C\u901A\u8FC7 ' + link(L.hireReport, big(D.entry.assessPassed), 'link-cyan') + ' \u4EBA</div>' +
-        '<span class="stage-rate rate-normal">\u8BC4\u4F30\u901A\u8FC7\u7387 ' + D.entry.assessRate + '%</span>' +
-      '</div></div></div>' +
-
-      '<div class="funnel-arrow"><span class="conversion-badge"><span class="arrow">\u2193</span><span class="pct">' + Math.round(D.writtenTest.collected / D.entry.assessPassed * 100) + '%</span> \u8FDB\u5165\u7B14\u8BD5</span></div>' +
-
-      '<div class="funnel-stage stage-2 anim-in" style="animation-delay:0.10s"><div class="funnel-shape"><div class="funnel-content">' +
-        '<div class="stage-tag">WRITTEN TEST \u00B7 \u7B14\u8BD5\u56DE\u6536</div>' +
-        '<div class="stage-numbers">\u56DE\u6536 ' + link(L.wiki, big(D.writtenTest.collected)) + ' \u4EFD\uFF0C\u901A\u8FC7 ' + link(L.wiki, big(D.writtenTest.passed)) + ' \u4EBA</div>' +
-        '<div class="stage-detail">\u6298\u635F\uFF1A' + link(L.wiki, '\u7B14\u8BD5\u4E2D <span class="num" style="color:var(--yellow)">' + D.writtenTest.inProgress + '</span> \u4EBA\uFF0C\u62D2\u7EDD\u673A\u4F1A <span class="num" style="color:var(--yellow)">' + D.writtenTest.rejected + '</span> \u4EBA') + '</div>' +
-        '<div class="stage-detail" style="font-size:10px;opacity:0.7">\u9644\uFF1A' + link(L.wiki, 'Root \u5168\u6808\u3001\u5DE5\u7A0B\u5168\u6808\u7B14\u8BD5 pipeline') + '</div>' +
+    '<header class="masthead fade-in">' +
+      '<div>' +
+        '<div class="eyebrow">Strategic Hire · Bimonthly</div>' +
+        '<h1 class="title">ROOT <em>全栈工程师</em> 招聘看板</h1>' +
       '</div>' +
-      '<div class="loss-branch"><div class="loss-line"></div><div class="loss-tag">\u7B14\u8BD5\u4E2D <span class="num">' + D.writtenTest.inProgress + '</span></div></div>' +
-      '<div class="loss-branch-left"><div class="loss-line"></div><div class="loss-tag">\u62D2\u7EDD <span class="num">' + D.writtenTest.rejected + '</span></div></div>' +
-      '</div></div>' +
-
-      '<div class="funnel-arrow"><span class="conversion-badge"><span class="arrow">\u2193</span><span class="pct">' + Math.round(i1.current.total / D.writtenTest.passed * 100) + '%</span> \u8FDB\u5165\u4E00\u9762</span></div>' +
-
-      '<div class="funnel-stage stage-3 anim-in" style="animation-delay:0.15s"><div class="funnel-shape"><div class="funnel-content">' +
-        '<div class="stage-tag">1ST INTERVIEW \u00B7 \u4E00\u9762-\u5FD7\u6743</div>' +
-        '<div class="stage-numbers">\u8FDB\u884C ' + big(i1.current.total) + ' \u4EBA\uFF0C\u901A\u8FC7 ' + big(i1.current.passed) + ' \u4EBA</div>' +
-        '<span class="stage-rate ' + (i1Anomaly ? 'rate-warning' : 'rate-normal') + '">\u4E00\u9762\u901A\u8FC7\u7387 ' + i1.current.rate + '%</span>' + i1StatusText +
-        miniCompare(i1, L.interview1_3m, L.interview1_12m, i1Anomaly) +
-      '</div></div></div>' +
-
-      '<div class="funnel-arrow"><span class="conversion-badge"><span class="arrow">\u2193</span><span class="pct">' + Math.round(i2.current.total / i1.current.passed * 100) + '%</span> \u8FDB\u5165\u4E8C\u9762</span></div>' +
-
-      '<div class="funnel-stage stage-4 anim-in" style="animation-delay:0.20s"><div class="funnel-shape"><div class="funnel-content">' +
-        '<div class="stage-tag">2ND INTERVIEW \u00B7 \u4E8C\u9762-\u6B27\u9633</div>' +
-        '<div class="stage-numbers">\u8FDB\u884C ' + big(i2.current.total) + ' \u4EBA\uFF0C\u901A\u8FC7 ' + big(i2.current.passed) + ' \u4EBA' + i2AnomalyBadge + '</div>' +
-        '<span class="stage-rate ' + i2RateClass + '">\u4E8C\u9762\u901A\u8FC7\u7387 ' + i2.current.rate + '%\uFF08' + i2.current.passed + '/' + i2.current.total + '\uFF09</span>' +
-        '<div class="stage-detail" style="margin-top:4px">' + link(L.interview2_detail, pendingText, i2LinkClass) + '</div>' +
-        miniCompare(i2, L.interview2_detail, L.interview2_12m, i2Anomaly) +
-      '</div></div></div>' +
-
-    '</section>' +
-
-    '<aside class="panel right-panel anim-in" style="animation-delay:0.1s">' +
-      '<div class="panel-title" style="color:var(--green)">&#9670; \u51FA\u53E3 \u00B7 HR\u9762</div>' +
-      '<div style="font-size:11px;color:var(--text-dim);margin-bottom:12px">HR \u9762\uFF1A' + link(L.wiki, '<strong style="color:var(--text-bright)">' + D.hrInterview.total + '</strong> \u4EBA') + '</div>' +
-      candidatesHTML +
-      '<div class="hr-summary">' +
-        '<div class="hr-summary-row"><span class="label">Offer \u63A5\u53D7</span><span class="value" style="color:var(--green)">' + hrAccept + '</span></div>' +
-        '<div class="hr-summary-row"><span class="label">\u5F85\u53CD\u9988</span><span class="value" style="color:var(--yellow)">' + hrPending + '</span></div>' +
-        '<div class="hr-summary-row"><span class="label">\u672A\u8F6C\u5316</span><span class="value" style="color:var(--gray)">' + hrOther + '</span></div>' +
+      '<div class="masthead-meta">' +
+        '<div><span class="live-dot"></span>数据周期 ' + D.dataPeriod + '</div>' +
+        '<div>更新 ' + D.updateTime + '</div>' +
       '</div>' +
-      actionItemsHTML +
-    '</aside>' +
+    '</header>' +
 
-  '</main>';
+    '<main class="layout">' +
 
-  // ─── Count-up animation ───
-  function countUp(el, target, duration) {
-    const start = Date.now();
-    function tick() {
-      const t = Math.min(1, (Date.now() - start) / duration);
-      const eased = 1 - Math.pow(1 - t, 3);
-      el.textContent = Math.round(target * eased);
-      if (t < 1) requestAnimationFrame(tick);
-    }
-    tick();
-  }
-  document.querySelectorAll('[data-countup]').forEach((el, i) => {
-    const target = parseInt(el.getAttribute('data-countup'), 10);
-    if (!isNaN(target)) {
-      el.textContent = '0';
-      setTimeout(() => countUp(el, target, 800), 200 + i * 60);
-    }
-  });
+      '<aside class="col fade-in" style="animation-delay:0.05s">' +
+        '<div class="section-label">本双月目标 <span class="tail">objective</span></div>' +
+        '<p class="objective-prose">Root 进一步扩，ROOT 全栈 / 工程全栈型人才不少于 <strong>' + D.target.goal + '</strong> 人。</p>' +
+        '<table class="metric-table">' +
+          '<tr><td>目标人数</td><td>≥' + D.target.goal + '</td></tr>' +
+          '<tr><td>当前在岗</td><td class="accent">' + D.target.current + '</td></tr>' +
+          '<tr><td>HC Gap</td><td class="warn">−' + D.target.gap + '</td></tr>' +
+        '</table>' +
+        '<div class="progress-line">' +
+          '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
+          '<div class="progress-meta"><span>' + D.target.current + ' / ' + D.target.goal + ' 在岗</span><span>' + pct + '%</span></div>' +
+        '</div>' +
+      '</aside>' +
 
-  // ─── Live clock ───
-  function tickClock() {
-    const d = new Date();
-    const pad = n => String(n).padStart(2, '0');
-    const el = document.getElementById('liveClock');
-    if (el) el.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
-  }
-  tickClock();
-  setInterval(tickClock, 1000);
+      '<section class="col fade-in" style="animation-delay:0.1s">' +
+        '<div class="section-label">招聘漏斗 <span class="tail">recruitment funnel · ' + D.dataPeriod + '</span></div>' +
+        '<table class="funnel-table">' +
+          '<thead><tr><th>阶段</th><th class="num">进入</th><th class="num">通过</th><th class="num">通过率</th></tr></thead>' +
+          '<tbody>' + funnelRowsHTML + '</tbody>' +
+        '</table>' +
+        summaryHTML +
+        compareHTML +
+      '</section>' +
+
+      '<aside class="col fade-in" style="animation-delay:0.15s">' +
+        '<div class="section-label">HR 面 · 出口 <span class="tail">' + D.hrInterview.total + ' candidates</span></div>' +
+        '<ul class="candidate-list">' + candidatesHTML + '</ul>' +
+        '<div class="hr-summary">' +
+          '<div class="hr-summary-item"><div class="n" style="color:var(--good)">' + hrAccept + '</div><div class="lbl">Offer 接受</div></div>' +
+          '<div class="hr-summary-item"><div class="n" style="color:var(--pending)">' + hrPending + '</div><div class="lbl">待反馈</div></div>' +
+          '<div class="hr-summary-item"><div class="n" style="color:var(--ink-dim)">' + hrOther + '</div><div class="lbl">未转化</div></div>' +
+        '</div>' +
+        actionItemsHTML +
+      '</aside>' +
+
+    '</main>';
 })();
 </script>
 </body>
