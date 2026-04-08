@@ -586,6 +586,205 @@
   /* ─── Scrollbar hidden ─── */
   ::-webkit-scrollbar { display: none; }
 
+  /* ─── Candidate card v2: status differentiation ─── */
+  .candidate-card {
+    position: relative;
+    overflow: hidden;
+  }
+  .candidate-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--gray);
+    border-radius: 6px 0 0 6px;
+  }
+  .card-accept::before  { background: var(--green); box-shadow: 0 0 8px var(--green-glow); }
+  .card-pending::before { background: var(--yellow); animation: barPulse 2.4s ease-in-out infinite; }
+  .card-reject::before  { background: var(--gray); }
+  .card-decline::before { background: var(--red);  opacity: 0.7; }
+
+  .card-accept  { background: linear-gradient(90deg, rgba(52,211,153,0.06) 0%, var(--bg-card) 60%); }
+  .card-pending { background: linear-gradient(90deg, rgba(251,191,36,0.06) 0%, var(--bg-card) 60%); }
+  .card-reject, .card-decline { opacity: 0.72; }
+
+  @keyframes barPulse {
+    0%, 100% { box-shadow: 0 0 4px rgba(251,191,36,0.3); }
+    50%      { box-shadow: 0 0 12px rgba(251,191,36,0.6); }
+  }
+
+  .candidate-info { display: flex; flex-direction: column; gap: 2px; }
+  .candidate-meta {
+    font-size: 10px;
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.3px;
+  }
+  .candidate-meta .dot { opacity: 0.4; margin: 0 4px; }
+
+  .candidate-name-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+  }
+
+  .followup-tag {
+    font-size: 9px;
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 1px 6px;
+    border-radius: 2px;
+    background: rgba(251,191,36,0.18);
+    color: var(--yellow);
+    border: 1px solid rgba(251,191,36,0.35);
+    flex-shrink: 0;
+  }
+
+  .candidate-icon svg { width: 16px; height: 16px; }
+  .icon-accept  svg { stroke: var(--green); }
+  .icon-pending svg { stroke: var(--yellow); }
+  .icon-reject  svg { stroke: var(--gray); }
+  .icon-decline svg { stroke: var(--red); }
+
+  /* ─── Action items ─── */
+  .action-items {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border);
+  }
+  .action-title {
+    font-size: 9px;
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--green);
+    margin-bottom: 8px;
+  }
+  .action-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    font-size: 11px;
+    line-height: 1.55;
+    color: var(--text);
+    padding: 4px 0;
+  }
+  .action-item .marker {
+    flex-shrink: 0;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--yellow);
+    font-weight: 700;
+  }
+  .action-item.warn .marker { color: var(--red); }
+  .action-item.empty {
+    color: var(--text-dim);
+    font-style: italic;
+  }
+  .action-item.empty .marker { color: var(--green); }
+
+  /* ─── Funnel conversion badge ─── */
+  .funnel-arrow { position: relative; }
+  .conversion-badge {
+    position: absolute;
+    left: calc(50% + 16px);
+    top: 50%;
+    transform: translateY(-55%);
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    background: rgba(26, 36, 64, 0.6);
+    padding: 1px 6px;
+    border-radius: 2px;
+    border: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .conversion-badge .arrow { color: var(--text-dim); opacity: 0.6; margin-right: 3px; }
+  .conversion-badge .pct   { color: var(--cyan-dim); }
+
+  /* ─── Mini bar compare ─── */
+  .mini-compare {
+    display: flex;
+    align-items: flex-end;
+    gap: 14px;
+    margin-top: 6px;
+    padding: 6px 4px 4px;
+    height: 38px;
+  }
+  .mini-bar-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    flex-shrink: 0;
+  }
+  .mini-bar-stack {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 22px;
+  }
+  .mini-bar {
+    width: 5px;
+    border-radius: 1px 1px 0 0;
+    transition: filter 0.2s;
+    cursor: pointer;
+  }
+  .mini-bar.base    { background: rgba(255,255,255,0.18); }
+  .mini-bar.current { background: var(--cyan); }
+  .mini-bar-group.warn .mini-bar.current { background: var(--red); }
+  .mini-bar:hover { filter: brightness(1.4); }
+  .mini-bar-label {
+    font-size: 9px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-dim);
+    line-height: 1;
+  }
+  .mini-bar-pct {
+    font-size: 10px;
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    color: var(--text-bright);
+    line-height: 1;
+  }
+  .mini-bar-group.warn .mini-bar-pct { color: var(--red); }
+
+  /* ─── Live clock ─── */
+  .live-clock {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--cyan);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-shadow: 0 0 8px var(--cyan-glow);
+  }
+
+  /* ─── Entrance animation ─── */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .anim-in {
+    animation: fadeInUp 0.55s ease-out backwards;
+  }
+
+  /* ─── Progress dot pulse upgrade ─── */
+  .progress-fill::after {
+    box-shadow: 0 0 8px var(--amber), 0 0 16px rgba(240,180,41,0.4);
+    animation: dotPulse 2.4s ease-in-out infinite;
+  }
+  @keyframes dotPulse {
+    0%, 100% { box-shadow: 0 0 6px var(--amber), 0 0 10px rgba(240,180,41,0.3); }
+    50%      { box-shadow: 0 0 12px var(--amber), 0 0 24px rgba(240,180,41,0.6); }
+  }
+
+  /* ─── Typography micro-tune ─── */
+  .stage-numbers { font-size: 13.5px; line-height: 1.55; }
+  .candidate-name { font-size: 13.5px; }
+
   /* ─── Noise overlay ─── */
   body::after {
     content: '';
@@ -611,7 +810,29 @@
   }
 
   function big(n, cls) {
-    return '<span class="big-num">' + n + '</span>';
+    return '<span class="big-num" data-countup="' + n + '">' + n + '</span>';
+  }
+
+  // Mini bar comparison: current period vs 12-bimonth baseline
+  function miniCompare(stage, currentLink, baseLink, isWarn) {
+    const cur = stage.current.rate;
+    const base = stage.bimonth.rate;
+    const maxR = Math.max(cur, base, 1);
+    const curH = Math.round(cur / maxR * 22);
+    const baseH = Math.round(base / maxR * 22);
+    const warnCls = isWarn ? ' warn' : '';
+    return '<div class="mini-compare">' +
+      '<div class="mini-bar-group' + warnCls + '" title="\u672C\u671F ' + stage.current.passed + '/' + stage.current.total + '">' +
+        '<div class="mini-bar-pct">' + cur + '%</div>' +
+        '<div class="mini-bar-stack"><div class="mini-bar current" style="height:' + curH + 'px"></div></div>' +
+        '<div class="mini-bar-label">' + link(currentLink, '\u672C\u671F') + '</div>' +
+      '</div>' +
+      '<div class="mini-bar-group" title="12\u53CC\u6708 ' + stage.bimonth.passed + '/' + stage.bimonth.total + '">' +
+        '<div class="mini-bar-pct" style="color:var(--text-dim)">' + base + '%</div>' +
+        '<div class="mini-bar-stack"><div class="mini-bar base" style="height:' + baseH + 'px"></div></div>' +
+        '<div class="mini-bar-label">' + link(baseLink, '12\u53CC\u6708') + '</div>' +
+      '</div>' +
+    '</div>';
   }
 
   // Detect anomaly: interview2 rate significantly lower than bimonth
@@ -634,13 +855,60 @@
   const hrPending = D.hrInterview.candidates.filter(c => c.status === 'pending').length;
   const hrOther = D.hrInterview.candidates.length - hrAccept - hrPending;
 
-  const iconMap = { accept: ['icon-accept', '\u2713'], pending: ['icon-pending', '\u23F3'], reject: ['icon-reject', '\u2014'], decline: ['icon-decline', '\u2715'] };
+  // Inline SVG icons (lucide-style, 14×14, stroke 1.6)
+  const SVG = {
+    accept:  '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+    pending: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+    reject:  '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>',
+    decline: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>'
+  };
+  const iconClsMap = { accept: 'icon-accept', pending: 'icon-pending', reject: 'icon-reject', decline: 'icon-decline' };
+  const cardClsMap = { accept: 'card-accept', pending: 'card-pending', reject: 'card-reject', decline: 'card-decline' };
   const statusColorMap = { accept: 'status-accept', pending: 'status-pending', reject: 'status-reject', decline: 'status-decline' };
 
-  const candidatesHTML = D.hrInterview.candidates.map(c => {
-    const [iconCls, iconChar] = iconMap[c.status] || ['icon-reject', '?'];
-    return '<div class="candidate-card"><div class="candidate-icon ' + iconCls + '">' + iconChar + '</div><div class="candidate-info"><div class="candidate-name">' + c.name + '</div><div class="candidate-status ' + statusColorMap[c.status] + '">' + c.label + '</div></div></div>';
+  const candidatesHTML = D.hrInterview.candidates.map((c, idx) => {
+    const cardCls = cardClsMap[c.status] || 'card-reject';
+    const iconCls = iconClsMap[c.status] || 'icon-reject';
+    const iconSvg = SVG[c.status] || SVG.reject;
+    const role = c.role || '';
+    const date = c.date || '';
+    const meta = [role, date].filter(Boolean).join(' \u00B7 ');
+    const tag = c.status === 'pending' ? '<span class="followup-tag">\u8DDF\u8FDB</span>' : '';
+    const delay = (0.15 + idx * 0.06).toFixed(2);
+    return '<div class="candidate-card anim-in ' + cardCls + '" style="animation-delay:' + delay + 's">' +
+      '<div class="candidate-icon ' + iconCls + '">' + iconSvg + '</div>' +
+      '<div class="candidate-info">' +
+        '<div class="candidate-name-row">' +
+          '<span class="candidate-name">' + c.name + '</span>' + tag +
+        '</div>' +
+        (meta ? '<div class="candidate-meta">' + meta + '</div>' : '') +
+        '<div class="candidate-status ' + statusColorMap[c.status] + '">' + c.label + '</div>' +
+      '</div>' +
+    '</div>';
   }).join('');
+
+  // Action items derived from data
+  const actionList = [];
+  D.hrInterview.candidates.forEach(c => {
+    if (c.status === 'pending' && c.nextAction) {
+      actionList.push({ kind: 'todo', text: '\u8DDF\u8FDB <strong>' + c.name + '</strong> \u00B7 ' + c.nextAction });
+    }
+  });
+  if (i2Anomaly) {
+    actionList.push({ kind: 'warn', text: '\u4E8C\u9762\u901A\u8FC7\u7387\u5F02\u5E38\uFF0C\u5173\u6CE8 pending <strong>' + i2.current.pending + '</strong> \u4EBA' });
+  }
+  const actionItemsHTML =
+    '<div class="action-items">' +
+      '<div class="action-title">\u25C6 ACTION ITEMS \u00B7 \u5F85\u529E</div>' +
+      (actionList.length === 0
+        ? '<div class="action-item empty"><span class="marker">\u2713</span><span>\u6682\u65E0\u5F85\u529E</span></div>'
+        : actionList.slice(0, 3).map(a =>
+            '<div class="action-item ' + (a.kind === 'warn' ? 'warn' : '') + '">' +
+              '<span class="marker">' + (a.kind === 'warn' ? '\u26A0' : '\u25B8') + '</span>' +
+              '<span>' + a.text + '</span>' +
+            '</div>'
+          ).join('')) +
+    '</div>';
 
   // Pending breakdown text for interview2
   const pendingTotal = i2.current.total - i2.current.passed;
@@ -655,11 +923,12 @@
     '<div class="header-right">' +
       '<span><span class="status-dot"></span>\u6570\u636E\u5468\u671F ' + D.dataPeriod + '</span>' +
       '<span class="date">\u66F4\u65B0: ' + D.updateTime + '</span>' +
+      '<span class="live-clock" id="liveClock">--:--:--</span>' +
     '</div>' +
   '</header>' +
 
   '<main class="main">' +
-    '<aside class="panel">' +
+    '<aside class="panel anim-in" style="animation-delay:0s">' +
       '<div class="panel-title">&#9670; \u672C\u53CC\u6708\u76EE\u6807</div>' +
       '<div class="objective-label">\u6838\u5FC3\u76EE\u6807</div>' +
       '<div class="objective-text">Root \u8FDB\u4E00\u6B65\u6269\uFF0CROOT \u5168\u6808 / \u5DE5\u7A0B\u5168\u6808\u578B\u4EBA\u624D\u4E0D\u5C11\u4E8E <strong style="color:var(--amber);font-family:Orbitron,monospace;font-size:15px;">' + D.target.goal + '</strong> \u4EBA</div>' +
@@ -672,15 +941,15 @@
 
     '<section class="funnel-container">' +
 
-      '<div class="funnel-stage stage-1"><div class="funnel-shape"><div class="funnel-content">' +
+      '<div class="funnel-stage stage-1 anim-in" style="animation-delay:0.05s"><div class="funnel-shape"><div class="funnel-content">' +
         '<div class="stage-tag">ENTRY \u00B7 \u5165\u53E3</div>' +
         '<div class="stage-numbers">\u8F93\u9001 ' + link(L.hireReport, big(D.entry.resumesSent), 'link-cyan') + ' \u4EFD\u7B80\u5386\u81F3\u6B27\u9633\u8BC4\u4F30\uFF0C\u901A\u8FC7 ' + link(L.hireReport, big(D.entry.assessPassed), 'link-cyan') + ' \u4EBA</div>' +
         '<span class="stage-rate rate-normal">\u8BC4\u4F30\u901A\u8FC7\u7387 ' + D.entry.assessRate + '%</span>' +
       '</div></div></div>' +
 
-      '<div class="funnel-arrow"></div>' +
+      '<div class="funnel-arrow"><span class="conversion-badge"><span class="arrow">\u2193</span><span class="pct">' + Math.round(D.writtenTest.collected / D.entry.assessPassed * 100) + '%</span> \u8FDB\u5165\u7B14\u8BD5</span></div>' +
 
-      '<div class="funnel-stage stage-2"><div class="funnel-shape"><div class="funnel-content">' +
+      '<div class="funnel-stage stage-2 anim-in" style="animation-delay:0.10s"><div class="funnel-shape"><div class="funnel-content">' +
         '<div class="stage-tag">WRITTEN TEST \u00B7 \u7B14\u8BD5\u56DE\u6536</div>' +
         '<div class="stage-numbers">\u56DE\u6536 ' + link(L.wiki, big(D.writtenTest.collected)) + ' \u4EFD\uFF0C\u901A\u8FC7 ' + link(L.wiki, big(D.writtenTest.passed)) + ' \u4EBA</div>' +
         '<div class="stage-detail">\u6298\u635F\uFF1A' + link(L.wiki, '\u7B14\u8BD5\u4E2D <span class="num" style="color:var(--yellow)">' + D.writtenTest.inProgress + '</span> \u4EBA\uFF0C\u62D2\u7EDD\u673A\u4F1A <span class="num" style="color:var(--yellow)">' + D.writtenTest.rejected + '</span> \u4EBA') + '</div>' +
@@ -690,32 +959,28 @@
       '<div class="loss-branch-left"><div class="loss-line"></div><div class="loss-tag">\u62D2\u7EDD <span class="num">' + D.writtenTest.rejected + '</span></div></div>' +
       '</div></div>' +
 
-      '<div class="funnel-arrow"></div>' +
+      '<div class="funnel-arrow"><span class="conversion-badge"><span class="arrow">\u2193</span><span class="pct">' + Math.round(i1.current.total / D.writtenTest.passed * 100) + '%</span> \u8FDB\u5165\u4E00\u9762</span></div>' +
 
-      '<div class="funnel-stage stage-3"><div class="funnel-shape"><div class="funnel-content">' +
+      '<div class="funnel-stage stage-3 anim-in" style="animation-delay:0.15s"><div class="funnel-shape"><div class="funnel-content">' +
         '<div class="stage-tag">1ST INTERVIEW \u00B7 \u4E00\u9762-\u5FD7\u6743</div>' +
         '<div class="stage-numbers">\u8FDB\u884C ' + big(i1.current.total) + ' \u4EBA\uFF0C\u901A\u8FC7 ' + big(i1.current.passed) + ' \u4EBA</div>' +
-        '<span class="stage-rate rate-normal">\u4E00\u9762\u901A\u8FC7\u7387 ' + i1.current.rate + '%</span>' + i1StatusText +
-        '<div class="compare-row">' +
-          link(L.interview1_12m, '12\u53CC\u6708 ' + i1.bimonth.rate + '%-' + i1.bimonth.passed + '/' + i1.bimonth.total) +
-          '<span class="vs">vs</span>' +
-          link(L.interview1_3m, '3\u6708 ' + i1.current.rate + '%-' + i1.current.passed + '/' + i1.current.total) +
-        '</div>' +
+        '<span class="stage-rate ' + (i1Anomaly ? 'rate-warning' : 'rate-normal') + '">\u4E00\u9762\u901A\u8FC7\u7387 ' + i1.current.rate + '%</span>' + i1StatusText +
+        miniCompare(i1, L.interview1_3m, L.interview1_12m, i1Anomaly) +
       '</div></div></div>' +
 
-      '<div class="funnel-arrow"></div>' +
+      '<div class="funnel-arrow"><span class="conversion-badge"><span class="arrow">\u2193</span><span class="pct">' + Math.round(i2.current.total / i1.current.passed * 100) + '%</span> \u8FDB\u5165\u4E8C\u9762</span></div>' +
 
-      '<div class="funnel-stage stage-4"><div class="funnel-shape"><div class="funnel-content">' +
+      '<div class="funnel-stage stage-4 anim-in" style="animation-delay:0.20s"><div class="funnel-shape"><div class="funnel-content">' +
         '<div class="stage-tag">2ND INTERVIEW \u00B7 \u4E8C\u9762-\u6B27\u9633</div>' +
         '<div class="stage-numbers">\u8FDB\u884C ' + big(i2.current.total) + ' \u4EBA\uFF0C\u901A\u8FC7 ' + big(i2.current.passed) + ' \u4EBA' + i2AnomalyBadge + '</div>' +
         '<span class="stage-rate ' + i2RateClass + '">\u4E8C\u9762\u901A\u8FC7\u7387 ' + i2.current.rate + '%\uFF08' + i2.current.passed + '/' + i2.current.total + '\uFF09</span>' +
         '<div class="stage-detail" style="margin-top:4px">' + link(L.interview2_detail, pendingText, i2LinkClass) + '</div>' +
-        '<div class="compare-row"><span class="vs">\u5BF9\u6BD4</span>' + link(L.interview2_12m, '12\u53CC\u6708 ' + i2.bimonth.total + '\u9762\u8BD5\u8FC7' + i2.bimonth.passed + '\u4E2A\uFF0Cpending ' + i2.bimonth.pending + '\u4E2A', i2LinkClass) + '</div>' +
+        miniCompare(i2, L.interview2_detail, L.interview2_12m, i2Anomaly) +
       '</div></div></div>' +
 
     '</section>' +
 
-    '<aside class="panel right-panel">' +
+    '<aside class="panel right-panel anim-in" style="animation-delay:0.1s">' +
       '<div class="panel-title" style="color:var(--green)">&#9670; \u51FA\u53E3 \u00B7 HR\u9762</div>' +
       '<div style="font-size:11px;color:var(--text-dim);margin-bottom:12px">HR \u9762\uFF1A' + link(L.wiki, '<strong style="color:var(--text-bright)">' + D.hrInterview.total + '</strong> \u4EBA') + '</div>' +
       candidatesHTML +
@@ -724,9 +989,39 @@
         '<div class="hr-summary-row"><span class="label">\u5F85\u53CD\u9988</span><span class="value" style="color:var(--yellow)">' + hrPending + '</span></div>' +
         '<div class="hr-summary-row"><span class="label">\u672A\u8F6C\u5316</span><span class="value" style="color:var(--gray)">' + hrOther + '</span></div>' +
       '</div>' +
+      actionItemsHTML +
     '</aside>' +
 
   '</main>';
+
+  // ─── Count-up animation ───
+  function countUp(el, target, duration) {
+    const start = Date.now();
+    function tick() {
+      const t = Math.min(1, (Date.now() - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      el.textContent = Math.round(target * eased);
+      if (t < 1) requestAnimationFrame(tick);
+    }
+    tick();
+  }
+  document.querySelectorAll('[data-countup]').forEach((el, i) => {
+    const target = parseInt(el.getAttribute('data-countup'), 10);
+    if (!isNaN(target)) {
+      el.textContent = '0';
+      setTimeout(() => countUp(el, target, 800), 200 + i * 60);
+    }
+  });
+
+  // ─── Live clock ───
+  function tickClock() {
+    const d = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    const el = document.getElementById('liveClock');
+    if (el) el.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
 })();
 </script>
 </body>

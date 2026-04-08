@@ -62,10 +62,10 @@ const DASHBOARD_DATA = {
   hrInterview: {
     total: 4,
     candidates: [
-      { name: "苗静思", status: "accept", label: "Offer 接受" },
-      { name: "张杰", status: "pending", label: "待反馈" },
-      { name: "阮傅浩", status: "reject", label: "无意向换工作" },
-      { name: "魏弘量", status: "decline", label: "拒绝 Offer" }
+      { name: "苗静思", status: "accept",  label: "Offer 接受",       role: "Root 全栈", date: "近期", nextAction: null },
+      { name: "张杰",   status: "pending", label: "待反馈",           role: "Root 全栈", date: "近期", nextAction: "待 HR 跟进反馈" },
+      { name: "阮傅浩", status: "reject",  label: "无意向换工作",     role: "Root 全栈", date: "近期", nextAction: null },
+      { name: "魏弘量", status: "decline", label: "拒绝 Offer",       role: "Root 全栈", date: "近期", nextAction: null }
     ]
   },
 
