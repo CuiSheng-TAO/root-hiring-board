@@ -1,7 +1,13 @@
 #!/bin/bash
 # update.sh — 从飞书拉取最新招聘数据并生成 data.js
-# 依赖: lark-cli, jq
+# 依赖: lark-cli, jq, curl
 # 用法: ./update.sh
+#
+# 数据说明：
+#   entry (247/86)     — 全渠道汇总，需手动从招聘报告页更新
+#   writtenTest (26)  — 来自 Wiki，需手动更新
+#   interview1/2       — 从电子表格自动拉取
+#   ATS 总申请数      — 从 hire API 自动拉取（reference）
 
 set -e
 
@@ -77,6 +83,51 @@ INTERVIEW2_RATE=$(calc_rate "$INTERVIEW2_PASS" "$INTERVIEW2_TOTAL")
 INTERVIEW2_12M_RATE=$(calc_rate "$INTERVIEW2_12M_PASS" "$INTERVIEW2_12M_TOTAL")
 
 UPDATE_TIME=$(date "+%Y.%m.%d %H:%M")
+
+# ─── 从 hire API 拉 ATS 总申请数 ───
+# ROOT 岗位: 7539897631183980810 (ROOT-全栈) + 7593964671033100563 (AI原生全栈)
+echo "  读取 ATS 总申请数..."
+
+ATS_JSON=$(python3 << 'PYEOF'
+import json, subprocess
+
+APP_ID = "cli_a95d929432785cc7"
+APP_SECRET = "0zSYGHc0JxNRrsY8adgsRhKZdOYKzTCS"
+JOBS = [("7539897631183980810","ROOT-全栈"),("7593964671033100563","AI原生全栈")]
+
+# get token
+r = subprocess.run(["curl","-s","-X","POST",
+    "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal",
+    "-H","Content-Type: application/json",
+    "-d",json.dumps({"app_id":APP_ID,"app_secret":APP_SECRET})],
+    capture_output=True, text=True)
+token = json.loads(r.stdout)["tenant_access_token"]
+
+counts = {}
+for job_id, name in JOBS:
+    total = 0
+    pt = ""
+    while True:
+        url = f"https://open.feishu.cn/open-apis/hire/v1/applications?job_id={job_id}&page_size=20"
+        if pt:
+            url += f"&page_token={pt}"
+        r = subprocess.run(["curl","-s",url,"-H",f"Authorization: Bearer {token}"],
+            capture_output=True, text=True)
+        d = json.loads(r.stdout)
+        total += len(d.get("data",{}).get("items",[]))
+        if not d.get("data",{}).get("has_more"):
+            break
+        pt = d.get("data",{}).get("page_token","")
+    counts[job_id] = total
+
+print(json.dumps({"root":counts.get("7539897631183980810",0),"ai":counts.get("7593964671033100563",0)}))
+PYEOF
+)
+
+ATS_ROOT=$(echo "$ATS_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin)['root'])")
+ATS_AI=$(echo "$ATS_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin)['ai'])")
+ATS_COMBINED=$((ATS_ROOT + ATS_AI))
+echo "  ATS 总申请: $ATS_COMBINED (ROOT: $ATS_ROOT + AI原生: $ATS_AI)"
 
 echo "  解析完成。"
 echo "  一面12双月: $INTERVIEW1_12M_PASS/$INTERVIEW1_12M_TOTAL ($INTERVIEW1_12M_RATE%)"
