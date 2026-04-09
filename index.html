@@ -698,6 +698,9 @@
   }
 
   function candidateLink(c) {
+    if (c.talent_id && c.application_id) {
+      return link('https://deepwisdom.feishu.cn/atsx/talent/' + c.talent_id + '?application_id=' + c.application_id, c.name);
+    }
     if (c.talent_id) {
       return link('https://deepwisdom.feishu.cn/hire/talent/' + c.talent_id, c.name);
     }

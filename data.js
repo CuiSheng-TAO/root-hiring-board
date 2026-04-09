@@ -62,10 +62,10 @@ const DASHBOARD_DATA = {
   hrInterview: {
     total: 4,
     candidates: [
-      { name: "苗静思", status: "accept",  label: "Offer 接受",       role: "Root 全栈", date: "近期", nextAction: null, talent_id: "7605124900320495881" },
-      { name: "张杰",   status: "accept",  label: "Offer 沟通中",      role: "Root 全栈", date: "近期", nextAction: null, talent_id: "7601899456342821129" },
-      { name: "阮傅浩", status: "reject",  label: "无意向换工作",     role: "Root 全栈", date: "近期", nextAction: null },
-      { name: "魏弘量", status: "decline", label: "拒绝 Offer",       role: "Root 全栈", date: "近期", nextAction: null }
+      { name: "苗静思", status: "accept",  label: "Offer 接受",       role: "Root 全栈", date: "近期", nextAction: null, talent_id: "7605124900320495881", application_id: "7605124896885311771" },
+      { name: "张杰",   status: "accept",  label: "Offer 沟通中",      role: "Root 全栈", date: "近期", nextAction: null, talent_id: "7601899456342821129", application_id: "7621085664163563786" },
+      { name: "阮傅浩", status: "reject",  label: "无意向换工作",     role: "Root 全栈", date: "近期", nextAction: null, talent_id: "7618999486904338697", application_id: "7618999656626489650" },
+      { name: "魏弘量", status: "decline", label: "拒绝 Offer",       role: "Root 全栈", date: "近期", nextAction: null, talent_id: "7615575380410386694", application_id: "7615617644800215346" }
     ]
   },
 
