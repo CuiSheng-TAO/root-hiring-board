@@ -96,6 +96,78 @@ calc_rate() {
   fi
 }
 
+# 提取每张表所有候选人姓名（用于链接）
+# 电子表格的姓名列是 HYPERLINK("url", "name") 格式，可直接提取 talent_id + application_id
+# SHEET1 (一面12双月): 列0=姓名, 无表头
+I1_12M_CANDS=$(echo "$SHEET1" | python3 -c "
+import json,sys,re
+d=json.load(sys.stdin)
+cands=[]
+for row in d.get('data',{}).get('valueRange',{}).get('values',[]):
+    if not row or not row[0]: continue
+    cell=str(row[0]).strip()
+    m=re.search(r'hire/talent/([^\?/]+)\?application_id=([^\"]+)', cell)
+    if m:
+        cands.append({'talent_id':m.group(1),'application_id':m.group(2)})
+    elif cell and cell!='None' and 'HYPERLINK' not in cell:
+        cands.append({'name':cell})
+print(json.dumps(cands, ensure_ascii=False))
+" 2>/dev/null)
+
+# SHEET2 (一面3月): 列0=姓名, 有表头
+I1_3M_CANDS=$(echo "$SHEET2" | python3 -c "
+import json,sys,re
+d=json.load(sys.stdin)
+cands=[]
+for row in d.get('data',{}).get('valueRange',{}).get('values',[])[1:]:
+    if not row or not row[0]: continue
+    cell=str(row[0]).strip()
+    m=re.search(r'hire/talent/([^\?/]+)\?application_id=([^\"]+)', cell)
+    if m:
+        cands.append({'talent_id':m.group(1),'application_id':m.group(2)})
+    elif cell and cell!='None' and 'HYPERLINK' not in cell:
+        cands.append({'name':cell})
+print(json.dumps(cands, ensure_ascii=False))
+" 2>/dev/null)
+
+# SHEET3 (二面本月): 列0=姓名, 有表头
+I2_CANDS=$(echo "$SHEET3" | python3 -c "
+import json,sys,re
+d=json.load(sys.stdin)
+cands=[]
+for row in d.get('data',{}).get('valueRange',{}).get('values',[])[1:]:
+    if not row or not row[0]: continue
+    cell=str(row[0]).strip()
+    m=re.search(r'hire/talent/([^\?/]+)\?application_id=([^\"]+)', cell)
+    if m:
+        cands.append({'talent_id':m.group(1),'application_id':m.group(2)})
+    elif cell and cell!='None' and 'HYPERLINK' not in cell:
+        cands.append({'name':cell})
+print(json.dumps(cands, ensure_ascii=False))
+" 2>/dev/null)
+
+# SHEET4 (二面12双月): 列0=姓名, 有表头
+I2_12M_CANDS=$(echo "$SHEET4" | python3 -c "
+import json,sys,re
+d=json.load(sys.stdin)
+cands=[]
+for row in d.get('data',{}).get('valueRange',{}).get('values',[])[1:]:
+    if not row or not row[0]: continue
+    cell=str(row[0]).strip()
+    m=re.search(r'hire/talent/([^\?/]+)\?application_id=([^\"]+)', cell)
+    if m:
+        cands.append({'talent_id':m.group(1),'application_id':m.group(2)})
+    elif cell and cell!='None' and 'HYPERLINK' not in cell:
+        cands.append({'name':cell})
+print(json.dumps(cands, ensure_ascii=False))
+" 2>/dev/null)
+
+echo "  一面3月候选人: $(echo $I1_3M_CANDS | python3 -c 'import json,sys; print(len(json.load(sys.stdin)))') 人"
+echo "  二面本月候选人: $(echo $I2_CANDS | python3 -c 'import json,sys; print(len(json.load(sys.stdin)))') 人"
+
+echo "  一面3月名单: $(echo $I1_3M_NAMES | python3 -c 'import json,sys; print(len(json.load(sys.stdin)))') 人"
+echo "  二面本月名单: $(echo $I2_NAMES | python3 -c 'import json,sys; print(len(json.load(sys.stdin)))') 人"
+
 INTERVIEW1_12M_RATE=$(calc_rate "$INTERVIEW1_12M_PASS" "$INTERVIEW1_12M_TOTAL")
 INTERVIEW1_3M_RATE=$(calc_rate "$INTERVIEW1_3M_PASS" "$INTERVIEW1_3M_TOTAL")
 INTERVIEW2_RATE=$(calc_rate "$INTERVIEW2_PASS" "$INTERVIEW2_TOTAL")
@@ -199,7 +271,9 @@ const DASHBOARD_DATA = {
       total: $INTERVIEW1_12M_TOTAL,
       passed: $INTERVIEW1_12M_PASS,
       rate: $INTERVIEW1_12M_RATE
-    }
+    },
+    candidates: $I1_3M_CANDS,
+    candidates12m: $I1_12M_CANDS
   },
 
   // 二面（从电子表格自动计算）
@@ -215,7 +289,9 @@ const DASHBOARD_DATA = {
       passed: $INTERVIEW2_12M_PASS,
       pending: $INTERVIEW2_12M_PENDING,
       rate: $INTERVIEW2_12M_RATE
-    }
+    },
+    candidates: $I2_CANDS,
+    candidates12m: $I2_12M_CANDS
   },
 
   // HR面（⚠️ 手动维护 — 候选人不常变动）

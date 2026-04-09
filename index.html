@@ -336,6 +336,37 @@
   /* ─── Compare section ─── */
   .compare-section { margin-top: 20px; }
 
+  .name-lists { margin-top: 12px; }
+  .name-list-row { margin-bottom: 8px; font-size: 11px; line-height: 1.8; }
+  .name-list-section {
+    display: inline-block;
+    color: var(--ink-dim);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  .name-tag {
+    display: inline-block;
+    margin: 2px 4px 2px 0;
+    padding: 1px 7px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 11px;
+    color: var(--ink-soft);
+    text-decoration: none;
+    white-space: nowrap;
+    vertical-align: middle;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  a.name-tag:hover {
+    background: rgba(0,212,170,0.1);
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
   .compare-row {
     display: flex;
     align-items: center;
@@ -651,6 +682,28 @@
       (i2Anomaly ? '二面通过率 <span class="warn">' + i2.current.rate + '%</span> 低于基线 <strong>' + i2.bimonth.rate + '%</strong>，关注 pending <strong>' + i2.current.pending + '</strong> 人。' : '') +
     '</div>';
 
+  /* ── Candidate name list (clickable links) ── */
+  function candidateList(cands, sectionLabel) {
+    if (!cands || !cands.length) return '';
+    var links = cands.map(function(c) {
+      if (c.talent_id && c.application_id) {
+        return '<a class="link name-tag" href="https://deepwisdom.feishu.cn/atsx/talent/' + c.talent_id + '?application_id=' + c.application_id + '" target="_blank">' + (c.name || c.talent_id) + '</a>';
+      } else if (c.talent_id) {
+        return '<a class="link name-tag" href="https://deepwisdom.feishu.cn/hire/talent/' + c.talent_id + '" target="_blank">' + (c.name || c.talent_id) + '</a>';
+      } else if (c.name) {
+        return '<span class="name-tag">' + c.name + '</span>';
+      }
+      return '';
+    });
+    return '<div class="name-list-row"><span class="name-list-section">' + sectionLabel + '</span> ' + links.join(' ') + '</div>';
+  }
+
+  var namesHTML =
+    (i1.candidates && i1.candidates.length ? candidateList(i1.candidates, '一面·本月') : '') +
+    (i1.candidates12m && i1.candidates12m.length ? candidateList(i1.candidates12m, '一面·12双月') : '') +
+    (i2.candidates && i2.candidates.length ? candidateList(i2.candidates, '二面·本月') : '') +
+    (i2.candidates12m && i2.candidates12m.length ? candidateList(i2.candidates12m, '二面·12双月') : '');
+
   /* ── Compare ── */
   var i1Delta = i1.current.rate - i1.bimonth.rate;
   var i2Delta = i2.current.rate - i2.bimonth.rate;
@@ -793,6 +846,7 @@
           '</table>' +
         '</div>' +
         proseHTML +
+        (namesHTML ? '<div class="name-lists">' + namesHTML + '</div>' : '') +
         compareHTML +
       '</section>' +
 
