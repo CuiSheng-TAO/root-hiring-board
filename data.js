@@ -1,9 +1,10 @@
 // 自动生成 — 请勿手动编辑
-// 更新时间: 2026.04.09 14:40
-// 数据来源: 飞书电子表格(一面/二面) + 招聘报告(入口) + 飞书招聘 API(ATS总数/候选人链接)
+// 更新时间: 2026.04.09 20:23
+// 数据来源: 飞书电子表格 (一面/二面) + 招聘报告(入口) + 飞书 Hire API(ATS总数/候选人链接)
+// ⚠️ 入口和笔试数据需要手动更新（见脚本顶部变量）
 
 const DASHBOARD_DATA = {
-  updateTime: "2026.04.09 14:25",
+  updateTime: "2026.04.09 20:23",
   dataPeriod: "0301 — till now",
 
   // 目标
@@ -13,14 +14,14 @@ const DASHBOARD_DATA = {
     gap: 4
   },
 
-  // 入口（这些数据来自招聘报告，需手动更新或接入 Hire API）
+  // 入口（⚠️ 需手动更新 — 来自飞书招聘报告页）
   entry: {
     resumesSent: 247,
     assessPassed: 86,
     assessRate: 34
   },
 
-  // 笔试（来自 wiki，需手动更新）
+  // 笔试（⚠️ 需手动更新 — 来自飞书 Wiki）
   writtenTest: {
     collected: 26,
     passed: 20,
@@ -36,9 +37,9 @@ const DASHBOARD_DATA = {
       rate: 42
     },
     bimonth: {
-      total: 18,
-      passed: 9,
-      rate: 50
+      total: 16,
+      passed: 6,
+      rate: 37
     }
   },
 
@@ -58,14 +59,14 @@ const DASHBOARD_DATA = {
     }
   },
 
-  // HR面（需手动更新）
+  // HR面（⚠️ 手动维护 — 候选人不常变动）
   hrInterview: {
     total: 4,
     candidates: [
-      { name: "苗静思", status: "accept",  label: "Offer 接受",       role: "Root 全栈", date: "近期", nextAction: null, talent_id: "7605124900320495881", application_id: "7605124896885311771" },
-      { name: "张杰",   status: "accept",  label: "Offer 沟通中",      role: "Root 全栈", date: "近期", nextAction: null, talent_id: "7601899456342821129", application_id: "7621085664163563786" },
-      { name: "阮傅浩", status: "reject",  label: "无意向换工作",     role: "Root 全栈", date: "近期", nextAction: null, talent_id: "7618999486904338697", application_id: "7618999656626489650" },
-      { name: "魏弘量", status: "decline", label: "拒绝 Offer",       role: "Root 全栈", date: "近期", nextAction: null, talent_id: "7615575380410386694", application_id: "7615617644800215346" }
+      { name: "苗静思", status: "accept", label: "Offer 接受", role: "Root 全栈", date: "近期", nextAction: null, talent_id: "7605124900320495881", application_id: "7605124896885311771" },
+      { name: "张杰", status: "accept", label: "Offer 沟通中", role: "Root 全栈", date: "近期", nextAction: null, talent_id: "7601899456342821129", application_id: "7621085664163563786" },
+      { name: "阮傅浩", status: "reject", label: "无意向换工作", role: "Root 全栈", date: "近期", nextAction: null, talent_id: "7618999486904338697", application_id: "7618999656626489650" },
+      { name: "魏弘量", status: "decline", label: "拒绝 Offer", role: "Root 全栈", date: "近期", nextAction: null, talent_id: "7615575380410386694", application_id: "7615617644800215346" }
     ]
   },
 
