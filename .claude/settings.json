@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(brctl status:*)",
+      "Bash(xattr -l /Users/wepie/Desktop/岗位招聘看板/index.html)",
+      "Bash(mount)",
+      "Bash(timeout 60 cat /Users/wepie/Desktop/岗位招聘看板/index.html)",
+      "Bash(xxd)",
+      "Bash(brctl log:*)",
+      "Bash(log show:*)",
+      "Bash(/usr/bin/log show:*)",
+      "Bash(fileproviderctl dump:*)",
+      "Read(//System/Volumes/Data/**)",
+      "Bash(xattr -p com.apple.file-provider-domain-id \"/Users/wepie/Library/Mobile Documents/com~apple~CloudDocs/Desktop/岗位招聘看板/\")",
+      "Bash(xattr -p com.apple.fileprovider.detached\\\\#B \"/Users/wepie/Library/Mobile Documents/com~apple~CloudDocs/Desktop/岗位招聘看板/\")",
+      "Bash(qlmanage -p \"/Users/wepie/Library/Mobile Documents/com~apple~CloudDocs/Desktop/岗位招聘看板/index.html\")",
+      "Bash(qlmanage -t -s 4000 -o /tmp/qlout \"/Users/wepie/Library/Mobile Documents/com~apple~CloudDocs/Desktop/岗位招聘看板/index.html\")",
+      "Bash(tmutil latestbackup:*)",
+      "Bash(tmutil listbackups:*)",
+      "Bash(xargs -I {} sh -c 'cat \"{}/entries.json\" 2>/dev/null | grep -l \"岗位\\\\|index.html\" && echo \"FOUND: {}\"')",
+      "Bash(grep -l \"岗位招聘看板\" \"/Users/wepie/Library/Application Support/Trae/User/History/\"*/entries.json)",
+      "Bash(grep -l \"岗位招聘看板\" \"/Users/wepie/Library/Application Support/Code/User/History/\"*/entries.json)",
+      "Bash(node -e ':*)",
+      "Bash('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --headless=new --disable-gpu --hide-scrollbars --window-size=1440,900 --screenshot=/tmp/root-hiring-board/preview.png --virtual-time-budget=3000 http://localhost:8765/index.html)",
+      "Bash('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --headless=new --disable-gpu --hide-scrollbars --window-size=1440,900 --screenshot=/tmp/root-hiring-board/preview2.png --timeout=5000 http://localhost:8765/index.html)",
+      "Bash('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --headless=new --disable-gpu --hide-scrollbars --window-size=1440,900 --screenshot=/tmp/root-hiring-board/preview3.png --virtual-time-budget=4000 http://localhost:8765/index.html)",
+      "Bash(sips -g pixelWidth -g pixelHeight /tmp/root-hiring-board/preview4.png)",
+      "Bash(sips --cropToHeightWidth 900 320 /tmp/root-hiring-board/preview4.png --out /tmp/root-hiring-board/right2.png)",
+      "Bash(sips --cropOffset 0 1120 --cropToHeightWidth 900 320 /tmp/root-hiring-board/right3.png)",
+      "Bash(sips -g pixelWidth -g pixelHeight /tmp/root-hiring-board/right3.png)",
+      "Bash(sips -g pixelWidth -g pixelHeight /tmp/root-hiring-board/right_hd.png)",
+      "Bash(sips --cropOffset 200 560 --cropToHeightWidth 1600 1760 /tmp/root-hiring-board/center.png)",
+      "Bash(curl -s https://open.feishu.cn/open-apis/hire/v1/jobs -H 'Authorization: Bearer t-g10449e8RAO5YYA4UKDEHS72K2NDSDCLB44AJKU3')",
+      "Bash(curl -s https://open.feishu.cn/open-apis/application/v2/app/contact -H 'Authorization: Bearer t-g10449e8RAO5YYA4UKDEHS72K2NDSDCLB44AJKU3')",
+      "Bash(curl -s https://open.feishu.cn/open-apis/hire/v1/reports -H 'Authorization: Bearer t-g10449e8RAO5YYA4UKDEHS72K2NDSDCLB44AJKU3')",
+      "Bash(curl -s -X POST https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal -H 'Content-Type: application/json' -d '{\"app_id\": \"cli_a95d929432785cc7\", \"app_secret\": \"0zSYGHc0JxNRrsY8adgsRhKZdOYKzTCS\"}')",
+      "Bash(curl -s 'https://open.feishu.cn/open-apis/hire/v1/jobs?page_size=20' -H 'Authorization: Bearer t-g10449e8RAO5YYA4UKDEHS72K2NDSDCLB44AJKU3')",
+      "Bash(curl -s 'https://open.feishu.cn/open-apis/hire/v1/jobs?page_size=3' -H 'Authorization: Bearer t-g10449e8RAO5YYA4UKDEHS72K2NDSDCLB44AJKU3')",
+      "Bash(curl -s 'https://open.feishu.cn/open-apis/hire/v1/jobs?page_size=50' -H 'Authorization: Bearer t-g10449e8RAO5YYA4UKDEHS72K2NDSDCLB44AJKU3')"
+    ]
+  }
+}
