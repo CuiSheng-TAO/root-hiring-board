@@ -1,9 +1,9 @@
 // 自动生成 — 请勿手动编辑
-// 更新时间: 2026.04.07 17:33
-// 数据来源: 飞书电子表格 + 招聘报告
+// 更新时间: 2026.04.09 14:25
+// 数据来源: 飞书电子表格 + 招聘报告 + 飞书招聘 API
 
 const DASHBOARD_DATA = {
-  updateTime: "2026.04.07 17:33",
+  updateTime: "2026.04.09 14:25",
   dataPeriod: "0301 — till now",
 
   // 目标
@@ -62,8 +62,8 @@ const DASHBOARD_DATA = {
   hrInterview: {
     total: 4,
     candidates: [
-      { name: "苗静思", status: "accept",  label: "Offer 接受",       role: "Root 全栈", date: "近期", nextAction: null },
-      { name: "张杰",   status: "pending", label: "待反馈",           role: "Root 全栈", date: "近期", nextAction: "待 HR 跟进反馈" },
+      { name: "苗静思", status: "accept",  label: "Offer 接受",       role: "Root 全栈", date: "近期", nextAction: null, talent_id: "7605124900320495881" },
+      { name: "张杰",   status: "accept",  label: "Offer 沟通中",      role: "Root 全栈", date: "近期", nextAction: null, talent_id: "7601899456342821129" },
       { name: "阮傅浩", status: "reject",  label: "无意向换工作",     role: "Root 全栈", date: "近期", nextAction: null },
       { name: "魏弘量", status: "decline", label: "拒绝 Offer",       role: "Root 全栈", date: "近期", nextAction: null }
     ]

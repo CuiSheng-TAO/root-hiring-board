@@ -697,13 +697,20 @@
     return name.charAt(0);
   }
 
+  function candidateLink(c) {
+    if (c.talent_id) {
+      return link('https://deepwisdom.feishu.cn/hire/talent/' + c.talent_id, c.name);
+    }
+    return link(L.wiki, c.name);
+  }
+
   var candidatesHTML = D.hrInterview.candidates.map(function(c) {
     var initial = getInitial(c.name);
     var meta = [c.role, c.date].filter(Boolean).join(' · ');
     return '<li class="candidate-card status-' + c.status + '">' +
       '<div class="candidate-avatar-inner">' + initial + '</div>' +
       '<div class="candidate-body">' +
-        '<div class="candidate-name">' + link(L.wiki, c.name) + '</div>' +
+        '<div class="candidate-name">' + candidateLink(c) + '</div>' +
         (meta ? '<div class="candidate-meta">' + meta + '</div>' : '') +
       '</div>' +
       '<span class="candidate-badge">' + c.label + '</span>' +
