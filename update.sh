@@ -106,15 +106,16 @@ cands=[]
 for row in d.get('data',{}).get('valueRange',{}).get('values',[]):
     if not row or not row[0]: continue
     cell=str(row[0]).strip()
-    m=re.search(r'hire/talent/([^\?/]+)\?application_id=([^\"]+)', cell)
+    if not cell or cell=='None': continue
+    m=re.search(r'HYPERLINK\(\"https://deepwisdom\.feishu\.cn/hire/talent/([^\"?]+)\?application_id=([^\"]+)\",\s*\"([^\"]+)\"\)', cell)
     if m:
-        cands.append({'talent_id':m.group(1),'application_id':m.group(2)})
-    elif cell and cell!='None' and 'HYPERLINK' not in cell:
+        cands.append({'talent_id':m.group(1),'application_id':m.group(2),'name':m.group(3)})
+    elif 'HYPERLINK' not in cell:
         cands.append({'name':cell})
 print(json.dumps(cands, ensure_ascii=False))
 " 2>/dev/null)
 
-# SHEET2 (一面3月): 列0=姓名, 有表头
+# SHEET2 (一面3月): 列0=姓名, 有表头（HYPERLINK格式）
 I1_3M_CANDS=$(echo "$SHEET2" | python3 -c "
 import json,sys,re
 d=json.load(sys.stdin)
@@ -122,15 +123,16 @@ cands=[]
 for row in d.get('data',{}).get('valueRange',{}).get('values',[])[1:]:
     if not row or not row[0]: continue
     cell=str(row[0]).strip()
-    m=re.search(r'hire/talent/([^\?/]+)\?application_id=([^\"]+)', cell)
+    if not cell or cell=='None': continue
+    m=re.search(r'HYPERLINK\(\"https://deepwisdom\.feishu\.cn/hire/talent/([^\"?]+)\?application_id=([^\"]+)\",\s*\"([^\"]+)\"\)', cell)
     if m:
-        cands.append({'talent_id':m.group(1),'application_id':m.group(2)})
-    elif cell and cell!='None' and 'HYPERLINK' not in cell:
+        cands.append({'talent_id':m.group(1),'application_id':m.group(2),'name':m.group(3)})
+    elif 'HYPERLINK' not in cell:
         cands.append({'name':cell})
 print(json.dumps(cands, ensure_ascii=False))
 " 2>/dev/null)
 
-# SHEET3 (二面本月): 列0=姓名, 有表头
+# SHEET3 (二面本月): 列0=姓名, 有表头（HYPERLINK格式）
 I2_CANDS=$(echo "$SHEET3" | python3 -c "
 import json,sys,re
 d=json.load(sys.stdin)
@@ -138,15 +140,16 @@ cands=[]
 for row in d.get('data',{}).get('valueRange',{}).get('values',[])[1:]:
     if not row or not row[0]: continue
     cell=str(row[0]).strip()
-    m=re.search(r'hire/talent/([^\?/]+)\?application_id=([^\"]+)', cell)
+    if not cell or cell=='None': continue
+    m=re.search(r'HYPERLINK\(\"https://deepwisdom\.feishu\.cn/hire/talent/([^\"?]+)\?application_id=([^\"]+)\",\s*\"([^\"]+)\"\)', cell)
     if m:
-        cands.append({'talent_id':m.group(1),'application_id':m.group(2)})
-    elif cell and cell!='None' and 'HYPERLINK' not in cell:
+        cands.append({'talent_id':m.group(1),'application_id':m.group(2),'name':m.group(3)})
+    elif 'HYPERLINK' not in cell:
         cands.append({'name':cell})
 print(json.dumps(cands, ensure_ascii=False))
 " 2>/dev/null)
 
-# SHEET4 (二面12双月): 列0=姓名, 有表头
+# SHEET4 (二面12双月): 列0=姓名, 有表头（HYPERLINK格式）
 I2_12M_CANDS=$(echo "$SHEET4" | python3 -c "
 import json,sys,re
 d=json.load(sys.stdin)
@@ -154,10 +157,11 @@ cands=[]
 for row in d.get('data',{}).get('valueRange',{}).get('values',[])[1:]:
     if not row or not row[0]: continue
     cell=str(row[0]).strip()
-    m=re.search(r'hire/talent/([^\?/]+)\?application_id=([^\"]+)', cell)
+    if not cell or cell=='None': continue
+    m=re.search(r'HYPERLINK\(\"https://deepwisdom\.feishu\.cn/hire/talent/([^\"?]+)\?application_id=([^\"]+)\",\s*\"([^\"]+)\"\)', cell)
     if m:
-        cands.append({'talent_id':m.group(1),'application_id':m.group(2)})
-    elif cell and cell!='None' and 'HYPERLINK' not in cell:
+        cands.append({'talent_id':m.group(1),'application_id':m.group(2),'name':m.group(3)})
+    elif 'HYPERLINK' not in cell:
         cands.append({'name':cell})
 print(json.dumps(cands, ensure_ascii=False))
 " 2>/dev/null)
@@ -165,8 +169,8 @@ print(json.dumps(cands, ensure_ascii=False))
 echo "  一面3月候选人: $(echo $I1_3M_CANDS | python3 -c 'import json,sys; print(len(json.load(sys.stdin)))') 人"
 echo "  二面本月候选人: $(echo $I2_CANDS | python3 -c 'import json,sys; print(len(json.load(sys.stdin)))') 人"
 
-echo "  一面3月名单: $(echo $I1_3M_NAMES | python3 -c 'import json,sys; print(len(json.load(sys.stdin)))') 人"
-echo "  二面本月名单: $(echo $I2_NAMES | python3 -c 'import json,sys; print(len(json.load(sys.stdin)))') 人"
+echo "  一面3月名单: $(echo $I1_3M_CANDS | python3 -c 'import json,sys; print(len(json.load(sys.stdin)))') 人"
+echo "  二面本月名单: $(echo $I2_CANDS | python3 -c 'import json,sys; print(len(json.load(sys.stdin)))') 人"
 
 INTERVIEW1_12M_RATE=$(calc_rate "$INTERVIEW1_12M_PASS" "$INTERVIEW1_12M_TOTAL")
 INTERVIEW1_3M_RATE=$(calc_rate "$INTERVIEW1_3M_PASS" "$INTERVIEW1_3M_TOTAL")
