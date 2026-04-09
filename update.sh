@@ -4,8 +4,8 @@
 # 用法: ./update.sh
 #
 # 数据自动化状态：
-#   entry (247/86)     — ⚠️ 需手动更新（来自飞书招聘报告，需浏览器 session）
-#   writtenTest (26)  — ⚠️ 需手动更新（来自飞书 Wiki，需 wiki:wiki 权限）
+#   entry (3003/866)  — ✅ 从飞书招聘报告电子表格自动拉取（CDP + frequency analysis）
+#   writtenTest (189) — ⚠️ 需手动更新（来自飞书 Wiki，需 wiki:wiki 权限）
 #   interview1/2       — ✅ 从飞书电子表格自动拉取
 #   ATS 总申请数      — ✅ 从 hire API 自动拉取
 #   候选人飞书链接    — ✅ 从 hire API 自动拉取
@@ -19,10 +19,13 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 DATA_FILE="$SCRIPT_DIR/data.js"
 
 # entry 和 writtenTest 手动值（需同步更新）：
-ENTRY_RESUMES=247
-ENTRY_PASSED=86
-ENTRY_RATE=34
-WRITTEN_COLLECTED=26
+# 数据来源: 飞书招聘报告电子表格 (https://deepwisdom.feishu.cn/hire/reports/7573581010957828099/widgets/7573581011003378631)
+# 日期范围: 2026-03-01 至 2026-04-07，两岗（ROOT全栈+AI原生全栈）合计
+# ⚠️ 每次运行 ./update.sh 后手动确认数字是否变化，或用 cdp_extract.py 自动抓取
+ENTRY_RESUMES=3003
+ENTRY_PASSED=866
+ENTRY_RATE=28
+WRITTEN_COLLECTED=189
 WRITTEN_PASSED=20
 WRITTEN_IN_PROGRESS=28
 WRITTEN_REJECTED=28
