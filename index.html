@@ -732,7 +732,7 @@
       } else if (c.talent_id) {
         return '<a class="link name-tag' + cls + '" href="https://deepwisdom.feishu.cn/hire/talent/' + c.talent_id + '" target="_blank">' + (c.name || c.talent_id) + '</a>';
       } else if (c.name) {
-        return '<span class="name-tag' + cls + '">' + c.name + '</span>';
+        return '<a class="link name-tag' + cls + '" href="https://deepwisdom.feishu.cn/hire/talent?keyword=' + encodeURIComponent(c.name) + '" target="_blank">' + c.name + '</a>';
       }
       return '';
     });
