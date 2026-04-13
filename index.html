@@ -171,30 +171,111 @@
   }
   .theme-toggle:hover { border-color: var(--ink-dim); }
 
-  .period-tabs {
-    display: flex;
-    gap: 2px;
+  .date-trigger {
     background: var(--bg-subtle);
+    border: 1px solid var(--border);
     border-radius: 6px;
-    padding: 2px;
+    padding: 4px 12px;
+    font-size: 11px;
+    font-family: inherit;
+    color: var(--ink);
+    cursor: pointer;
+    transition: border-color 0.15s;
+    white-space: nowrap;
   }
-  .period-tab {
+  .date-trigger:hover { border-color: var(--ink-dim); }
+  .date-trigger.active { border-color: var(--accent); }
+  .cal-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    z-index: 100;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    padding: 12px;
+    width: 260px;
+  }
+  .cal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .cal-nav {
     background: none;
     border: none;
-    padding: 3px 10px;
+    font-size: 16px;
+    color: var(--ink-dim);
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    line-height: 1;
+  }
+  .cal-nav:hover { background: var(--bg-subtle); color: var(--ink); }
+  .cal-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 10px;
+    color: var(--ink-faint);
+    margin-bottom: 4px;
+    gap: 2px;
+  }
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+  }
+  .cal-day {
+    position: relative;
+    text-align: center;
+    font-size: 12px;
+    padding: 5px 0;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--ink);
+    transition: background 0.1s;
+  }
+  .cal-day:hover { background: var(--bg-subtle); }
+  .cal-day.other-month { color: var(--ink-faint); }
+  .cal-day.today { font-weight: 700; }
+  .cal-day.selected { background: var(--accent); color: #fff; }
+  .cal-day.in-range { background: color-mix(in srgb, var(--accent) 15%, transparent); }
+  .cal-day.has-data::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .cal-day.selected.has-data::after { background: #fff; }
+  .cal-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+  .cal-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 3px 14px;
     font-size: 11px;
     font-family: inherit;
     color: var(--ink-dim);
-    border-radius: 4px;
     cursor: pointer;
-    transition: all 0.15s;
   }
-  .period-tab.active {
-    background: var(--bg);
-    color: var(--ink);
-    font-weight: 500;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
-  }
+  .cal-btn:hover { border-color: var(--ink-dim); color: var(--ink); }
 
   .cumulative-tag {
     font-size: 9px;
@@ -689,21 +770,22 @@
     return '<a class="link" href="' + href + '" target="_blank">' + text + '</a>';
   }
 
-  /* ── Period helpers ── */
-  function getPeriodStart(period) {
-    var now = new Date();
-    switch(period) {
-      case 'week':    return new Date(now.getTime() - 7 * 86400000);
-      case 'month':   return new Date(now.getFullYear(), now.getMonth(), 1);
-      case 'quarter': return new Date(now.getFullYear(), Math.floor(now.getMonth()/3)*3, 1);
-      default:        return new Date(0);
-    }
-  }
+  /* ── Calendar state ── */
+  var calStart = null, calEnd = null;
+  var calYear = new Date().getFullYear();
+  var calMonth = new Date().getMonth();
+  var calPicking = 0; // 0=idle, 1=picked start waiting for end
 
-  function filterByPeriod(round, period) {
-    var start = getPeriodStart(period);
+  /* ── Date helpers ── */
+  var dataDates = {};
+  records.forEach(function(r) { if (r.date) dataDates[r.date] = true; });
+
+  function filterByRange(round, start, end) {
     return records.filter(function(r) {
-      return r.round === round && r.date && new Date(r.date) >= start;
+      if (r.round !== round || !r.date) return false;
+      if (!start) return true;
+      var d = new Date(r.date + 'T00:00:00');
+      return d >= start && d <= end;
     });
   }
 
@@ -712,6 +794,64 @@
     var passed = filtered.filter(function(r) { return r.result && r.result.indexOf('通过') === 0; }).length;
     var pending = filtered.filter(function(r) { return r.result && r.result.indexOf('待定') === 0; }).length;
     return { total: total, passed: passed, pending: pending, rate: total > 0 ? Math.round(passed / total * 100) : 0 };
+  }
+
+  function rangeLabel(s, e) {
+    if (!s) return '全部';
+    var fmt = function(d) { return (d.getMonth()+1) + '月' + d.getDate() + '日'; };
+    return s.getTime() === e.getTime() ? fmt(s) : fmt(s) + ' ~ ' + fmt(e);
+  }
+
+  function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+
+  function dateKey(y, m, d) { return y + '-' + pad2(m + 1) + '-' + pad2(d); }
+
+  function renderCalendar() {
+    var grid = document.getElementById('cal-grid');
+    var title = document.getElementById('cal-title');
+    if (!grid || !title) return;
+    title.textContent = calYear + '年' + (calMonth + 1) + '月';
+    var first = new Date(calYear, calMonth, 1);
+    var dow = (first.getDay() + 6) % 7; // Monday=0
+    var daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+    var prevDays = new Date(calYear, calMonth, 0).getDate();
+    var today = new Date();
+    var todayKey = dateKey(today.getFullYear(), today.getMonth(), today.getDate());
+    var html = '';
+    // Previous month padding
+    for (var p = dow - 1; p >= 0; p--) {
+      var pd = prevDays - p;
+      var pm = calMonth - 1, py = calYear;
+      if (pm < 0) { pm = 11; py--; }
+      var pk = dateKey(py, pm, pd);
+      html += '<div class="cal-day other-month' + (dataDates[pk] ? ' has-data' : '') + '">' + pd + '</div>';
+    }
+    // Current month
+    for (var d = 1; d <= daysInMonth; d++) {
+      var dk = dateKey(calYear, calMonth, d);
+      var cls = 'cal-day';
+      if (dk === todayKey) cls += ' today';
+      if (dataDates[dk]) cls += ' has-data';
+      if (calStart && calEnd) {
+        var cd = new Date(calYear, calMonth, d);
+        if (cd.getTime() === calStart.getTime() || cd.getTime() === calEnd.getTime()) cls += ' selected';
+        else if (cd > calStart && cd < calEnd) cls += ' in-range';
+      } else if (calStart && !calEnd) {
+        var cd2 = new Date(calYear, calMonth, d);
+        if (cd2.getTime() === calStart.getTime()) cls += ' selected';
+      }
+      html += '<div class="' + cls + '" data-date="' + dk + '">' + d + '</div>';
+    }
+    // Next month padding
+    var totalCells = dow + daysInMonth;
+    var remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+    for (var n = 1; n <= remaining; n++) {
+      var nm = calMonth + 1, ny = calYear;
+      if (nm > 11) { nm = 0; ny++; }
+      var nk = dateKey(ny, nm, n);
+      html += '<div class="cal-day other-month' + (dataDates[nk] ? ' has-data' : '') + '">' + n + '</div>';
+    }
+    grid.innerHTML = html;
   }
 
   var pct = Math.round(D.target.current / D.target.goal * 100);
@@ -764,31 +904,21 @@
     '</li>';
   }).join('');
 
-  /* ── Period label ── */
-  function periodLabel(period) {
-    switch(period) {
-      case 'week':    return '本周';
-      case 'month':   return '本月';
-      case 'quarter': return '本季度';
-      default:        return '全部';
-    }
-  }
-
-  /* ── Render (called on period change) ── */
-  function render(period) {
-    var i1Filtered = filterByPeriod(1, period);
-    var i2Filtered = filterByPeriod(2, period);
+  /* ── Render (called on date range change) ── */
+  function render(start, end) {
+    var i1Filtered = filterByRange(1, start, end);
+    var i2Filtered = filterByRange(2, start, end);
     var i1Stats = computeStats(i1Filtered);
     var i2Stats = computeStats(i2Filtered);
 
     // All-time stats for baseline comparison
-    var i1All = computeStats(filterByPeriod(1, 'all'));
-    var i2All = computeStats(filterByPeriod(2, 'all'));
+    var i1All = computeStats(filterByRange(1, null, null));
+    var i2All = computeStats(filterByRange(2, null, null));
 
     var i1Anomaly = i1All.rate > 0 && i1Stats.rate < i1All.rate * 0.6;
     var i2Anomaly = i2All.rate > 0 && i2Stats.rate < i2All.rate * 0.6;
 
-    var isCumulative = period !== 'all';
+    var isCumulative = !!start;
 
     /* Funnel */
     var stages = [
@@ -820,8 +950,8 @@
 
     /* Names */
     var namesHTML =
-      (i1Filtered.length ? candidateList(i1Filtered, '一面 · ' + periodLabel(period), 'stage-i1') : '') +
-      (i2Filtered.length ? candidateList(i2Filtered, '二面 · ' + periodLabel(period), 'stage-i2') : '');
+      (i1Filtered.length ? candidateList(i1Filtered, '一面 · ' + rangeLabel(start, end), 'stage-i1') : '') +
+      (i2Filtered.length ? candidateList(i2Filtered, '二面 · ' + rangeLabel(start, end), 'stage-i2') : '');
 
     /* Compare: selected period vs all-time */
     var maxRate = Math.max(i1Stats.rate, i1All.rate, i2Stats.rate, i2All.rate, 1);
@@ -830,9 +960,9 @@
     var i1Delta = i1Stats.rate - i1All.rate;
     var i2Delta = i2Stats.rate - i2All.rate;
 
-    var compareHTML = period === 'all' ? '' :
+    var compareHTML = !start ? '' :
       '<div class="compare-section">' +
-        '<div class="section-label">' + periodLabel(period) + ' vs 全部 <span class="tail">baseline</span></div>' +
+        '<div class="section-label">' + rangeLabel(start, end) + ' vs 全部 <span class="tail">baseline</span></div>' +
         '<div class="compare-row' + (i1Anomaly ? ' anomaly' : '') + '">' +
           '<span class="label">一面通过率</span>' +
           '<div class="bars">' +
@@ -896,6 +1026,8 @@
     document.getElementById('names-content').innerHTML = namesHTML;
     document.getElementById('compare-content').innerHTML = compareHTML + alertHTML;
     document.getElementById('actions-content').innerHTML = actionItemsHTML;
+    var trigger = document.getElementById('date-trigger');
+    if (trigger) trigger.textContent = rangeLabel(start, end);
   }
 
   /* ── Static shell (rendered once) ── */
@@ -906,11 +1038,20 @@
         '<h1>ROOT <em>全栈工程师</em> 招聘看板</h1>' +
       '</div>' +
       '<div class="header-right">' +
-        '<div class="period-tabs">' +
-          '<button class="period-tab active" data-period="all">全部</button>' +
-          '<button class="period-tab" data-period="quarter">季度</button>' +
-          '<button class="period-tab" data-period="month">月</button>' +
-          '<button class="period-tab" data-period="week">周</button>' +
+        '<div style="position:relative">' +
+          '<button class="date-trigger" id="date-trigger">全部</button>' +
+          '<div class="cal-dropdown" id="cal-dropdown" style="display:none">' +
+            '<div class="cal-header">' +
+              '<button class="cal-nav" id="cal-prev">\u2039</button>' +
+              '<span id="cal-title"></span>' +
+              '<button class="cal-nav" id="cal-next">\u203a</button>' +
+            '</div>' +
+            '<div class="cal-weekdays"><span>\u4e00</span><span>\u4e8c</span><span>\u4e09</span><span>\u56db</span><span>\u4e94</span><span>\u516d</span><span>\u65e5</span></div>' +
+            '<div class="cal-grid" id="cal-grid"></div>' +
+            '<div class="cal-actions">' +
+              '<button class="cal-btn" id="cal-all">\u5168\u90e8</button>' +
+            '</div>' +
+          '</div>' +
         '</div>' +
         '<span>更新 ' + D.updateTime + '</span>' +
         '<button id="theme-toggle" class="theme-toggle"></button>' +
@@ -957,15 +1098,76 @@
     '</main>';
 
   /* ── Initial render ── */
-  render('all');
+  render(null, null);
 
-  /* ── Period tab switching ── */
-  document.querySelectorAll('.period-tab').forEach(function(tab) {
-    tab.addEventListener('click', function() {
-      document.querySelector('.period-tab.active').classList.remove('active');
-      tab.classList.add('active');
-      render(tab.getAttribute('data-period'));
-    });
+  /* ── Calendar interactions ── */
+  var triggerEl = document.getElementById('date-trigger');
+  var dropdownEl = document.getElementById('cal-dropdown');
+
+  function openCalendar() {
+    dropdownEl.style.display = 'block';
+    triggerEl.classList.add('active');
+    renderCalendar();
+  }
+  function closeCalendar() {
+    dropdownEl.style.display = 'none';
+    triggerEl.classList.remove('active');
+  }
+
+  triggerEl.addEventListener('click', function(e) {
+    e.stopPropagation();
+    if (dropdownEl.style.display === 'none') openCalendar();
+    else closeCalendar();
+  });
+
+  document.getElementById('cal-prev').addEventListener('click', function(e) {
+    e.stopPropagation();
+    calMonth--;
+    if (calMonth < 0) { calMonth = 11; calYear--; }
+    renderCalendar();
+  });
+
+  document.getElementById('cal-next').addEventListener('click', function(e) {
+    e.stopPropagation();
+    calMonth++;
+    if (calMonth > 11) { calMonth = 0; calYear++; }
+    renderCalendar();
+  });
+
+  document.getElementById('cal-grid').addEventListener('click', function(e) {
+    e.stopPropagation();
+    var day = e.target.closest('.cal-day');
+    if (!day) return;
+    var dk = day.getAttribute('data-date');
+    if (!dk) return; // other-month cells without data-date
+    var clicked = new Date(dk + 'T00:00:00');
+    if (calPicking === 0) {
+      calStart = clicked;
+      calEnd = null;
+      calPicking = 1;
+      renderCalendar();
+    } else {
+      calEnd = clicked;
+      if (calEnd < calStart) { var tmp = calStart; calStart = calEnd; calEnd = tmp; }
+      calPicking = 0;
+      closeCalendar();
+      render(calStart, calEnd);
+    }
+  });
+
+  document.getElementById('cal-all').addEventListener('click', function(e) {
+    e.stopPropagation();
+    calStart = null;
+    calEnd = null;
+    calPicking = 0;
+    closeCalendar();
+    render(null, null);
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!dropdownEl.contains(e.target) && e.target !== triggerEl) {
+      closeCalendar();
+    }
   });
 
   /* ── Theme toggle ── */
