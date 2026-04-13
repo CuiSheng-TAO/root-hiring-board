@@ -1,10 +1,9 @@
 // 自动生成 — 请勿手动编辑
-// 更新时间: 2026.04.13 16:30
-// 数据来源: 飞书电子表格 (一面/二面) + 招聘报告(入口) + 飞书 Hire API(ATS总数/候选人链接)
-// ⚠️ 入口和笔试数据需要手动更新（见脚本顶部变量）
+// 更新时间: 2026.04.13 17:45
+// 数据来源: Hire API(入口) + Wiki 电子表格(笔试) + 飞书电子表格(面试) + Hire API(候选人链接)
 
 const DASHBOARD_DATA = {
-  updateTime: "2026.04.13 16:30",
+  updateTime: "2026.04.13 17:45",
 
   // 目标
   target: {
@@ -13,19 +12,19 @@ const DASHBOARD_DATA = {
     gap: 4
   },
 
-  // 入口（⚠️ 需手动更新 — 来自飞书招聘报告页，累计值）
+  // 入口（✅ Hire API 自动拉取）
   entry: {
-    resumesSent: 3003,
-    assessPassed: 866,
-    assessRate: 28
+    resumesSent: 2578,
+    assessPassed: 867,
+    assessRate: 34
   },
 
-  // 笔试（⚠️ 需手动更新 — 来自飞书 Wiki，累计值）
+  // 笔试（✅ Wiki 嵌入电子表格自动拉取）
   writtenTest: {
-    collected: 189,
-    passed: 20,
+    collected: 26,
+    passed: 18,
     inProgress: 28,
-    rejected: 28
+    rejected: 4
   },
 
   // 面试记录（含日期，前端按时间段动态聚合）

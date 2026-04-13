@@ -1,34 +1,20 @@
 #!/bin/bash
 # update.sh — 从飞书拉取最新招聘数据并生成 data.js
-# 依赖: lark-cli, jq, curl, python3
+# 依赖: lark-cli, python3
 # 用法: ./update.sh
 #
-# 数据自动化状态：
-#   entry (3003/866)  — ✅ 从飞书招聘报告电子表格自动拉取（CDP + frequency analysis）
-#   writtenTest (189) — ⚠️ 需手动更新（来自飞书 Wiki，需 wiki:wiki 权限）
-#   interview1/2       — ✅ 从飞书电子表格自动拉取
-#   ATS 总申请数      — ✅ 从 hire API 自动拉取
-#   候选人飞书链接    — ✅ 从 hire API 自动拉取
+# 数据自动化状态（全部自动）：
+#   entry        — ✅ Hire API: 总申请数 + 逐条 detail 统计评估通过数
+#   writtenTest  — ✅ 飞书 Wiki 嵌入电子表格自动拉取
+#   interview1/2 — ✅ 飞书电子表格自动拉取
+#   候选人链接   — ✅ Hire API 自动拉取
 
 set -e
 
-# 确保 curl 在 PATH
 export PATH="/usr/bin:/bin:/usr/local/bin:$PATH"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 DATA_FILE="$SCRIPT_DIR/data.js"
-
-# entry 和 writtenTest 手动值（需同步更新）：
-# 数据来源: 飞书招聘报告电子表格 (https://deepwisdom.feishu.cn/hire/reports/7573581010957828099/widgets/7573581011003378631)
-# 日期范围: 2026-03-01 至 2026-04-07，两岗（ROOT全栈+AI原生全栈）合计
-# ⚠️ 每次运行 ./update.sh 后手动确认数字是否变化，或用 cdp_extract.py 自动抓取
-ENTRY_RESUMES=3003
-ENTRY_PASSED=866
-ENTRY_RATE=28
-WRITTEN_COLLECTED=189
-WRITTEN_PASSED=20
-WRITTEN_IN_PROGRESS=28
-WRITTEN_REJECTED=28
 
 echo "[招聘看板] 开始拉取飞书数据..."
 
@@ -180,46 +166,115 @@ echo "  面试记录: $RECORD_COUNT"
 
 UPDATE_TIME=$(date "+%Y.%m.%d %H:%M")
 
-# ─── 从 hire API 拉 ATS 总申请数 ───
-# ROOT 岗位: 7539897631183980810 (ROOT-全栈) + 7593964671033100563 (AI原生全栈)
-echo "  读取 ATS 总申请数..."
+# ─── 入口数据：从 Hire API 拉取总申请数 + 评估通过数 ───
+echo "  拉取入口数据（Hire API 全量）..."
 
-ATS_JSON=$(python3 << 'PYEOF'
-import json, subprocess
+ENTRY_JSON=$(python3 << 'PYEOF'
+import json, subprocess, sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
-JOBS = [("7539897631183980810","ROOT-全栈"),("7593964671033100563","AI原生全栈")]
+JOBS = ["7539897631183980810", "7593964671033100563"]
 
-counts = {}
-for job_id, name in JOBS:
-    total = 0
-    pt = ""
-    while True:
-        params = {"job_id": job_id, "page_size": "20"}
-        if pt:
-            params["page_token"] = pt
-        r = subprocess.run(
-            ["lark-cli", "api", "GET", "/open-apis/hire/v1/applications",
-             "--params", json.dumps(params), "--as", "bot"],
-            capture_output=True, text=True)
-        if r.returncode != 0 or not r.stdout.strip():
-            break
-        d = json.loads(r.stdout)
-        items = d.get("data", {}).get("items", [])
-        total += len(items)
-        if not d.get("data", {}).get("has_more"):
-            break
-        pt = d.get("data", {}).get("page_token", "")
-    counts[job_id] = total
+def list_all_app_ids():
+    """Paginate all application IDs for both jobs."""
+    all_ids = []
+    for job_id in JOBS:
+        pt = ""
+        while True:
+            params = {"job_id": job_id, "page_size": "200"}
+            if pt:
+                params["page_token"] = pt
+            r = subprocess.run(
+                ["lark-cli", "api", "GET", "/open-apis/hire/v1/applications",
+                 "--params", json.dumps(params), "--as", "bot"],
+                capture_output=True, text=True)
+            if r.returncode != 0 or not r.stdout.strip():
+                break
+            d = json.loads(r.stdout)
+            all_ids.extend(d.get("data", {}).get("items", []))
+            if not d.get("data", {}).get("has_more"):
+                break
+            pt = d.get("data", {}).get("page_token", "")
+    return all_ids
 
-print(json.dumps({"root":counts.get("7539897631183980810",0),"ai":counts.get("7593964671033100563",0)}))
+def get_app_detail(app_id):
+    """Fetch single application detail."""
+    r = subprocess.run(
+        ["lark-cli", "api", "GET", f"/open-apis/hire/v1/applications/{app_id}", "--as", "bot"],
+        capture_output=True, text=True)
+    if r.returncode != 0 or not r.stdout.strip():
+        return None
+    d = json.loads(r.stdout)
+    return d.get("data", {}).get("application", {})
+
+print("  listing...", file=sys.stderr)
+app_ids = list_all_app_ids()
+total = len(app_ids)
+print(f"  {total} applications found, fetching details...", file=sys.stderr)
+
+passed_screening = 0
+with ThreadPoolExecutor(max_workers=10) as executor:
+    futures = {executor.submit(get_app_detail, aid): aid for aid in app_ids}
+    done = 0
+    for f in as_completed(futures):
+        done += 1
+        if done % 500 == 0:
+            print(f"  ...{done}/{total}", file=sys.stderr)
+        app = f.result()
+        if not app:
+            continue
+        stages = app.get("stage_time_list", [])
+        stage_type = app.get("stage", {}).get("type", 0)
+        if len(stages) > 1 or stage_type > 2:
+            passed_screening += 1
+
+rate = round(passed_screening / total * 100) if total > 0 else 0
+print(json.dumps({"total": total, "passed": passed_screening, "rate": rate}))
 PYEOF
 )
 
-ATS_ROOT=$(echo "$ATS_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin)['root'])")
-ATS_AI=$(echo "$ATS_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin)['ai'])")
-ATS_COMBINED=$((ATS_ROOT + ATS_AI))
-echo "  ATS 总申请: $ATS_COMBINED (ROOT: $ATS_ROOT + AI原生: $ATS_AI)"
-echo "  (ATS总数仅供参考，不写入看板)"
+ENTRY_RESUMES=$(echo "$ENTRY_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin)['total'])")
+ENTRY_PASSED=$(echo "$ENTRY_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin)['passed'])")
+ENTRY_RATE=$(echo "$ENTRY_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin)['rate'])")
+echo "  入口: $ENTRY_RESUMES 份简历, $ENTRY_PASSED 通过评估 ($ENTRY_RATE%)"
+
+# ─── 笔试数据：从 Wiki 嵌入电子表格自动拉取 ───
+echo "  读取笔试 Pipeline 电子表格..."
+
+WRITTEN_SHEET=$(lark-cli sheets +read \
+  --url "https://deepwisdom.feishu.cn/sheets/XxpusdPtoh5pkwtpKSicPDjYnlh" \
+  --range "HgPg6g!A1:I300" \
+  --value-render-option ToString 2>/dev/null)
+
+WRITTEN_JSON=$(echo "$WRITTEN_SHEET" | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+rows = data.get('data', {}).get('valueRange', {}).get('values', [])
+collected = 0
+in_progress = 0
+passed = 0
+rejected = 0
+for row in rows[1:]:
+    if not row or not row[0]:
+        continue
+    g = str(row[6]).strip() if len(row) > 6 and row[6] else ''
+    i = str(row[8]).strip() if len(row) > 8 and row[8] else ''
+    if g == '已回收':
+        collected += 1
+    elif g == '笔试中':
+        in_progress += 1
+    if i == '通过':
+        passed += 1
+    elif i == '不通过':
+        rejected += 1
+print(json.dumps({'collected': collected, 'passed': passed, 'inProgress': in_progress, 'rejected': rejected}))
+")
+
+WRITTEN_COLLECTED=$(echo "$WRITTEN_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin)['collected'])")
+WRITTEN_PASSED=$(echo "$WRITTEN_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin)['passed'])")
+WRITTEN_IN_PROGRESS=$(echo "$WRITTEN_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin)['inProgress'])")
+WRITTEN_REJECTED=$(echo "$WRITTEN_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin)['rejected'])")
+echo "  笔试: 已回收 $WRITTEN_COLLECTED, 通过 $WRITTEN_PASSED, 笔试中 $WRITTEN_IN_PROGRESS, 不通过 $WRITTEN_REJECTED"
 
 echo "  解析完成。"
 
@@ -227,8 +282,7 @@ echo "  解析完成。"
 cat > "$DATA_FILE" << JSEOF
 // 自动生成 — 请勿手动编辑
 // 更新时间: $UPDATE_TIME
-// 数据来源: 飞书电子表格 (一面/二面) + 招聘报告(入口) + 飞书 Hire API(ATS总数/候选人链接)
-// ⚠️ 入口和笔试数据需要手动更新（见脚本顶部变量）
+// 数据来源: Hire API(入口) + Wiki 电子表格(笔试) + 飞书电子表格(面试) + Hire API(候选人链接)
 
 const DASHBOARD_DATA = {
   updateTime: "$UPDATE_TIME",
@@ -240,14 +294,14 @@ const DASHBOARD_DATA = {
     gap: 4
   },
 
-  // 入口（⚠️ 需手动更新 — 来自飞书招聘报告页，累计值）
+  // 入口（✅ Hire API 自动拉取）
   entry: {
     resumesSent: $ENTRY_RESUMES,
     assessPassed: $ENTRY_PASSED,
     assessRate: $ENTRY_RATE
   },
 
-  // 笔试（⚠️ 需手动更新 — 来自飞书 Wiki，累计值）
+  // 笔试（✅ Wiki 嵌入电子表格自动拉取）
   writtenTest: {
     collected: $WRITTEN_COLLECTED,
     passed: $WRITTEN_PASSED,
