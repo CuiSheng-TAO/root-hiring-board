@@ -948,9 +948,12 @@
       '</div>';
     }).join('');
 
-    /* Names */
+    /* Names — exclude candidates already in round 2 from round 1 list */
+    var i2Names = {};
+    i2Filtered.forEach(function(r) { i2Names[r.name] = true; });
+    var i1Only = i1Filtered.filter(function(r) { return !i2Names[r.name]; });
     var namesHTML =
-      (i1Filtered.length ? candidateList(i1Filtered, '一面 · ' + rangeLabel(start, end), 'stage-i1') : '') +
+      (i1Only.length ? candidateList(i1Only, '一面 · ' + rangeLabel(start, end), 'stage-i1') : '') +
       (i2Filtered.length ? candidateList(i2Filtered, '二面 · ' + rangeLabel(start, end), 'stage-i2') : '');
 
     /* Compare: selected period vs all-time */
