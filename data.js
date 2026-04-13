@@ -1,9 +1,9 @@
 // 自动生成 — 请勿手动编辑
-// 更新时间: 2026.04.13 13:26
+// 更新时间: 2026.04.13 14:46
 // 数据来源: Hire API(入口) + Wiki 电子表格(笔试) + 飞书电子表格(面试) + Hire API(候选人链接)
 
 const DASHBOARD_DATA = {
-  updateTime: "2026.04.13 13:26",
+  updateTime: "2026.04.13 14:46",
 
   // 目标
   target: {
@@ -14,7 +14,7 @@ const DASHBOARD_DATA = {
 
   // 入口（✅ Hire API 自动拉取）
   entry: {
-    resumesSent: 2580,
+    resumesSent: 2585,
     assessPassed: 871,
     assessRate: 34
   },
