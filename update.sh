@@ -57,125 +57,126 @@ SHEET4=$(lark-cli sheets +read \
   --range "0AspYr!A1:I50" \
   --value-render-option ToString 2>/dev/null)
 
-# ─── 解析数据 ───
-# 计算每个表格的有效行数（排除表头和空行）
-count_rows() {
-  echo "$1" | jq '[.data.valueRange.values[1:][] | select(.[0] != null)] | length'
-}
+# ─── 解析数据：提取原始面试记录（含日期） ───
+# 统一用 Python 从 4 张表提取 interviewRecords 数组
+# SHEET1 (一面12双月): col0=姓名(纯文本), col3=日期("YYYY-MM-DD HH:MM"), col4=结论, 无表头
+# SHEET2 (一面3月):    col0=姓名(HYPERLINK), col6=日期(Excel serial), col8=结论, 有表头
+# SHEET3 (二面本月):   同 SHEET2 列布局
+# SHEET4 (二面12双月): 同 SHEET2 列布局
+# 去重策略：SHEET1 + SHEET2 合并(round 1)，SHEET3 + SHEET4 合并(round 2)，同名取有链接的优先
 
-# 提取面试结论
-extract_results() {
-  echo "$1" | jq -r '.data.valueRange.values[1:][] | select(.[0] != null) | "\(.[0])|\(.[4] // "未知")"'
-}
+# Save sheets to temp files for Python processing
+TMPDIR_SHEETS=$(mktemp -d)
+echo "$SHEET1" > "$TMPDIR_SHEETS/s1.json"
+echo "$SHEET2" > "$TMPDIR_SHEETS/s2.json"
+echo "$SHEET3" > "$TMPDIR_SHEETS/s3.json"
+echo "$SHEET4" > "$TMPDIR_SHEETS/s4.json"
 
-# 一面数据
-# 一面12双月：纯数据格式，结论在第5列(index 4)
-INTERVIEW1_12M_TOTAL=$(count_rows "$SHEET1")
-INTERVIEW1_12M_PASS=$(echo "$SHEET1" | jq '[.data.valueRange.values[1:][] | select(.[0] != null) | select(.[4] != null) | select((.[4] | tostring) | startswith("通过"))] | length')
+INTERVIEW_RECORDS=$(python3 << PYEOF
+import json, re
+from datetime import datetime, timedelta
 
-# 一面3月：有表头，结论在第9列(index 8)
-INTERVIEW1_3M_TOTAL=$(count_rows "$SHEET2")
-INTERVIEW1_3M_PASS=$(echo "$SHEET2" | jq '[.data.valueRange.values[1:][] | select(.[0] != null) | select(.[8] != null) | select((.[8] | tostring) | startswith("通过"))] | length')
+def excel_to_date(serial):
+    try:
+        return (datetime(1899, 12, 30) + timedelta(days=float(serial))).strftime("%Y-%m-%d")
+    except:
+        return ""
 
-# 二面数据：均有表头，结论在第9列(index 8)
-INTERVIEW2_TOTAL=$(count_rows "$SHEET3")
-INTERVIEW2_PASS=$(echo "$SHEET3" | jq '[.data.valueRange.values[1:][] | select(.[0] != null) | select(.[8] != null) | select((.[8] | tostring) | startswith("通过"))] | length')
-INTERVIEW2_PENDING=$(echo "$SHEET3" | jq '[.data.valueRange.values[1:][] | select(.[0] != null) | select(.[8] != null) | select((.[8] | tostring) | startswith("待定"))] | length')
-
-# 二面12双月对比：同上
-INTERVIEW2_12M_TOTAL=$(count_rows "$SHEET4")
-INTERVIEW2_12M_PASS=$(echo "$SHEET4" | jq '[.data.valueRange.values[1:][] | select(.[0] != null) | select(.[8] != null) | select((.[8] | tostring) | startswith("通过"))] | length')
-INTERVIEW2_12M_PENDING=$(echo "$SHEET4" | jq '[.data.valueRange.values[1:][] | select(.[0] != null) | select(.[8] != null) | select((.[8] | tostring) | startswith("待定"))] | length')
-
-# 计算通过率
-calc_rate() {
-  if [ "$2" -gt 0 ]; then
-    echo "scale=0; $1 * 100 / $2" | bc
-  else
-    echo "0"
-  fi
-}
-
-# 提取每张表所有候选人姓名（用于链接）
-# 电子表格的姓名列是 HYPERLINK("url", "name") 格式，可直接提取 talent_id + application_id
-# SHEET1 (一面12双月): 列0=姓名, 无表头
-I1_12M_CANDS=$(echo "$SHEET1" | python3 -c "
-import json,sys,re
-d=json.load(sys.stdin)
-cands=[]
-for row in d.get('data',{}).get('valueRange',{}).get('values',[]):
-    if not row or not row[0]: continue
-    cell=str(row[0]).strip()
-    if not cell or cell=='None': continue
-    m=re.search(r'HYPERLINK\(\"https://deepwisdom\.feishu\.cn/hire/talent/([^\"?]+)\?application_id=([^\"]+)\",\s*\"([^\"]+)\"\)', cell)
+def parse_name_cell(cell):
+    cell = str(cell).strip()
+    if not cell or cell == "None":
+        return None
+    m = re.search(r'HYPERLINK\("https://deepwisdom\.feishu\.cn/hire/talent/([^"?]+)\?application_id=([^"]+)",\s*"([^"]+)"\)', cell)
     if m:
-        cands.append({'talent_id':m.group(1),'application_id':m.group(2),'name':m.group(3)})
-    elif 'HYPERLINK' not in cell:
-        cands.append({'name':cell})
-print(json.dumps(cands, ensure_ascii=False))
-" 2>/dev/null)
+        return {"name": m.group(3), "talent_id": m.group(1), "application_id": m.group(2)}
+    if "HYPERLINK" not in cell:
+        return {"name": cell}
+    return None
 
-# SHEET2 (一面3月): 列0=姓名, 有表头（HYPERLINK格式）
-I1_3M_CANDS=$(echo "$SHEET2" | python3 -c "
-import json,sys,re
-d=json.load(sys.stdin)
-cands=[]
-for row in d.get('data',{}).get('valueRange',{}).get('values',[])[1:]:
+def load_sheet(path):
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+tmpdir = "$TMPDIR_SHEETS"
+s1 = load_sheet(f"{tmpdir}/s1.json")
+s2 = load_sheet(f"{tmpdir}/s2.json")
+s3 = load_sheet(f"{tmpdir}/s3.json")
+s4 = load_sheet(f"{tmpdir}/s4.json")
+
+records = []
+seen = set()
+
+# SHEET2 (一面3月) first — HYPERLINK versions take priority
+for row in s2.get("data", {}).get("valueRange", {}).get("values", [])[1:]:
     if not row or not row[0]: continue
-    cell=str(row[0]).strip()
-    if not cell or cell=='None': continue
-    m=re.search(r'HYPERLINK\(\"https://deepwisdom\.feishu\.cn/hire/talent/([^\"?]+)\?application_id=([^\"]+)\",\s*\"([^\"]+)\"\)', cell)
-    if m:
-        cands.append({'talent_id':m.group(1),'application_id':m.group(2),'name':m.group(3)})
-    elif 'HYPERLINK' not in cell:
-        cands.append({'name':cell})
-print(json.dumps(cands, ensure_ascii=False))
-" 2>/dev/null)
+    info = parse_name_cell(row[0])
+    if not info: continue
+    date_val = row[6] if len(row) > 6 and row[6] else ""
+    result = str(row[8]) if len(row) > 8 and row[8] else ""
+    key = (info["name"], 1)
+    if key not in seen:
+        seen.add(key)
+        records.append({**info, "round": 1, "date": excel_to_date(date_val) if date_val else "", "result": result})
 
-# SHEET3 (二面本月): 列0=姓名, 有表头（HYPERLINK格式）
-I2_CANDS=$(echo "$SHEET3" | python3 -c "
-import json,sys,re
-d=json.load(sys.stdin)
-cands=[]
-for row in d.get('data',{}).get('valueRange',{}).get('values',[])[1:]:
+# SHEET1 (一面12双月) — fill in missing
+for row in s1.get("data", {}).get("valueRange", {}).get("values", []):
     if not row or not row[0]: continue
-    cell=str(row[0]).strip()
-    if not cell or cell=='None': continue
-    m=re.search(r'HYPERLINK\(\"https://deepwisdom\.feishu\.cn/hire/talent/([^\"?]+)\?application_id=([^\"]+)\",\s*\"([^\"]+)\"\)', cell)
-    if m:
-        cands.append({'talent_id':m.group(1),'application_id':m.group(2),'name':m.group(3)})
-    elif 'HYPERLINK' not in cell:
-        cands.append({'name':cell})
-print(json.dumps(cands, ensure_ascii=False))
-" 2>/dev/null)
+    info = parse_name_cell(row[0])
+    if not info: continue
+    date_val = str(row[3]).strip() if len(row) > 3 and row[3] else ""
+    result = str(row[4]) if len(row) > 4 and row[4] else ""
+    date_str = date_val[:10] if date_val and date_val != "None" else ""
+    key = (info["name"], 1)
+    if key not in seen:
+        seen.add(key)
+        records.append({**info, "round": 1, "date": date_str, "result": result})
+    else:
+        for r in records:
+            if r["name"] == info["name"] and r["round"] == 1 and not r["date"] and date_str:
+                r["date"] = date_str
 
-# SHEET4 (二面12双月): 列0=姓名, 有表头（HYPERLINK格式）
-I2_12M_CANDS=$(echo "$SHEET4" | python3 -c "
-import json,sys,re
-d=json.load(sys.stdin)
-cands=[]
-for row in d.get('data',{}).get('valueRange',{}).get('values',[])[1:]:
+# SHEET3 (二面本月) first — HYPERLINK priority
+for row in s3.get("data", {}).get("valueRange", {}).get("values", [])[1:]:
     if not row or not row[0]: continue
-    cell=str(row[0]).strip()
-    if not cell or cell=='None': continue
-    m=re.search(r'HYPERLINK\(\"https://deepwisdom\.feishu\.cn/hire/talent/([^\"?]+)\?application_id=([^\"]+)\",\s*\"([^\"]+)\"\)', cell)
-    if m:
-        cands.append({'talent_id':m.group(1),'application_id':m.group(2),'name':m.group(3)})
-    elif 'HYPERLINK' not in cell:
-        cands.append({'name':cell})
-print(json.dumps(cands, ensure_ascii=False))
-" 2>/dev/null)
+    info = parse_name_cell(row[0])
+    if not info: continue
+    date_val = row[6] if len(row) > 6 and row[6] else ""
+    result = str(row[8]) if len(row) > 8 and row[8] else ""
+    key = (info["name"], 2)
+    if key not in seen:
+        seen.add(key)
+        records.append({**info, "round": 2, "date": excel_to_date(date_val) if date_val else "", "result": result})
 
-echo "  一面3月候选人: $(echo $I1_3M_CANDS | python3 -c 'import json,sys; print(len(json.load(sys.stdin)))') 人"
-echo "  二面本月候选人: $(echo $I2_CANDS | python3 -c 'import json,sys; print(len(json.load(sys.stdin)))') 人"
+# SHEET4 (二面12双月)
+for row in s4.get("data", {}).get("valueRange", {}).get("values", [])[1:]:
+    if not row or not row[0]: continue
+    info = parse_name_cell(row[0])
+    if not info: continue
+    date_val = row[6] if len(row) > 6 and row[6] else ""
+    result = str(row[8]) if len(row) > 8 and row[8] else ""
+    key = (info["name"], 2)
+    if key not in seen:
+        seen.add(key)
+        records.append({**info, "round": 2, "date": excel_to_date(date_val) if date_val else "", "result": result})
 
-echo "  一面3月名单: $(echo $I1_3M_CANDS | python3 -c 'import json,sys; print(len(json.load(sys.stdin)))') 人"
-echo "  二面本月名单: $(echo $I2_CANDS | python3 -c 'import json,sys; print(len(json.load(sys.stdin)))') 人"
+# Cross-reference talent_id across rounds
+name_map = {}
+for r in records:
+    if r.get("talent_id") and r["name"] not in name_map:
+        name_map[r["name"]] = {"talent_id": r["talent_id"], "application_id": r.get("application_id", "")}
+for r in records:
+    if not r.get("talent_id") and r["name"] in name_map:
+        r["talent_id"] = name_map[r["name"]]["talent_id"]
+        r["application_id"] = name_map[r["name"]]["application_id"]
 
-INTERVIEW1_12M_RATE=$(calc_rate "$INTERVIEW1_12M_PASS" "$INTERVIEW1_12M_TOTAL")
-INTERVIEW1_3M_RATE=$(calc_rate "$INTERVIEW1_3M_PASS" "$INTERVIEW1_3M_TOTAL")
-INTERVIEW2_RATE=$(calc_rate "$INTERVIEW2_PASS" "$INTERVIEW2_TOTAL")
-INTERVIEW2_12M_RATE=$(calc_rate "$INTERVIEW2_12M_PASS" "$INTERVIEW2_12M_TOTAL")
+print(json.dumps(records, ensure_ascii=False))
+PYEOF
+)
+
+rm -rf "$TMPDIR_SHEETS"
+
+RECORD_COUNT=$(echo "$INTERVIEW_RECORDS" | python3 -c "import json,sys; r=json.load(sys.stdin); print(f'Round 1: {sum(1 for x in r if x[\"round\"]==1)}, Round 2: {sum(1 for x in r if x[\"round\"]==2)}')")
+echo "  面试记录: $RECORD_COUNT"
 
 UPDATE_TIME=$(date "+%Y.%m.%d %H:%M")
 
@@ -221,10 +222,6 @@ echo "  ATS 总申请: $ATS_COMBINED (ROOT: $ATS_ROOT + AI原生: $ATS_AI)"
 echo "  (ATS总数仅供参考，不写入看板)"
 
 echo "  解析完成。"
-echo "  一面12双月: $INTERVIEW1_12M_PASS/$INTERVIEW1_12M_TOTAL ($INTERVIEW1_12M_RATE%)"
-echo "  一面3月: $INTERVIEW1_3M_PASS/$INTERVIEW1_3M_TOTAL ($INTERVIEW1_3M_RATE%)"
-echo "  二面本月: $INTERVIEW2_PASS/$INTERVIEW2_TOTAL ($INTERVIEW2_RATE%), pending $INTERVIEW2_PENDING"
-echo "  二面12双月: $INTERVIEW2_12M_PASS/$INTERVIEW2_12M_TOTAL ($INTERVIEW2_12M_RATE%), pending $INTERVIEW2_12M_PENDING"
 
 # ─── 生成 data.js ───
 cat > "$DATA_FILE" << JSEOF
@@ -235,7 +232,6 @@ cat > "$DATA_FILE" << JSEOF
 
 const DASHBOARD_DATA = {
   updateTime: "$UPDATE_TIME",
-  dataPeriod: "0301 — till now",
 
   // 目标
   target: {
@@ -244,14 +240,14 @@ const DASHBOARD_DATA = {
     gap: 4
   },
 
-  // 入口（⚠️ 需手动更新 — 来自飞书招聘报告页）
+  // 入口（⚠️ 需手动更新 — 来自飞书招聘报告页，累计值）
   entry: {
     resumesSent: $ENTRY_RESUMES,
     assessPassed: $ENTRY_PASSED,
     assessRate: $ENTRY_RATE
   },
 
-  // 笔试（⚠️ 需手动更新 — 来自飞书 Wiki）
+  // 笔试（⚠️ 需手动更新 — 来自飞书 Wiki，累计值）
   writtenTest: {
     collected: $WRITTEN_COLLECTED,
     passed: $WRITTEN_PASSED,
@@ -259,39 +255,9 @@ const DASHBOARD_DATA = {
     rejected: $WRITTEN_REJECTED
   },
 
-  // 一面（从电子表格自动计算）
-  interview1: {
-    current: {
-      total: $INTERVIEW1_3M_TOTAL,
-      passed: $INTERVIEW1_3M_PASS,
-      rate: $INTERVIEW1_3M_RATE
-    },
-    bimonth: {
-      total: $INTERVIEW1_12M_TOTAL,
-      passed: $INTERVIEW1_12M_PASS,
-      rate: $INTERVIEW1_12M_RATE
-    },
-    candidates: $I1_3M_CANDS,
-    candidates12m: $I1_12M_CANDS
-  },
-
-  // 二面（从电子表格自动计算）
-  interview2: {
-    current: {
-      total: $INTERVIEW2_TOTAL,
-      passed: $INTERVIEW2_PASS,
-      pending: $INTERVIEW2_PENDING,
-      rate: $INTERVIEW2_RATE
-    },
-    bimonth: {
-      total: $INTERVIEW2_12M_TOTAL,
-      passed: $INTERVIEW2_12M_PASS,
-      pending: $INTERVIEW2_12M_PENDING,
-      rate: $INTERVIEW2_12M_RATE
-    },
-    candidates: $I2_CANDS,
-    candidates12m: $I2_12M_CANDS
-  },
+  // 面试记录（含日期，前端按时间段动态聚合）
+  // round: 1=一面, 2=二面
+  interviewRecords: $INTERVIEW_RECORDS,
 
   // HR面（⚠️ 手动维护 — 候选人不常变动）
   hrInterview: {
@@ -309,10 +275,8 @@ const DASHBOARD_DATA = {
     hireReport: "https://deepwisdom.feishu.cn/hire/reports/7578526668101258184",
     wiki: "https://deepwisdom.feishu.cn/wiki/Un5MwIF0oimoSukvwvjca9fznoN",
     writtenTestPipeline: "https://deepwisdom.feishu.cn/wiki/NUMRwkfCeiVrGMkF4TWc7EZ0nxg",
-    interview1_12m: "https://deepwisdom.feishu.cn/sheets/HGh6splmdh8xgPtrDX1cNtT9ntb",
     interview1_3m: "https://deepwisdom.feishu.cn/hire/reports/762705618927226317/widgets/7627056189327576021",
-    interview2_detail: "https://deepwisdom.feishu.cn/hire/reports/7627056633239292891/widgets/_",
-    interview2_12m: "https://deepwisdom.feishu.cn/sheets/Wq33sHFBihdjm2tLRaCc9zHynR1"
+    interview2_detail: "https://deepwisdom.feishu.cn/hire/reports/7627056633239292891/widgets/_"
   }
 };
 JSEOF

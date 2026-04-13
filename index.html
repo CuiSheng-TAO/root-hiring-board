@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500&display=swap" rel="stylesheet">
+<script>var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);</script>
 <style>
   :root {
     --bg:          #FFFFFF;
@@ -38,11 +39,40 @@
     --purple-soft: rgba(124, 58, 237, 0.08);
   }
 
+  [data-theme="dark"] {
+    --bg:          #0F1117;
+    --bg-subtle:   #1A1D27;
+    --bg-hover:    #242832;
+    --surface:     #1A1D27;
+    --border:      #2D3242;
+    --border-hi:   #3D4356;
+    --ink:         #E5E7EB;
+    --ink-soft:    #C9CDD5;
+    --ink-dim:     #8B92A5;
+    --ink-faint:   #3D4356;
+    --accent:      #60A5FA;
+    --accent-soft: rgba(96, 165, 250, 0.12);
+    --green:       #4ADE80;
+    --green-soft:  rgba(74, 222, 128, 0.12);
+    --yellow:      #FACC15;
+    --yellow-soft: rgba(250, 204, 21, 0.12);
+    --red:         #F87171;
+    --red-soft:    rgba(248, 113, 113, 0.1);
+    --gray:        #6B7280;
+    --gray-soft:   rgba(107, 114, 128, 0.12);
+    --purple:      #A78BFA;
+    --purple-soft: rgba(167, 139, 250, 0.12);
+  }
+
+  [data-theme="dark"] body {
+    background: linear-gradient(180deg, #0A0C12 0%, var(--bg) 120px), var(--bg);
+  }
+
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
   html, body {
     height: 100%;
-    overflow: hidden;
+    overflow-y: auto;
     background: var(--bg);
     color: var(--ink);
     font-family: 'Inter', -apple-system, 'PingFang SC', 'Noto Sans SC', sans-serif;
@@ -53,14 +83,13 @@
 
   body {
     background:
-      linear-gradient(180deg, #F3F4F6 0%, var(--bg) 120px),
+      linear-gradient(180deg, #F8F9FA 0%, var(--bg) 120px),
       var(--bg);
   }
 
   .dashboard {
     max-width: 1320px;
-    height: 100vh;
-    max-height: 900px;
+    min-height: 100vh;
     margin: 0 auto;
     padding: 28px 44px 28px;
     display: grid;
@@ -129,6 +158,52 @@
     50%       { opacity: 0.4; }
   }
 
+  .theme-toggle {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    color: var(--ink-dim);
+    transition: border-color 0.2s;
+  }
+  .theme-toggle:hover { border-color: var(--ink-dim); }
+
+  .period-tabs {
+    display: flex;
+    gap: 2px;
+    background: var(--bg-subtle);
+    border-radius: 6px;
+    padding: 2px;
+  }
+  .period-tab {
+    background: none;
+    border: none;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-family: inherit;
+    color: var(--ink-dim);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .period-tab.active {
+    background: var(--bg);
+    color: var(--ink);
+    font-weight: 500;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  }
+
+  .cumulative-tag {
+    font-size: 9px;
+    color: var(--ink-faint);
+    margin-left: 6px;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+  }
+
   /* ─── Main layout ─── */
   .main {
     display: grid;
@@ -152,6 +227,11 @@
     justify-content: space-between;
   }
 
+  section > .section-label {
+    font-size: 12px;
+    font-weight: 600;
+  }
+
   .section-label .tail {
     font-size: 11px;
     font-weight: 400;
@@ -169,6 +249,9 @@
 
   /* ─── Metric hero: 个人主页风格，无边框 ─── */
   .metric-hero {
+    background: var(--bg-subtle);
+    border-radius: 8px;
+    padding: 20px;
     margin-bottom: 16px;
   }
 
@@ -214,7 +297,7 @@
   }
 
   .progress-bar {
-    height: 2px;
+    height: 4px;
     background: var(--border);
     border-radius: 1px;
     overflow: hidden;
@@ -226,91 +309,71 @@
     border-radius: 1px;
   }
 
-  /* ─── Funnel table: 极简无边框 ─── */
-  .funnel-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-variant-numeric: tabular-nums;
+  /* ─── Funnel steps ─── */
+  .funnel-steps {
+    display: flex;
+    flex-direction: column;
   }
 
-  .funnel-table tr {
+  .funnel-step {
+    padding: 12px 16px;
     border-bottom: 1px solid var(--border);
   }
 
-  .funnel-table tr:last-child { border-bottom: none; }
+  .funnel-step:last-child { border-bottom: none; }
 
-  .funnel-table tbody tr:hover td {
-    background: var(--bg-hover);
+  .funnel-step:hover { background: var(--bg-hover); }
+
+  .funnel-step-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
   }
 
-  .funnel-table td {
-    padding: 12px 0;
-    vertical-align: middle;
-  }
-
-  .stage-name .primary {
-    font-size: 14px;
+  .funnel-step-head .link {
+    font-size: 13px;
     font-weight: 500;
     color: var(--ink);
-    margin-bottom: 2px;
   }
 
-  .stage-name .secondary {
-    font-size: 10px;
-    color: var(--ink-dim);
-    letter-spacing: 0.5px;
-    font-weight: 400;
-  }
-
-  .funnel-table .num {
-    text-align: right;
+  .funnel-rate {
     font-family: 'JetBrains Mono', monospace;
     font-size: 14px;
-    font-weight: 500;
-    color: var(--ink-soft);
-    letter-spacing: -0.2px;
-    padding-right: 16px;
-  }
-
-  .funnel-table .num .unit {
-    font-size: 10px;
-    color: var(--ink-dim);
-    margin-left: 2px;
-    font-weight: 400;
-  }
-
-  .funnel-table .rate {
-    text-align: right;
-    width: 100px;
-  }
-
-  .funnel-table .rate .pct {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--accent);
-    letter-spacing: -0.2px;
+    letter-spacing: -0.3px;
   }
 
-  .funnel-table tr.anomaly .rate .pct { color: var(--red); }
-
-  .mini-bar {
-    height: 2px;
-    background: var(--border);
-    width: 80px;
-    margin-top: 5px;
-    border-radius: 1px;
+  .funnel-bar {
+    height: 6px;
+    background: var(--bg-hover);
+    border-radius: 3px;
     overflow: hidden;
-    margin-left: auto;
+    margin-bottom: 6px;
   }
 
-  .mini-bar .fill {
+  .funnel-bar-fill {
     height: 100%;
     background: var(--accent);
-    border-radius: 1px;
+    border-radius: 3px;
   }
 
-  .funnel-table tr.anomaly .mini-bar .fill { background: var(--red); }
+  .funnel-nums {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-dim);
+    letter-spacing: -0.2px;
+  }
+
+  .funnel-nums .unit {
+    font-size: 10px;
+    color: var(--ink-faint);
+    margin-left: 1px;
+  }
+
+  .funnel-step.anomaly .funnel-rate { color: var(--red); }
+  .funnel-step.anomaly .funnel-bar-fill { background: var(--red); }
 
   .warn-tag {
     display: inline-block;
@@ -353,7 +416,7 @@
     display: inline-block;
     margin: 2px 4px 2px 0;
     padding: 1px 7px;
-    background: rgba(0,0,0,0.02);
+    background: var(--bg-subtle);
     border: 1px solid var(--border);
     border-radius: 10px;
     font-size: 11px;
@@ -365,8 +428,9 @@
   }
   /* 一面: blue */
   .name-tag.stage-i1 {
-    border-color: rgba(37, 99, 235, 0.2);
+    border-color: rgba(37, 99, 235, 0.25);
     color: #2563EB;
+    background: var(--accent-soft);
   }
   a.name-tag.stage-i1:hover {
     background: var(--accent-soft);
@@ -375,8 +439,9 @@
   }
   /* 二面: purple */
   .name-tag.stage-i2 {
-    border-color: rgba(124, 58, 237, 0.2);
+    border-color: rgba(124, 58, 237, 0.25);
     color: #7C3AED;
+    background: var(--purple-soft);
   }
   a.name-tag.stage-i2:hover {
     background: var(--purple-soft);
@@ -416,20 +481,20 @@
   }
 
   .compare-bar-track {
-    width: 40px;
-    height: 2px;
+    width: 52px;
+    height: 3px;
     background: var(--border);
-    border-radius: 1px;
+    border-radius: 2px;
     overflow: hidden;
   }
 
   .compare-bar-track .fill {
     height: 100%;
-    border-radius: 1px;
+    border-radius: 2px;
   }
 
   .compare-bar-track .fill.current { background: var(--accent); }
-  .compare-bar-track .fill.base     { background: var(--ink-faint); }
+  .compare-bar-track .fill.base     { background: var(--border-hi); }
 
   .compare-bar .pct {
     font-family: 'JetBrains Mono', monospace;
@@ -472,12 +537,12 @@
   }
 
   .candidate-card:last-child { border-bottom: none; }
-  .candidate-card:hover { background: var(--bg-hover); margin: 0 -8px; padding-left: 8px; padding-right: 8px; border-radius: 4px; }
+  .candidate-card:hover { background: var(--bg-hover); border-radius: 4px; }
 
   .candidate-card.status-accept  { opacity: 1; }
   .candidate-card.status-pending { opacity: 1; }
-  .candidate-card.status-reject  { opacity: 0.45; }
-  .candidate-card.status-decline { opacity: 0.45; }
+  .candidate-card.status-reject  { opacity: 0.55; }
+  .candidate-card.status-decline { opacity: 0.55; }
 
   /* 圆形头像 */
   .candidate-avatar {
@@ -527,7 +592,7 @@
   }
 
   .status-reject .candidate-name,
-  .status-decline .candidate-name { color: var(--ink-dim); }
+  .status-decline .candidate-name { color: var(--ink-dim); text-decoration: line-through; }
 
   .candidate-meta {
     font-size: 10px;
@@ -555,7 +620,9 @@
     display: flex;
     flex-direction: column;
     gap: 0;
-    margin-top: 16px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
   }
 
   .action-item {
@@ -616,80 +683,46 @@
 (function() {
   var D = DASHBOARD_DATA;
   var L = D.links;
+  var records = D.interviewRecords || [];
 
   function link(href, text) {
     return '<a class="link" href="' + href + '" target="_blank">' + text + '</a>';
   }
 
-  var i1 = D.interview1;
-  var i2 = D.interview2;
-  var i1Anomaly = i1.current.rate < i1.bimonth.rate * 0.6;
-  var i2Anomaly = i2.current.rate < i2.bimonth.rate * 0.6;
+  /* ── Period helpers ── */
+  function getPeriodStart(period) {
+    var now = new Date();
+    switch(period) {
+      case 'week':    return new Date(now.getTime() - 7 * 86400000);
+      case 'month':   return new Date(now.getFullYear(), now.getMonth(), 1);
+      case 'quarter': return new Date(now.getFullYear(), Math.floor(now.getMonth()/3)*3, 1);
+      default:        return new Date(0);
+    }
+  }
+
+  function filterByPeriod(round, period) {
+    var start = getPeriodStart(period);
+    return records.filter(function(r) {
+      return r.round === round && r.date && new Date(r.date) >= start;
+    });
+  }
+
+  function computeStats(filtered) {
+    var total = filtered.length;
+    var passed = filtered.filter(function(r) { return r.result && r.result.indexOf('通过') === 0; }).length;
+    var pending = filtered.filter(function(r) { return r.result && r.result.indexOf('待定') === 0; }).length;
+    return { total: total, passed: passed, pending: pending, rate: total > 0 ? Math.round(passed / total * 100) : 0 };
+  }
 
   var pct = Math.round(D.target.current / D.target.goal * 100);
 
-  /* ── Funnel stages ── */
-  var stages = [
-    {
-      name: '入口 · 欧阳评估', sub: 'ENTRY · ASSESSMENT',
-      entered: D.entry.resumesSent, passed: D.entry.assessPassed,
-      rate: D.entry.assessRate, link: L.hireReport, unit: '份', anomaly: false
-    },
-    {
-      name: '笔试 · 已回收', sub: 'WRITTEN TEST',
-      entered: D.writtenTest.collected, passed: D.writtenTest.passed,
-      rate: Math.round(D.writtenTest.passed / D.writtenTest.collected * 100),
-      link: L.writtenTestPipeline || L.wiki, unit: '份', anomaly: false
-    },
-    {
-      name: '一面 · 志权', sub: '1ST INTERVIEW',
-      entered: i1.current.total, passed: i1.current.passed,
-      rate: i1.current.rate, link: L.interview1_3m, unit: '人', anomaly: i1Anomaly
-    },
-    {
-      name: '二面 · 欧阳', sub: '2ND INTERVIEW',
-      entered: i2.current.total, passed: i2.current.passed,
-      rate: i2.current.rate, link: L.interview2_detail, unit: '人', anomaly: i2Anomaly
-    }
-  ];
-
-  var funnelRowsHTML = stages.map(function(s) {
-    return '<tr class="' + (s.anomaly ? 'anomaly' : '') + '">' +
-      '<td>' +
-        '<div class="stage-name">' +
-          '<div class="primary">' + link(s.link, s.name) + '</div>' +
-          '<div class="secondary">' + s.sub + '</div>' +
-        '</div>' +
-      '</td>' +
-      '<td class="num">' + s.entered + '<span class="unit">' + s.unit + '</span></td>' +
-      '<td class="num">' + s.passed + '<span class="unit">' + s.unit + '</span></td>' +
-      '<td class="rate">' +
-        '<span class="pct">' + s.rate + '%' + (s.anomaly ? '<span class="warn-tag">⚠ 异常</span>' : '') + '</span>' +
-        '<div class="mini-bar"><div class="fill" style="width:' + Math.min(s.rate, 100) + '%"></div></div>' +
-      '</td>' +
-    '</tr>';
-  }).join('');
-
-  /* ── Anomaly alert (only shown when rate is abnormal) ── */
-  var alertHTML = i2Anomaly
-    ? '<div class="funnel-prose">⚠ 二面通过率 <span class="warn">' + i2.current.rate + '%</span> 低于基线 <strong>' + i2.bimonth.rate + '%</strong>，关注 pending <strong>' + i2.current.pending + '</strong> 人。</div>'
-    : '';
-
-  /* ── Build name→link lookup from all candidate arrays ── */
+  /* ── Name→link lookup from all records + HR ── */
   var nameMap = {};
-  [i1.candidates, i2.candidates, i2.candidates12m, D.hrInterview.candidates].forEach(function(arr) {
-    (arr || []).forEach(function(c) {
-      if (c.name && c.talent_id && !nameMap[c.name]) nameMap[c.name] = c;
-    });
+  records.forEach(function(c) {
+    if (c.name && c.talent_id && !nameMap[c.name]) nameMap[c.name] = c;
   });
-  // Fill missing links via cross-reference
-  [i1.candidates12m, i1.candidates, i2.candidates, i2.candidates12m].forEach(function(arr) {
-    (arr || []).forEach(function(c) {
-      if (!c.talent_id && c.name && nameMap[c.name]) {
-        c.talent_id = nameMap[c.name].talent_id;
-        c.application_id = nameMap[c.name].application_id;
-      }
-    });
+  (D.hrInterview.candidates || []).forEach(function(c) {
+    if (c.name && c.talent_id && !nameMap[c.name]) nameMap[c.name] = c;
   });
 
   /* ── Candidate name list (clickable links) ── */
@@ -697,70 +730,18 @@
     if (!cands || !cands.length) return '';
     var cls = stageClass ? ' ' + stageClass : '';
     var links = cands.map(function(c) {
-      if (c.talent_id && c.application_id) {
-        return '<a class="link name-tag' + cls + '" href="https://deepwisdom.feishu.cn/atsx/talent/' + c.talent_id + '?application_id=' + c.application_id + '" target="_blank">' + (c.name || c.talent_id) + '</a>';
-      } else if (c.talent_id) {
-        return '<a class="link name-tag' + cls + '" href="https://deepwisdom.feishu.cn/hire/talent/' + c.talent_id + '" target="_blank">' + (c.name || c.talent_id) + '</a>';
-      } else if (c.name) {
-        return '<a class="link name-tag' + cls + '" href="https://deepwisdom.feishu.cn/hire/talent?keyword=' + encodeURIComponent(c.name) + '" target="_blank">' + c.name + '</a>';
+      var info = nameMap[c.name] || c;
+      if (info.talent_id && info.application_id) {
+        return '<a class="link name-tag' + cls + '" href="https://deepwisdom.feishu.cn/atsx/talent/' + info.talent_id + '?application_id=' + info.application_id + '" target="_blank">' + c.name + '</a>';
+      } else if (info.talent_id) {
+        return '<a class="link name-tag' + cls + '" href="https://deepwisdom.feishu.cn/hire/talent/' + info.talent_id + '" target="_blank">' + c.name + '</a>';
       }
-      return '';
+      return '<a class="link name-tag' + cls + '" href="https://deepwisdom.feishu.cn/hire/talent?keyword=' + encodeURIComponent(c.name) + '" target="_blank">' + c.name + '</a>';
     });
     return '<div class="name-list-row"><span class="name-list-section">' + sectionLabel + '</span> ' + links.join(' ') + '</div>';
   }
 
-  var namesHTML =
-    (i1.candidates && i1.candidates.length ? candidateList(i1.candidates, '一面·本月', 'stage-i1') : '') +
-    (i1.candidates12m && i1.candidates12m.length ? candidateList(i1.candidates12m, '一面·12双月', 'stage-i1') : '') +
-    (i2.candidates && i2.candidates.length ? candidateList(i2.candidates, '二面·本月', 'stage-i2') : '') +
-    (i2.candidates12m && i2.candidates12m.length ? candidateList(i2.candidates12m, '二面·12双月', 'stage-i2') : '');
-
-  /* ── Compare ── */
-  var i1Delta = i1.current.rate - i1.bimonth.rate;
-  var i2Delta = i2.current.rate - i2.bimonth.rate;
-  var maxRate = Math.max(i1.current.rate, i1.bimonth.rate, i2.current.rate, i2.bimonth.rate, 1);
-
-  function bar(w) { return Math.round(w / maxRate * 100); }
-  var fmtDelta = function(d) { return (d >= 0 ? '+' : '') + d + 'pt'; };
-
-  var compareHTML =
-    '<div class="compare-section">' +
-      '<div class="section-label">本期 vs 12双月 <span class="tail">baseline</span></div>' +
-      '<div class="compare-row' + (i1Anomaly ? ' anomaly' : '') + '">' +
-        '<span class="label">一面通过率</span>' +
-        '<div class="bars">' +
-          '<div class="compare-bar' + (i1Anomaly ? ' warn' : '') + '">' +
-            '<div class="compare-bar-track"><div class="fill current" style="width:' + bar(i1.current.rate) + '%"></div></div>' +
-            '<span class="pct">' + link(L.interview1_3m, i1.current.rate + '%') + '</span>' +
-          '</div>' +
-          '<div class="compare-bar">' +
-            '<div class="compare-bar-track"><div class="fill base" style="width:' + bar(i1.bimonth.rate) + '%"></div></div>' +
-            '<span class="pct" style="color:var(--ink-dim)">' + link(L.interview1_12m, i1.bimonth.rate + '%') + '</span>' +
-          '</div>' +
-          '<span class="delta">' + fmtDelta(i1Delta) + '</span>' +
-        '</div>' +
-      '</div>' +
-      '<div class="compare-row' + (i2Anomaly ? ' anomaly' : '') + '">' +
-        '<span class="label">二面通过率</span>' +
-        '<div class="bars">' +
-          '<div class="compare-bar' + (i2Anomaly ? ' warn' : '') + '">' +
-            '<div class="compare-bar-track"><div class="fill current" style="width:' + bar(i2.current.rate) + '%"></div></div>' +
-            '<span class="pct">' + link(L.interview2_detail, i2.current.rate + '%') + '</span>' +
-          '</div>' +
-          '<div class="compare-bar">' +
-            '<div class="compare-bar-track"><div class="fill base" style="width:' + bar(i2.bimonth.rate) + '%"></div></div>' +
-            '<span class="pct" style="color:var(--ink-dim)">' + link(L.interview2_12m, i2.bimonth.rate + '%') + '</span>' +
-          '</div>' +
-          '<span class="delta">' + fmtDelta(i2Delta) + (i2Anomaly ? ' ⚠' : '') + '</span>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
-
-  /* ── Candidates: 飞书风格圆形头像 ── */
-  function getInitial(name) {
-    return name.charAt(0);
-  }
-
+  /* ── Candidate cards (HR stage, right column) ── */
   function candidateLink(c) {
     if (c.talent_id && c.application_id) {
       return link('https://deepwisdom.feishu.cn/atsx/talent/' + c.talent_id + '?application_id=' + c.application_id, c.name);
@@ -772,10 +753,9 @@
   }
 
   var candidatesHTML = D.hrInterview.candidates.map(function(c) {
-    var initial = getInitial(c.name);
     var meta = [c.role, c.date].filter(Boolean).join(' · ');
     return '<li class="candidate-card status-' + c.status + '">' +
-      '<div class="candidate-avatar-inner">' + initial + '</div>' +
+      '<div class="candidate-avatar-inner">' + c.name.charAt(0) + '</div>' +
       '<div class="candidate-body">' +
         '<div class="candidate-name">' + candidateLink(c) + '</div>' +
         (meta ? '<div class="candidate-meta">' + meta + '</div>' : '') +
@@ -784,42 +764,156 @@
     '</li>';
   }).join('');
 
-  /* ── Action items ── */
-  var actions = [];
-  D.hrInterview.candidates.forEach(function(c) {
-    if (c.status === 'pending' && c.nextAction) {
-      actions.push({ warn: false, text: '跟进 <strong>' + c.name + '</strong> · ' + c.nextAction });
+  /* ── Period label ── */
+  function periodLabel(period) {
+    switch(period) {
+      case 'week':    return '本周';
+      case 'month':   return '本月';
+      case 'quarter': return '本季度';
+      default:        return '全部';
     }
-  });
-  if (i2Anomaly) {
-    actions.push({ warn: true, text: '二面通过率 <strong>' + i2.current.rate + '%</strong> 异常，关注 pending <strong>' + i2.current.pending + '</strong> 人' });
   }
 
-  var actionItemsHTML =
-    '<ul class="action-list">' +
-      (actions.length === 0
-        ? '<li class="action-item" style="color:var(--ink-dim);font-style:italic">暂无待办</li>'
-        : actions.map(function(a) {
-            return '<li class="action-item' + (a.warn ? ' warn' : '') + '">' +
-              '<span class="bullet">' + (a.warn ? '!' : '→') + '</span>' +
-              '<span>' + a.text + '</span>' +
-            '</li>';
-          }).join('')) +
-    '</ul>';
+  /* ── Render (called on period change) ── */
+  function render(period) {
+    var i1Filtered = filterByPeriod(1, period);
+    var i2Filtered = filterByPeriod(2, period);
+    var i1Stats = computeStats(i1Filtered);
+    var i2Stats = computeStats(i2Filtered);
 
-  /* ── Assemble ── */
+    // All-time stats for baseline comparison
+    var i1All = computeStats(filterByPeriod(1, 'all'));
+    var i2All = computeStats(filterByPeriod(2, 'all'));
+
+    var i1Anomaly = i1All.rate > 0 && i1Stats.rate < i1All.rate * 0.6;
+    var i2Anomaly = i2All.rate > 0 && i2Stats.rate < i2All.rate * 0.6;
+
+    var isCumulative = period !== 'all';
+
+    /* Funnel */
+    var stages = [
+      { name: '入口 · 欧阳评估', entered: D.entry.resumesSent, passed: D.entry.assessPassed,
+        rate: D.entry.assessRate, link: L.hireReport, unit: '份', anomaly: false, cumulative: isCumulative },
+      { name: '笔试 · 已回收', entered: D.writtenTest.collected, passed: D.writtenTest.passed,
+        rate: Math.round(D.writtenTest.passed / D.writtenTest.collected * 100),
+        link: L.writtenTestPipeline || L.wiki, unit: '份', anomaly: false, cumulative: isCumulative },
+      { name: '一面 · 志权', entered: i1Stats.total, passed: i1Stats.passed,
+        rate: i1Stats.rate, link: L.interview1_3m, unit: '人', anomaly: i1Anomaly },
+      { name: '二面 · 欧阳', entered: i2Stats.total, passed: i2Stats.passed,
+        rate: i2Stats.rate, link: L.interview2_detail, unit: '人', anomaly: i2Anomaly }
+    ];
+
+    var funnelHTML = stages.map(function(s) {
+      return '<div class="funnel-step' + (s.anomaly ? ' anomaly' : '') + '">' +
+        '<div class="funnel-step-head">' +
+          link(s.link, s.name) +
+          '<span class="funnel-rate">' + s.rate + '%' +
+            (s.anomaly ? '<span class="warn-tag">⚠ 异常</span>' : '') +
+          '</span>' +
+        '</div>' +
+        '<div class="funnel-bar"><div class="funnel-bar-fill" style="width:' + Math.min(s.rate, 100) + '%"></div></div>' +
+        '<div class="funnel-nums">' + s.entered + ' → ' + s.passed + '<span class="unit">' + s.unit + '</span>' +
+          (s.cumulative ? '<span class="cumulative-tag">累计</span>' : '') +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    /* Names */
+    var namesHTML =
+      (i1Filtered.length ? candidateList(i1Filtered, '一面 · ' + periodLabel(period), 'stage-i1') : '') +
+      (i2Filtered.length ? candidateList(i2Filtered, '二面 · ' + periodLabel(period), 'stage-i2') : '');
+
+    /* Compare: selected period vs all-time */
+    var maxRate = Math.max(i1Stats.rate, i1All.rate, i2Stats.rate, i2All.rate, 1);
+    function bar(w) { return Math.round(w / maxRate * 100); }
+    function fmtDelta(d) { return (d >= 0 ? '+' : '') + d + 'pt'; }
+    var i1Delta = i1Stats.rate - i1All.rate;
+    var i2Delta = i2Stats.rate - i2All.rate;
+
+    var compareHTML = period === 'all' ? '' :
+      '<div class="compare-section">' +
+        '<div class="section-label">' + periodLabel(period) + ' vs 全部 <span class="tail">baseline</span></div>' +
+        '<div class="compare-row' + (i1Anomaly ? ' anomaly' : '') + '">' +
+          '<span class="label">一面通过率</span>' +
+          '<div class="bars">' +
+            '<div class="compare-bar' + (i1Anomaly ? ' warn' : '') + '">' +
+              '<div class="compare-bar-track"><div class="fill current" style="width:' + bar(i1Stats.rate) + '%"></div></div>' +
+              '<span class="pct">' + link(L.interview1_3m, i1Stats.rate + '%') + '</span>' +
+            '</div>' +
+            '<div class="compare-bar">' +
+              '<div class="compare-bar-track"><div class="fill base" style="width:' + bar(i1All.rate) + '%"></div></div>' +
+              '<span class="pct" style="color:var(--ink-dim)">' + i1All.rate + '%</span>' +
+            '</div>' +
+            '<span class="delta">' + fmtDelta(i1Delta) + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="compare-row' + (i2Anomaly ? ' anomaly' : '') + '">' +
+          '<span class="label">二面通过率</span>' +
+          '<div class="bars">' +
+            '<div class="compare-bar' + (i2Anomaly ? ' warn' : '') + '">' +
+              '<div class="compare-bar-track"><div class="fill current" style="width:' + bar(i2Stats.rate) + '%"></div></div>' +
+              '<span class="pct">' + link(L.interview2_detail, i2Stats.rate + '%') + '</span>' +
+            '</div>' +
+            '<div class="compare-bar">' +
+              '<div class="compare-bar-track"><div class="fill base" style="width:' + bar(i2All.rate) + '%"></div></div>' +
+              '<span class="pct" style="color:var(--ink-dim)">' + i2All.rate + '%</span>' +
+            '</div>' +
+            '<span class="delta">' + fmtDelta(i2Delta) + (i2Anomaly ? ' ⚠' : '') + '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    /* Alert */
+    var alertHTML = i2Anomaly
+      ? '<div class="funnel-prose">⚠ 二面通过率 <span class="warn">' + i2Stats.rate + '%</span> 低于基线 <strong>' + i2All.rate + '%</strong>，关注 pending <strong>' + i2Stats.pending + '</strong> 人。</div>'
+      : '';
+
+    /* Action items */
+    var actions = [];
+    D.hrInterview.candidates.forEach(function(c) {
+      if (c.status === 'pending' && c.nextAction) {
+        actions.push({ warn: false, text: '跟进 <strong>' + c.name + '</strong> · ' + c.nextAction });
+      }
+    });
+    if (i2Anomaly) {
+      actions.push({ warn: true, text: '二面通过率 <strong>' + i2Stats.rate + '%</strong> 异常，关注 pending <strong>' + i2Stats.pending + '</strong> 人' });
+    }
+    var actionItemsHTML =
+      '<ul class="action-list">' +
+        (actions.length === 0
+          ? '<li class="action-item" style="color:var(--ink-dim);font-style:italic">暂无待办</li>'
+          : actions.map(function(a) {
+              return '<li class="action-item' + (a.warn ? ' warn' : '') + '">' +
+                '<span class="bullet">' + (a.warn ? '!' : '→') + '</span>' +
+                '<span>' + a.text + '</span>' +
+              '</li>';
+            }).join('')) +
+      '</ul>';
+
+    /* Write dynamic sections */
+    document.getElementById('funnel-content').innerHTML =
+      '<div class="funnel-steps">' + funnelHTML + '</div>';
+    document.getElementById('names-content').innerHTML = namesHTML;
+    document.getElementById('compare-content').innerHTML = compareHTML + alertHTML;
+    document.getElementById('actions-content').innerHTML = actionItemsHTML;
+  }
+
+  /* ── Static shell (rendered once) ── */
   document.getElementById('app').innerHTML = '' +
-    '<div class="dashboard">' +
-
-    /* 个人主页风格 header */
     '<header class="header fade-in">' +
       '<div class="header-left">' +
         '<div class="eyebrow">Strategic Hire · Bimonthly</div>' +
         '<h1>ROOT <em>全栈工程师</em> 招聘看板</h1>' +
       '</div>' +
       '<div class="header-right">' +
-        '<span class="live-badge"><span class="live-dot"></span>数据 ' + D.dataPeriod + '</span>' +
+        '<div class="period-tabs">' +
+          '<button class="period-tab active" data-period="all">全部</button>' +
+          '<button class="period-tab" data-period="quarter">季度</button>' +
+          '<button class="period-tab" data-period="month">月</button>' +
+          '<button class="period-tab" data-period="week">周</button>' +
+        '</div>' +
         '<span>更新 ' + D.updateTime + '</span>' +
+        '<button id="theme-toggle" class="theme-toggle"></button>' +
       '</div>' +
     '</header>' +
 
@@ -846,15 +940,10 @@
 
       /* Center */
       '<section class="fade-in" style="animation-delay:0.1s;display:flex;flex-direction:column;gap:0">' +
-        '<div class="section-label">招聘漏斗 <span class="tail">funnel · ' + D.dataPeriod + '</span></div>' +
-        '<div class="card" style="padding:0;overflow:hidden">' +
-          '<table class="funnel-table">' +
-            '<tbody>' + funnelRowsHTML + '</tbody>' +
-          '</table>' +
-        '</div>' +
-        (namesHTML ? '<div class="name-lists">' + namesHTML + '</div>' : '') +
-        compareHTML +
-        alertHTML +
+        '<div class="section-label">招聘漏斗 <span class="tail" id="funnel-label">funnel</span></div>' +
+        '<div class="card" style="padding:0;overflow:hidden" id="funnel-content"></div>' +
+        '<div id="names-content"></div>' +
+        '<div id="compare-content"></div>' +
       '</section>' +
 
       /* Right */
@@ -862,11 +951,36 @@
         '<div class="section-label">HR 面 · 出口 <span class="tail">' + D.hrInterview.total + ' 人</span></div>' +
         '<ul class="candidate-list">' + candidatesHTML + '</ul>' +
         '<div class="section-label" style="margin-top:16px">待办 <span class="tail">action items</span></div>' +
-        actionItemsHTML +
+        '<div id="actions-content"></div>' +
       '</aside>' +
 
-    '</main>' +
-    '</div>';
+    '</main>';
+
+  /* ── Initial render ── */
+  render('all');
+
+  /* ── Period tab switching ── */
+  document.querySelectorAll('.period-tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      document.querySelector('.period-tab.active').classList.remove('active');
+      tab.classList.add('active');
+      render(tab.getAttribute('data-period'));
+    });
+  });
+
+  /* ── Theme toggle ── */
+  var btn = document.getElementById('theme-toggle');
+  function updateThemeBtn() {
+    var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    btn.textContent = dark ? '☀' : '☾';
+  }
+  btn.addEventListener('click', function() {
+    var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    updateThemeBtn();
+  });
+  updateThemeBtn();
 })();
 </script>
 </body>
