@@ -9,33 +9,33 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:          #0E0E10;
-    --bg-subtle:   #141416;
-    --bg-hover:    #1A1A1E;
-    --surface:     #111113;
-    --border:      #1C1C1E;
-    --border-hi:   #2A2A2E;
+    --bg:          #FFFFFF;
+    --bg-subtle:   #F7F8FA;
+    --bg-hover:    #F0F1F3;
+    --surface:     #FFFFFF;
+    --border:      #E5E7EB;
+    --border-hi:   #D1D5DB;
 
-    --ink:         #FFFFFF;
-    --ink-soft:    #E5E5E5;
-    --ink-dim:     #888;
-    --ink-faint:   #444;
+    --ink:         #1F2937;
+    --ink-soft:    #374151;
+    --ink-dim:     #6B7280;
+    --ink-faint:   #D1D5DB;
 
-    /* 强调色 — 和个人主页一致 */
-    --accent:      #3B82F6;
-    --accent-soft: rgba(59, 130, 246, 0.12);
+    /* 强调色 */
+    --accent:      #2563EB;
+    --accent-soft: rgba(37, 99, 235, 0.08);
 
     /* 状态色 */
-    --green:       #4ADE80;
-    --green-soft:  rgba(74, 222, 128, 0.1);
-    --yellow:      #FACC15;
-    --yellow-soft: rgba(250, 204, 21, 0.12);
-    --red:         #F87171;
-    --red-soft:    rgba(248, 113, 113, 0.1);
-    --gray:        #8C8C99;
-    --gray-soft:   rgba(140, 140, 153, 0.1);
-    --purple:      #A78BFA;
-    --purple-soft: rgba(167, 139, 250, 0.1);
+    --green:       #16A34A;
+    --green-soft:  rgba(22, 163, 74, 0.08);
+    --yellow:      #CA8A04;
+    --yellow-soft: rgba(202, 138, 4, 0.08);
+    --red:         #DC2626;
+    --red-soft:    rgba(220, 38, 38, 0.06);
+    --gray:        #9CA3AF;
+    --gray-soft:   rgba(156, 163, 175, 0.08);
+    --purple:      #7C3AED;
+    --purple-soft: rgba(124, 58, 237, 0.08);
   }
 
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -53,7 +53,7 @@
 
   body {
     background:
-      linear-gradient(180deg, #161618 0%, var(--bg) 120px),
+      linear-gradient(180deg, #F3F4F6 0%, var(--bg) 120px),
       var(--bg);
   }
 
@@ -353,7 +353,7 @@
     display: inline-block;
     margin: 2px 4px 2px 0;
     padding: 1px 7px;
-    background: rgba(255,255,255,0.04);
+    background: rgba(0,0,0,0.02);
     border: 1px solid var(--border);
     border-radius: 10px;
     font-size: 11px;
@@ -363,10 +363,10 @@
     vertical-align: middle;
     transition: background 0.15s, color 0.15s, border-color 0.15s;
   }
-  /* 一面: blue accent */
+  /* 一面: blue */
   .name-tag.stage-i1 {
-    border-color: rgba(59, 130, 246, 0.25);
-    color: #93C5FD;
+    border-color: rgba(37, 99, 235, 0.2);
+    color: #2563EB;
   }
   a.name-tag.stage-i1:hover {
     background: var(--accent-soft);
@@ -375,17 +375,17 @@
   }
   /* 二面: purple */
   .name-tag.stage-i2 {
-    border-color: rgba(167, 139, 250, 0.25);
-    color: #C4B5FD;
+    border-color: rgba(124, 58, 237, 0.2);
+    color: #7C3AED;
   }
   a.name-tag.stage-i2:hover {
     background: var(--purple-soft);
     color: var(--purple);
     border-color: var(--purple);
   }
-  /* no-link fallback hover */
+  /* fallback hover */
   a.name-tag:hover {
-    background: rgba(0,212,170,0.1);
+    background: var(--accent-soft);
     color: var(--accent);
     border-color: var(--accent);
   }
@@ -549,33 +549,6 @@
   .status-reject  .candidate-badge { color: var(--ink-dim); }
   .status-decline .candidate-badge { color: var(--red); }
 
-  /* ─── HR summary row ─── */
-  .hr-summary {
-    display: flex;
-    gap: 16px;
-    margin-top: 16px;
-    padding: 14px 0;
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-  }
-
-  .hr-summary-item { flex: 1; text-align: center; }
-  .hr-summary-item .n {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 20px;
-    font-weight: 600;
-    line-height: 1;
-  }
-  .hr-summary-item .lbl {
-    font-size: 10px;
-    color: var(--ink-dim);
-    margin-top: 4px;
-    letter-spacing: 0.3px;
-  }
-  .hr-summary-item.accept .n { color: var(--green); }
-  .hr-summary-item.pending .n { color: var(--yellow); }
-  .hr-summary-item.other  .n { color: var(--ink-dim); }
-
   /* ─── Action items: 无边框无背景 ─── */
   .action-list {
     list-style: none;
@@ -697,13 +670,10 @@
     '</tr>';
   }).join('');
 
-  /* ── Prose summary ── */
-  var cumRate = (i2.current.passed / D.entry.resumesSent * 100).toFixed(1);
-  var proseHTML =
-    '<div class="funnel-prose">' +
-      '本期 <span class="n">' + D.entry.resumesSent + '</span> 份简历进漏斗，最终 <span class="n">' + i2.current.passed + '</span> 人通过二面，累计 <span class="n">' + cumRate + '%</span>。' +
-      (i2Anomaly ? '二面通过率 <span class="warn">' + i2.current.rate + '%</span> 低于基线 <strong>' + i2.bimonth.rate + '%</strong>，关注 pending <strong>' + i2.current.pending + '</strong> 人。' : '') +
-    '</div>';
+  /* ── Anomaly alert (only shown when rate is abnormal) ── */
+  var alertHTML = i2Anomaly
+    ? '<div class="funnel-prose">⚠ 二面通过率 <span class="warn">' + i2.current.rate + '%</span> 低于基线 <strong>' + i2.bimonth.rate + '%</strong>，关注 pending <strong>' + i2.current.pending + '</strong> 人。</div>'
+    : '';
 
   /* ── Build name→link lookup from all candidate arrays ── */
   var nameMap = {};
@@ -814,10 +784,6 @@
     '</li>';
   }).join('');
 
-  var hrAccept  = D.hrInterview.candidates.filter(function(c) { return c.status === 'accept';  }).length;
-  var hrPending = D.hrInterview.candidates.filter(function(c) { return c.status === 'pending'; }).length;
-  var hrOther   = D.hrInterview.candidates.length - hrAccept - hrPending;
-
   /* ── Action items ── */
   var actions = [];
   D.hrInterview.candidates.forEach(function(c) {
@@ -886,20 +852,15 @@
             '<tbody>' + funnelRowsHTML + '</tbody>' +
           '</table>' +
         '</div>' +
-        proseHTML +
         (namesHTML ? '<div class="name-lists">' + namesHTML + '</div>' : '') +
         compareHTML +
+        alertHTML +
       '</section>' +
 
       /* Right */
       '<aside class="fade-in" style="animation-delay:0.14s;display:flex;flex-direction:column;gap:0">' +
         '<div class="section-label">HR 面 · 出口 <span class="tail">' + D.hrInterview.total + ' 人</span></div>' +
         '<ul class="candidate-list">' + candidatesHTML + '</ul>' +
-        '<div class="hr-summary">' +
-          '<div class="hr-summary-item accept"><div class="n">' + hrAccept + '</div><div class="lbl">Offer 接受</div></div>' +
-          '<div class="hr-summary-item pending"><div class="n">' + hrPending + '</div><div class="lbl">待反馈</div></div>' +
-          '<div class="hr-summary-item other"><div class="n">' + hrOther + '</div><div class="lbl">未转化</div></div>' +
-        '</div>' +
         '<div class="section-label" style="margin-top:16px">待办 <span class="tail">action items</span></div>' +
         actionItemsHTML +
       '</aside>' +
