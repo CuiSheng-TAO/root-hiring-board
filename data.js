@@ -1,10 +1,10 @@
 // 自动生成 — 请勿手动编辑
-// 更新时间: 2026.04.10 11:08
+// 更新时间: 2026.04.13 14:08
 // 数据来源: 飞书电子表格 (一面/二面) + 招聘报告(入口) + 飞书 Hire API(ATS总数/候选人链接)
 // ⚠️ 入口和笔试数据需要手动更新（见脚本顶部变量）
 
 const DASHBOARD_DATA = {
-  updateTime: "2026.04.10 11:08",
+  updateTime: "2026.04.13 14:08",
   dataPeriod: "0301 — till now",
 
   // 目标
@@ -78,6 +78,7 @@ const DASHBOARD_DATA = {
   links: {
     hireReport: "https://deepwisdom.feishu.cn/hire/reports/7578526668101258184",
     wiki: "https://deepwisdom.feishu.cn/wiki/Un5MwIF0oimoSukvwvjca9fznoN",
+    writtenTestPipeline: "https://deepwisdom.feishu.cn/hire/pipeline/job/7539897631183980810",
     interview1_12m: "https://deepwisdom.feishu.cn/sheets/HGh6splmdh8xgPtrDX1cNtT9ntb",
     interview1_3m: "https://deepwisdom.feishu.cn/hire/reports/762705618927226317/widgets/7627056189327576021",
     interview2_detail: "https://deepwisdom.feishu.cn/sheets/HrIosFttQhvq3qt6iIPcIum5nNg",

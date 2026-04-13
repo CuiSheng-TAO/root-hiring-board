@@ -1,0 +1,61 @@
+name: Update Dashboard Data
+
+on:
+  schedule:
+    # 9:00 AM GMT+8 = 01:03 UTC (offset to avoid :00 stampede)
+    - cron: '3 1 * * *'
+    # 9:00 PM GMT+8 = 13:03 UTC
+    - cron: '3 13 * * *'
+  workflow_dispatch: # allow manual trigger
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          npm install -g @larksuite/cli
+          sudo apt-get update && sudo apt-get install -y jq bc
+
+      - name: Configure lark-cli
+        run: |
+          mkdir -p ~/.lark-cli
+          echo '{
+            "apps": [{
+              "appId": "${{ secrets.LARK_APP_ID }}",
+              "appSecret": "${{ secrets.LARK_APP_SECRET }}",
+              "brand": "feishu",
+              "lang": "zh",
+              "users": [{
+                "userOpenId": "${{ secrets.LARK_USER_OPEN_ID }}",
+                "userName": "ci-bot"
+              }]
+            }]
+          }' > ~/.lark-cli/config.json
+
+      - name: Run update script
+        run: |
+          chmod +x update.sh
+          ./update.sh
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data.js
+          if git diff --cached --quiet; then
+            echo "No data changes detected"
+          else
+            git commit -m "chore: auto-update dashboard data $(date -u -d '+8 hours' '+%Y.%m.%d %H:%M')"
+            git push
+          fi

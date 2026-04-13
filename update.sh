@@ -186,33 +186,28 @@ echo "  读取 ATS 总申请数..."
 ATS_JSON=$(python3 << 'PYEOF'
 import json, subprocess
 
-APP_ID = "cli_a95d929432785cc7"
-APP_SECRET = "0zSYGHc0JxNRrsY8adgsRhKZdOYKzTCS"
 JOBS = [("7539897631183980810","ROOT-全栈"),("7593964671033100563","AI原生全栈")]
-
-# get token
-r = subprocess.run(["curl","-s","-X","POST",
-    "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal",
-    "-H","Content-Type: application/json",
-    "-d",json.dumps({"app_id":APP_ID,"app_secret":APP_SECRET})],
-    capture_output=True, text=True)
-token = json.loads(r.stdout)["tenant_access_token"]
 
 counts = {}
 for job_id, name in JOBS:
     total = 0
     pt = ""
     while True:
-        url = f"https://open.feishu.cn/open-apis/hire/v1/applications?job_id={job_id}&page_size=20"
+        params = {"job_id": job_id, "page_size": "20"}
         if pt:
-            url += f"&page_token={pt}"
-        r = subprocess.run(["curl","-s",url,"-H",f"Authorization: Bearer {token}"],
+            params["page_token"] = pt
+        r = subprocess.run(
+            ["lark-cli", "api", "GET", "/open-apis/hire/v1/applications",
+             "--params", json.dumps(params), "--as", "bot"],
             capture_output=True, text=True)
-        d = json.loads(r.stdout)
-        total += len(d.get("data",{}).get("items",[]))
-        if not d.get("data",{}).get("has_more"):
+        if r.returncode != 0 or not r.stdout.strip():
             break
-        pt = d.get("data",{}).get("page_token","")
+        d = json.loads(r.stdout)
+        items = d.get("data", {}).get("items", [])
+        total += len(items)
+        if not d.get("data", {}).get("has_more"):
+            break
+        pt = d.get("data", {}).get("page_token", "")
     counts[job_id] = total
 
 print(json.dumps({"root":counts.get("7539897631183980810",0),"ai":counts.get("7593964671033100563",0)}))
@@ -313,6 +308,7 @@ const DASHBOARD_DATA = {
   links: {
     hireReport: "https://deepwisdom.feishu.cn/hire/reports/7578526668101258184",
     wiki: "https://deepwisdom.feishu.cn/wiki/Un5MwIF0oimoSukvwvjca9fznoN",
+    writtenTestPipeline: "https://deepwisdom.feishu.cn/hire/pipeline/job/7539897631183980810",
     interview1_12m: "https://deepwisdom.feishu.cn/sheets/HGh6splmdh8xgPtrDX1cNtT9ntb",
     interview1_3m: "https://deepwisdom.feishu.cn/hire/reports/762705618927226317/widgets/7627056189327576021",
     interview2_detail: "https://deepwisdom.feishu.cn/sheets/HrIosFttQhvq3qt6iIPcIum5nNg",
