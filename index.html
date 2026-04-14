@@ -171,20 +171,46 @@
   }
   .theme-toggle:hover { border-color: var(--ink-dim); }
 
-  .date-trigger {
-    background: var(--bg-subtle);
+  .date-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+  }
+  .preset-btn {
+    background: var(--bg);
     border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 4px 12px;
-    font-size: 11px;
+    border-radius: 999px;
+    padding: 5px 14px;
+    font-size: 12px;
     font-family: inherit;
     color: var(--ink);
     cursor: pointer;
-    transition: border-color 0.15s;
+    transition: all 0.15s;
     white-space: nowrap;
   }
-  .date-trigger:hover { border-color: var(--ink-dim); }
-  .date-trigger.active { border-color: var(--accent); }
+  .preset-btn:hover { border-color: var(--ink-dim); }
+  .preset-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+  }
+  .range-display {
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 14px;
+    font-size: 12px;
+    font-family: inherit;
+    color: var(--ink-dim);
+    cursor: pointer;
+    transition: border-color 0.15s;
+    white-space: nowrap;
+    letter-spacing: 0.3px;
+  }
+  .range-display:hover { border-color: var(--ink-dim); color: var(--ink); }
+  .range-display.active { border-color: var(--accent); color: var(--ink); }
+  .range-display .sep { margin: 0 8px; color: var(--ink-faint); }
   .cal-dropdown {
     position: absolute;
     top: calc(100% + 6px);
@@ -780,6 +806,15 @@
   var dataDates = {};
   records.forEach(function(r) { if (r.date) dataDates[r.date] = true; });
 
+  // Compute full data span (earliest record ~ today)
+  var allDates = records.map(function(r){return r.date}).filter(Boolean).sort();
+  var dataMinDate = allDates.length ? new Date(allDates[0] + 'T00:00:00') : new Date();
+  var dataMaxDate = new Date();
+
+  function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+  function dateKey(y, m, d) { return y + '-' + pad2(m + 1) + '-' + pad2(d); }
+  function fmtISO(d) { return dateKey(d.getFullYear(), d.getMonth(), d.getDate()); }
+
   function filterByRange(round, start, end) {
     return records.filter(function(r) {
       if (r.round !== round || !r.date) return false;
@@ -796,15 +831,19 @@
     return { total: total, passed: passed, pending: pending, rate: total > 0 ? Math.round(passed / total * 100) : 0 };
   }
 
+  // Label for section headers (funnel/compare): keep 简短
   function rangeLabel(s, e) {
     if (!s) return '全部';
     var fmt = function(d) { return (d.getMonth()+1) + '月' + d.getDate() + '日'; };
     return s.getTime() === e.getTime() ? fmt(s) : fmt(s) + ' ~ ' + fmt(e);
   }
 
-  function pad2(n) { return n < 10 ? '0' + n : '' + n; }
-
-  function dateKey(y, m, d) { return y + '-' + pad2(m + 1) + '-' + pad2(d); }
+  // Label for range-display button: YYYY-MM-DD 至 YYYY-MM-DD
+  function rangeDisplayHTML(s, e) {
+    var ds = s || dataMinDate;
+    var de = e || dataMaxDate;
+    return fmtISO(ds) + '<span class="sep">至</span>' + fmtISO(de);
+  }
 
   function renderCalendar() {
     var grid = document.getElementById('cal-grid');
@@ -1029,8 +1068,18 @@
     document.getElementById('names-content').innerHTML = namesHTML;
     document.getElementById('compare-content').innerHTML = compareHTML + alertHTML;
     document.getElementById('actions-content').innerHTML = actionItemsHTML;
-    var trigger = document.getElementById('date-trigger');
-    if (trigger) trigger.textContent = rangeLabel(start, end);
+    var rangeEl = document.getElementById('range-display');
+    var presetEl = document.getElementById('preset-all');
+    if (rangeEl) rangeEl.innerHTML = rangeDisplayHTML(start, end);
+    if (presetEl) {
+      if (!start) {
+        presetEl.classList.add('active');
+        rangeEl && rangeEl.classList.remove('active');
+      } else {
+        presetEl.classList.remove('active');
+        rangeEl && rangeEl.classList.add('active');
+      }
+    }
   }
 
   /* ── Static shell (rendered once) ── */
@@ -1041,8 +1090,9 @@
         '<h1>ROOT <em>全栈工程师</em> 招聘看板</h1>' +
       '</div>' +
       '<div class="header-right">' +
-        '<div style="position:relative">' +
-          '<button class="date-trigger" id="date-trigger">全部</button>' +
+        '<div class="date-filter-group">' +
+          '<button class="preset-btn active" id="preset-all">所有时间</button>' +
+          '<button class="range-display" id="range-display"></button>' +
           '<div class="cal-dropdown" id="cal-dropdown" style="display:none">' +
             '<div class="cal-header">' +
               '<button class="cal-nav" id="cal-prev">\u2039</button>' +
@@ -1052,7 +1102,7 @@
             '<div class="cal-weekdays"><span>\u4e00</span><span>\u4e8c</span><span>\u4e09</span><span>\u56db</span><span>\u4e94</span><span>\u516d</span><span>\u65e5</span></div>' +
             '<div class="cal-grid" id="cal-grid"></div>' +
             '<div class="cal-actions">' +
-              '<button class="cal-btn" id="cal-all">\u5168\u90e8</button>' +
+              '<button class="cal-btn" id="cal-all">重置</button>' +
             '</div>' +
           '</div>' +
         '</div>' +
@@ -1104,23 +1154,31 @@
   render(null, null);
 
   /* ── Calendar interactions ── */
-  var triggerEl = document.getElementById('date-trigger');
+  var rangeDisplayBtn = document.getElementById('range-display');
+  var presetAllBtn = document.getElementById('preset-all');
   var dropdownEl = document.getElementById('cal-dropdown');
 
   function openCalendar() {
     dropdownEl.style.display = 'block';
-    triggerEl.classList.add('active');
     renderCalendar();
   }
   function closeCalendar() {
     dropdownEl.style.display = 'none';
-    triggerEl.classList.remove('active');
   }
 
-  triggerEl.addEventListener('click', function(e) {
+  rangeDisplayBtn.addEventListener('click', function(e) {
     e.stopPropagation();
     if (dropdownEl.style.display === 'none') openCalendar();
     else closeCalendar();
+  });
+
+  presetAllBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    calStart = null;
+    calEnd = null;
+    calPicking = 0;
+    closeCalendar();
+    render(null, null);
   });
 
   document.getElementById('cal-prev').addEventListener('click', function(e) {
@@ -1168,7 +1226,7 @@
   });
 
   document.addEventListener('click', function(e) {
-    if (!dropdownEl.contains(e.target) && e.target !== triggerEl) {
+    if (!dropdownEl.contains(e.target) && e.target !== rangeDisplayBtn && e.target !== presetAllBtn) {
       closeCalendar();
     }
   });
