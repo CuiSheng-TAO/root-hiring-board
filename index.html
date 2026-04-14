@@ -1271,8 +1271,14 @@
 
     '</main>';
 
-  /* ── Initial render ── */
-  render(null, null);
+  /* ── Initial render: 默认选中今天 ── */
+  (function() {
+    var now = new Date();
+    var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    calStart = today;
+    calEnd = today;
+    render(today, today);
+  })();
 
   /* ── Calendar interactions ── */
   var rangeDisplayBtn = document.getElementById('range-display');
