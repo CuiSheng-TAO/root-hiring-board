@@ -391,72 +391,46 @@
 
   /* ─── 招聘公式卡片 ─── */
   .formula-card {
-    background: var(--bg-subtle);
-    border-radius: 8px;
-    padding: 18px 20px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--ink-soft);
   }
-  .formula-card .tag {
-    font-size: 10px;
-    font-weight: 500;
-    color: var(--accent);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-bottom: 14px;
+  .formula-card .fc-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--border);
   }
-  .formula-card .fc-lead {
-    font-size: 11px;
+  .formula-card .fc-row:last-of-type { border-bottom: none; }
+  .formula-card .fc-row-label {
+    font-size: 12px;
     color: var(--ink-dim);
-    margin-bottom: 6px;
-    letter-spacing: 0.3px;
   }
-  .formula-card .fc-unit-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 14px;
-  }
-  .formula-card .fc-unit {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 10px 12px;
-    text-align: center;
-  }
-  .formula-card .fc-num {
+  .formula-card .fc-row-val {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 26px;
-    font-weight: 700;
+    font-size: 15px;
+    font-weight: 600;
     color: var(--ink);
-    line-height: 1;
-    letter-spacing: -1px;
-  }
-  .formula-card .fc-label {
-    font-size: 11px;
-    color: var(--ink-dim);
-    margin-top: 4px;
-  }
-  .formula-card .fc-divider {
-    height: 1px;
-    background: var(--border);
-    margin: 12px 0;
+    letter-spacing: -0.3px;
   }
   .formula-card .fc-proj {
-    font-size: 12px;
+    margin-top: 10px;
+    font-size: 13px;
+    line-height: 1.7;
     color: var(--ink-soft);
-    line-height: 1.8;
   }
   .formula-card .fc-proj strong {
     color: var(--accent);
     font-family: 'JetBrains Mono', monospace;
     font-weight: 700;
-    letter-spacing: -0.3px;
   }
-  .formula-card .fc-footer {
-    font-size: 10px;
+  .formula-card .fc-base {
+    margin-top: 8px;
+    font-size: 11px;
     color: var(--ink-faint);
-    margin-top: 12px;
-    letter-spacing: 0.2px;
     font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.2px;
   }
 
   /* ─── Metric hero: 个人主页风格，无边框 ─── */
@@ -1269,20 +1243,12 @@
           var gapResume = perResume * D.target.gap;
           var gapAssess = perAssess * D.target.gap;
           return '<div class="section-label" style="margin-top:4px">招聘公式 <span class="tail">formula</span></div>' +
-                 '<div class="formula-card">' +
-                   '<div class="tag">UNIT COST</div>' +
-                   '<div class="fc-lead">每入职 1 人平均需要</div>' +
-                   '<div class="fc-unit-grid">' +
-                     '<div class="fc-unit"><div class="fc-num">' + perResume + '</div><div class="fc-label">份简历</div></div>' +
-                     '<div class="fc-unit"><div class="fc-num">' + perAssess + '</div><div class="fc-label">人评估通过</div></div>' +
-                   '</div>' +
-                   '<div class="fc-divider"></div>' +
-                   '<div class="fc-proj">' +
-                     '还差 <strong>' + D.target.gap + '</strong> 人 → 预计还需<br>' +
-                     '· <strong>' + gapResume.toLocaleString() + '</strong> 份简历<br>' +
-                     '· <strong>' + gapAssess.toLocaleString() + '</strong> 人评估通过' +
-                   '</div>' +
-                   '<div class="fc-footer">base: ' + D.entry.resumesSent + ' → ' + D.entry.assessPassed + ' → ' + hires + '</div>' +
+                 '<div class="card formula-card">' +
+                   '<div style="font-size:13px;color:var(--ink-soft);margin-bottom:4px">每入职 <strong style="color:var(--ink)">1</strong> 人平均需要</div>' +
+                   '<div class="fc-row"><span class="fc-row-label">简历投递</span><span class="fc-row-val">' + perResume + ' 份</span></div>' +
+                   '<div class="fc-row"><span class="fc-row-label">评估通过</span><span class="fc-row-val">' + perAssess + ' 人</span></div>' +
+                   '<div class="fc-proj">还差 <strong>' + D.target.gap + '</strong> 人 → 预计还需 <strong>' + gapResume.toLocaleString() + '</strong> 份简历、<strong>' + gapAssess.toLocaleString() + '</strong> 人评估通过。</div>' +
+                   '<div class="fc-base">base · ' + D.entry.resumesSent + ' → ' + D.entry.assessPassed + ' → ' + hires + '</div>' +
                  '</div>';
         })() +
       '</aside>' +
