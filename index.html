@@ -389,6 +389,76 @@
     padding: 16px;
   }
 
+  /* ─── 招聘公式卡片 ─── */
+  .formula-card {
+    background: var(--bg-subtle);
+    border-radius: 8px;
+    padding: 18px 20px;
+  }
+  .formula-card .tag {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .formula-card .fc-lead {
+    font-size: 11px;
+    color: var(--ink-dim);
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+  }
+  .formula-card .fc-unit-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .formula-card .fc-unit {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    text-align: center;
+  }
+  .formula-card .fc-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+  .formula-card .fc-label {
+    font-size: 11px;
+    color: var(--ink-dim);
+    margin-top: 4px;
+  }
+  .formula-card .fc-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 12px 0;
+  }
+  .formula-card .fc-proj {
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.8;
+  }
+  .formula-card .fc-proj strong {
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+  .formula-card .fc-footer {
+    font-size: 10px;
+    color: var(--ink-faint);
+    margin-top: 12px;
+    letter-spacing: 0.2px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
   /* ─── Metric hero: 个人主页风格，无边框 ─── */
   .metric-hero {
     background: var(--bg-subtle);
@@ -1190,6 +1260,31 @@
         '<div class="card" style="font-size:13px;line-height:1.7;color:var(--ink-soft)">' +
           '目标：<strong style="color:var(--ink)">Root 全栈 / 工程全栈</strong> 人才不少于 <strong style="color:var(--accent)">' + D.target.goal + '</strong> 人，当前在岗 <strong style="color:var(--ink)">' + D.target.current + '</strong> 人，还需 <strong style="color:var(--red)">' + D.target.gap + '</strong> 人。' +
         '</div>' +
+        (function() {
+          /* 招聘公式：基于历史累计 倒推每入职 1 人所需的简历/评估数，并推算 gap 剩余人数所需 */
+          var hires = D.target.current || 0;
+          if (hires <= 0) return '';  // 无历史样本，不展示
+          var perResume = Math.round(D.entry.resumesSent / hires);
+          var perAssess = Math.round(D.entry.assessPassed / hires);
+          var gapResume = perResume * D.target.gap;
+          var gapAssess = perAssess * D.target.gap;
+          return '<div class="section-label" style="margin-top:4px">招聘公式 <span class="tail">formula</span></div>' +
+                 '<div class="formula-card">' +
+                   '<div class="tag">UNIT COST</div>' +
+                   '<div class="fc-lead">每入职 1 人平均需要</div>' +
+                   '<div class="fc-unit-grid">' +
+                     '<div class="fc-unit"><div class="fc-num">' + perResume + '</div><div class="fc-label">份简历</div></div>' +
+                     '<div class="fc-unit"><div class="fc-num">' + perAssess + '</div><div class="fc-label">人评估通过</div></div>' +
+                   '</div>' +
+                   '<div class="fc-divider"></div>' +
+                   '<div class="fc-proj">' +
+                     '还差 <strong>' + D.target.gap + '</strong> 人 → 预计还需<br>' +
+                     '· <strong>' + gapResume.toLocaleString() + '</strong> 份简历<br>' +
+                     '· <strong>' + gapAssess.toLocaleString() + '</strong> 人评估通过' +
+                   '</div>' +
+                   '<div class="fc-footer">base: ' + D.entry.resumesSent + ' → ' + D.entry.assessPassed + ' → ' + hires + '</div>' +
+                 '</div>';
+        })() +
       '</aside>' +
 
       /* Center */
