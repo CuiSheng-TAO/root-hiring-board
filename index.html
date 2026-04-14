@@ -866,6 +866,21 @@
     return { total: total, passed: passed, pending: pending, rate: total > 0 ? Math.round(passed / total * 100) : 0 };
   }
 
+  // 在 [start, end] 范围内对 byDay 字典的字段求和；start=null 表全部
+  function sumByDay(byDay, fields, start, end) {
+    var sum = {};
+    fields.forEach(function(f) { sum[f] = 0; });
+    if (!byDay) return sum;
+    Object.keys(byDay).forEach(function(dk) {
+      if (start) {
+        var d = new Date(dk + 'T00:00:00');
+        if (d < start || d > end) return;
+      }
+      fields.forEach(function(f) { sum[f] += byDay[dk][f] || 0; });
+    });
+    return sum;
+  }
+
   // Label for section headers (funnel/compare): keep 简短
   function rangeLabel(s, e) {
     if (!s) return '全部';
@@ -992,14 +1007,23 @@
     var i1Anomaly = i1All.rate > 0 && i1Stats.rate < i1All.rate * 0.6;
     var i2Anomaly = i2All.rate > 0 && i2Stats.rate < i2All.rate * 0.6;
 
-    var isCumulative = !!start;
+    var isCumulative = !start;
+
+    /* 入口/笔试按选中日期范围聚合（全部时显示累计） */
+    var entryAgg = !start
+      ? { sent: D.entry.resumesSent, assessPassed: D.entry.assessPassed }
+      : sumByDay(D.entryByDay, ['sent', 'assessPassed'], start, end);
+    var writtenAgg = !start
+      ? { collected: D.writtenTest.collected, passed: D.writtenTest.passed }
+      : sumByDay(D.writtenByDay, ['collected', 'passed'], start, end);
 
     /* Funnel */
     var stages = [
-      { name: '入口 · 欧阳评估', entered: D.entry.resumesSent, passed: D.entry.assessPassed,
-        rate: D.entry.assessRate, link: L.hireReport, unit: '份', anomaly: false, cumulative: isCumulative },
-      { name: '笔试 · 已回收', entered: D.writtenTest.collected, passed: D.writtenTest.passed,
-        rate: Math.round(D.writtenTest.passed / D.writtenTest.collected * 100),
+      { name: '入口 · 欧阳评估', entered: entryAgg.sent, passed: entryAgg.assessPassed,
+        rate: entryAgg.sent ? Math.round(entryAgg.assessPassed / entryAgg.sent * 100) : 0,
+        link: L.hireReport, unit: '份', anomaly: false, cumulative: isCumulative },
+      { name: '笔试 · 已回收', entered: writtenAgg.collected, passed: writtenAgg.passed,
+        rate: writtenAgg.collected ? Math.round(writtenAgg.passed / writtenAgg.collected * 100) : 0,
         link: L.writtenTestPipeline || L.wiki, unit: '份', anomaly: false, cumulative: isCumulative },
       { name: '一面 · 志权', entered: i1Stats.total, passed: i1Stats.passed,
         rate: i1Stats.rate, link: L.interview1_3m, unit: '人', anomaly: i1Anomaly },

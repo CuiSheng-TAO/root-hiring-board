@@ -166,17 +166,45 @@ echo "  面试记录: $RECORD_COUNT"
 
 UPDATE_TIME=$(date "+%Y.%m.%d %H:%M")
 
-# ─── 入口数据：从 Hire API 拉取总申请数 + 评估通过数 ───
-echo "  拉取入口数据（Hire API 全量）..."
+# ─── 入口数据：从 Hire API 拉取 + 按日期分桶 + 缓存 app details ───
+echo "  拉取入口数据（Hire API 全量 + 按日期分桶）..."
 
-ENTRY_JSON=$(python3 << 'PYEOF'
+# 输出三个 JSON 临时文件供后续步骤使用
+ENTRY_TMP=$(mktemp)
+APP_CACHE_TMP=$(mktemp)
+STAGE_TYPE_TMP=$(mktemp)
+
+python3 << PYEOF
 import json, subprocess, sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime, timezone, timedelta
 
 JOBS = ["7539897631183980810", "7593964671033100563"]
+TZ = timezone(timedelta(hours=8))
+
+def ts_to_date(ts):
+    """Convert ms or s timestamp to YYYY-MM-DD (Beijing time)."""
+    if not ts:
+        return None
+    n = int(ts)
+    if n > 1e12:
+        n //= 1000
+    return datetime.fromtimestamp(n, TZ).strftime('%Y-%m-%d')
+
+# 1. 拉 stage_id → stage_type 映射
+print("  building stage_id → type map...", file=sys.stderr)
+r = subprocess.run(
+    ["lark-cli", "api", "GET", "/open-apis/hire/v1/job_processes", "--as", "bot"],
+    capture_output=True, text=True)
+stage_type_map = {}
+if r.returncode == 0 and r.stdout.strip():
+    d = json.loads(r.stdout)
+    for proc in d.get("data", {}).get("items", []):
+        for s in proc.get("stage_list", []):
+            stage_type_map[s["id"]] = s.get("type", 0)
+print(f"  {len(stage_type_map)} stages mapped", file=sys.stderr)
 
 def list_all_app_ids():
-    """Paginate all application IDs for both jobs."""
     all_ids = []
     for job_id in JOBS:
         pt = ""
@@ -198,7 +226,6 @@ def list_all_app_ids():
     return all_ids
 
 def get_app_detail(app_id):
-    """Fetch single application detail."""
     r = subprocess.run(
         ["lark-cli", "api", "GET", f"/open-apis/hire/v1/applications/{app_id}", "--as", "bot"],
         capture_output=True, text=True)
@@ -207,12 +234,19 @@ def get_app_detail(app_id):
     d = json.loads(r.stdout)
     return d.get("data", {}).get("application", {})
 
-print("  listing...", file=sys.stderr)
+print("  listing applications...", file=sys.stderr)
 app_ids = list_all_app_ids()
 total = len(app_ids)
 print(f"  {total} applications found, fetching details...", file=sys.stderr)
 
 passed_screening = 0
+entry_by_day = {}      # {date: {sent, assessPassed}}
+app_cache = {}         # {app_id: {written_test_date}} — for written test bucketing
+
+def bump(d, key):
+    entry_by_day.setdefault(d, {"sent": 0, "assessPassed": 0})
+    entry_by_day[d][key] += 1
+
 with ThreadPoolExecutor(max_workers=10) as executor:
     futures = {executor.submit(get_app_detail, aid): aid for aid in app_ids}
     done = 0
@@ -223,20 +257,55 @@ with ThreadPoolExecutor(max_workers=10) as executor:
         app = f.result()
         if not app:
             continue
+        app_id = app.get("id")
         stages = app.get("stage_time_list", [])
         stage_type = app.get("stage", {}).get("type", 0)
-        if len(stages) > 1 or stage_type > 2:
+        passed = (len(stages) > 1) or (stage_type > 2)
+        if passed:
             passed_screening += 1
 
-rate = round(passed_screening / total * 100) if total > 0 else 0
-print(json.dumps({"total": total, "passed": passed_screening, "rate": rate}))
-PYEOF
-)
+        # 投递日期 — create_time
+        d_sent = ts_to_date(app.get("create_time"))
+        if d_sent:
+            bump(d_sent, "sent")
 
-ENTRY_RESUMES=$(echo "$ENTRY_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin)['total'])")
-ENTRY_PASSED=$(echo "$ENTRY_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin)['passed'])")
-ENTRY_RATE=$(echo "$ENTRY_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin)['rate'])")
+        # 评估通过日期 — 第一次进入 type>2 的 stage 的 enter_time
+        # 笔试日期 — ROOT-全栈流程无 type==3 阶段，用 create_time（投递日期）作为 cohort 日期
+        assess_date = None
+        for s in stages:
+            sid = s.get("stage_id")
+            stype = stage_type_map.get(sid, 0)
+            etime = s.get("enter_time")
+            if stype > 2 and assess_date is None:
+                assess_date = ts_to_date(etime)
+                break
+        # 若 stage_time_list 没记录但当前 stage 已 > 2（早期数据可能缺失 enter_time），fallback 到 modify_time
+        if passed and assess_date is None:
+            assess_date = ts_to_date(app.get("modify_time"))
+        if assess_date:
+            bump(assess_date, "assessPassed")
+
+        # 笔试 cohort 用 create_time 作 proxy
+        if app_id:
+            app_cache[app_id] = {"written_test_date": d_sent}
+
+rate = round(passed_screening / total * 100) if total > 0 else 0
+
+# 输出三个文件
+with open("$ENTRY_TMP", "w") as f:
+    json.dump({"total": total, "passed": passed_screening, "rate": rate, "by_day": entry_by_day}, f, ensure_ascii=False)
+with open("$APP_CACHE_TMP", "w") as f:
+    json.dump(app_cache, f, ensure_ascii=False)
+with open("$STAGE_TYPE_TMP", "w") as f:
+    json.dump(stage_type_map, f)
+PYEOF
+
+ENTRY_RESUMES=$(python3 -c "import json; print(json.load(open('$ENTRY_TMP'))['total'])")
+ENTRY_PASSED=$(python3 -c "import json; print(json.load(open('$ENTRY_TMP'))['passed'])")
+ENTRY_RATE=$(python3 -c "import json; print(json.load(open('$ENTRY_TMP'))['rate'])")
+ENTRY_BY_DAY=$(python3 -c "import json; print(json.dumps(json.load(open('$ENTRY_TMP'))['by_day'], separators=(',',':'), ensure_ascii=False))")
 echo "  入口: $ENTRY_RESUMES 份简历, $ENTRY_PASSED 通过评估 ($ENTRY_RATE%)"
+echo "  入口分桶: $(python3 -c "import json; print(len(json.load(open('$ENTRY_TMP'))['by_day']))") 天"
 
 # ─── 笔试数据：从 Wiki 嵌入电子表格自动拉取 ───
 echo "  读取笔试 Pipeline 电子表格..."
@@ -246,35 +315,78 @@ WRITTEN_SHEET=$(lark-cli sheets +read \
   --range "HgPg6g!A1:I300" \
   --value-render-option ToString 2>/dev/null)
 
-WRITTEN_JSON=$(echo "$WRITTEN_SHEET" | python3 -c "
-import json, sys
-data = json.load(sys.stdin)
+WRITTEN_TMP=$(mktemp)
+echo "$WRITTEN_SHEET" > "${WRITTEN_TMP}.raw"
+
+python3 << PYEOF
+import json, re, sys
+
+with open("${WRITTEN_TMP}.raw") as f:
+    data = json.load(f)
+with open("$APP_CACHE_TMP") as f:
+    app_cache = json.load(f)
+
 rows = data.get('data', {}).get('valueRange', {}).get('values', [])
 collected = 0
 in_progress = 0
 passed = 0
 rejected = 0
+written_by_day = {}   # {date: {collected, passed, inProgress, rejected}}
+matched = 0
+unmatched = 0
+
+def bump(date, key):
+    written_by_day.setdefault(date, {"collected":0,"passed":0,"inProgress":0,"rejected":0})
+    written_by_day[date][key] += 1
+
 for row in rows[1:]:
     if not row or not row[0]:
         continue
     g = str(row[6]).strip() if len(row) > 6 and row[6] else ''
     i = str(row[8]).strip() if len(row) > 8 and row[8] else ''
-    if g == '已回收':
-        collected += 1
-    elif g == '笔试中':
-        in_progress += 1
-    if i == '通过':
-        passed += 1
-    elif i == '不通过':
-        rejected += 1
-print(json.dumps({'collected': collected, 'passed': passed, 'inProgress': in_progress, 'rejected': rejected}))
-")
 
-WRITTEN_COLLECTED=$(echo "$WRITTEN_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin)['collected'])")
-WRITTEN_PASSED=$(echo "$WRITTEN_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin)['passed'])")
-WRITTEN_IN_PROGRESS=$(echo "$WRITTEN_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin)['inProgress'])")
-WRITTEN_REJECTED=$(echo "$WRITTEN_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin)['rejected'])")
+    # 累计计数（向后兼容）
+    if g == '已回收': collected += 1
+    elif g == '笔试中': in_progress += 1
+    if i == '通过': passed += 1
+    elif i == '不通过': rejected += 1
+
+    # 抽取 application_id → 反查笔试日期
+    m = re.search(r'application_id=(\d+)', str(row[0]))
+    app_id = m.group(1) if m else None
+    written_date = None
+    if app_id and app_id in app_cache:
+        written_date = app_cache[app_id].get("written_test_date")
+
+    if written_date:
+        matched += 1
+        if g == '已回收': bump(written_date, "collected")
+        elif g == '笔试中': bump(written_date, "inProgress")
+        if i == '通过': bump(written_date, "passed")
+        elif i == '不通过': bump(written_date, "rejected")
+    else:
+        unmatched += 1
+
+print(f"  笔试匹配到日期: {matched} 行, 未匹配: {unmatched} 行 (后者只计入累计)", file=sys.stderr)
+
+with open("$WRITTEN_TMP", "w") as f:
+    json.dump({
+        "collected": collected, "passed": passed,
+        "inProgress": in_progress, "rejected": rejected,
+        "by_day": written_by_day
+    }, f, ensure_ascii=False)
+PYEOF
+
+WRITTEN_COLLECTED=$(python3 -c "import json; print(json.load(open('$WRITTEN_TMP'))['collected'])")
+WRITTEN_PASSED=$(python3 -c "import json; print(json.load(open('$WRITTEN_TMP'))['passed'])")
+WRITTEN_IN_PROGRESS=$(python3 -c "import json; print(json.load(open('$WRITTEN_TMP'))['inProgress'])")
+WRITTEN_REJECTED=$(python3 -c "import json; print(json.load(open('$WRITTEN_TMP'))['rejected'])")
+WRITTEN_BY_DAY=$(python3 -c "import json; print(json.dumps(json.load(open('$WRITTEN_TMP'))['by_day'], separators=(',',':'), ensure_ascii=False))")
 echo "  笔试: 已回收 $WRITTEN_COLLECTED, 通过 $WRITTEN_PASSED, 笔试中 $WRITTEN_IN_PROGRESS, 不通过 $WRITTEN_REJECTED"
+echo "  笔试分桶: $(python3 -c "import json; print(len(json.load(open('$WRITTEN_TMP'))['by_day']))") 天"
+
+# 清理临时文件
+rm -f "$ENTRY_TMP" "$APP_CACHE_TMP" "$STAGE_TYPE_TMP" "$WRITTEN_TMP" "${WRITTEN_TMP}.raw"
 
 echo "  解析完成。"
 
@@ -294,20 +406,27 @@ const DASHBOARD_DATA = {
     gap: 4
   },
 
-  // 入口（✅ Hire API 自动拉取）
+  // 入口（✅ Hire API 自动拉取，累计）
   entry: {
     resumesSent: $ENTRY_RESUMES,
     assessPassed: $ENTRY_PASSED,
     assessRate: $ENTRY_RATE
   },
 
-  // 笔试（✅ Wiki 嵌入电子表格自动拉取）
+  // 入口按日期分桶（前端按日历范围求和）
+  // {date: {sent: 投递数, assessPassed: 评估通过数}}
+  entryByDay: $ENTRY_BY_DAY,
+
+  // 笔试（✅ Wiki 嵌入电子表格自动拉取，累计）
   writtenTest: {
     collected: $WRITTEN_COLLECTED,
     passed: $WRITTEN_PASSED,
     inProgress: $WRITTEN_IN_PROGRESS,
     rejected: $WRITTEN_REJECTED
   },
+
+  // 笔试按日期分桶（用候选人投递日期作 cohort proxy，因 ROOT-全栈流程无 type==3 笔试阶段）
+  writtenByDay: $WRITTEN_BY_DAY,
 
   // 面试记录（含日期，前端按时间段动态聚合）
   // round: 1=一面, 2=二面
