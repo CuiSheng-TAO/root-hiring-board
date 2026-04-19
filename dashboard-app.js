@@ -127,6 +127,29 @@
       .join("");
   }
 
+  function renderHeadcountNames(data) {
+    const names = data.headcount && Array.isArray(data.headcount.matchedNames)
+      ? data.headcount.matchedNames
+      : [];
+
+    if (!names.length) {
+      return "";
+    }
+
+    return (
+      '<div class="matched-line">' +
+      '<span class="matched-label">当前在岗命中</span>' +
+      '<div class="matched-names">' +
+      names
+        .map(function (name) {
+          return '<span class="matched-name">' + escapeHtml(name) + "</span>";
+        })
+        .join("") +
+      "</div>" +
+      "</div>"
+    );
+  }
+
   function renderSummaryStages(data) {
     const stages = data.funnel.summaryStages || [];
     const maxCount = Math.max.apply(
@@ -211,7 +234,16 @@
     });
 
     return (
-      '<div class="card weekly-card">' +
+      '<details class="card fold-card">' +
+      '<summary class="fold-summary">' +
+      '<div class="fold-copy">' +
+      '<span class="fold-kicker">次级视图</span>' +
+      '<span class="fold-title">阶段周趋势</span>' +
+      '<span class="fold-desc">保留周度波动，但默认折叠，不抢主漏斗的注意力。</span>' +
+      '</div>' +
+      '<span class="fold-arrow">展开</span>' +
+      "</summary>" +
+      '<div class="weekly-card">' +
       '<table class="weekly-table">' +
       "<thead><tr>" +
       head
@@ -224,7 +256,8 @@
       rows.join("") +
       "</tbody>" +
       "</table>" +
-      "</div>"
+      "</div>" +
+      "</details>"
     );
   }
 
@@ -268,7 +301,7 @@
       return '<div class="card empty-state">当前没有正在进行中的一面 / 二面候选人。</div>';
     }
 
-    return '<div class="name-lists">' + sections.join("") + "</div>";
+    return '<div class="card pipe-card"><div class="name-lists">' + sections.join("") + "</div></div>";
   }
 
   function candidateLink(candidate) {
@@ -330,7 +363,8 @@
   function renderRefreshCard(data) {
     return (
       '<div class="card info-card">' +
-      '<div class="mini-note">页面不再等待 Vercel 重新部署，点击按钮只会重新拉取最新数据文件。</div>' +
+      '<div class="card-kicker">发布链路</div>' +
+      '<div class="mini-note">页面壳保持稳定，刷新按钮只重新拉取最新数据，不再用一次部署去制造“实时更新”的错觉。</div>' +
       '<div class="info-list compact">' +
       '<div class="info-row"><span class="info-key">自动同步</span><span class="info-value">' +
       escapeHtml(data.runtime.autoSync) +
@@ -354,6 +388,7 @@
       '<div class="header-left">' +
       '<div class="eyebrow">Strategic Hire · Root Scope</div>' +
       "<h1>ROOT <em>全栈工程师</em> 招聘看板</h1>" +
+      '<p class="hero-subtitle">把飞书招聘里的关键口径压成一页可读的战情摘要，让你一眼看见 HC 缺口、漏斗压力和出口状态。</p>' +
       "</div>" +
       '<div class="header-right">' +
       '<div class="live-badge">' +
@@ -398,22 +433,24 @@
       '%"></div></div>' +
       "</div>" +
       '<div class="card info-card">' +
-      '<div class="mini-note">本看板只统计 ROOT 白名单岗位，不做关键词模糊匹配。</div>' +
+      '<div class="card-kicker">当前口径</div>' +
+      '<div class="mini-note">整体版式保持原来的简洁战情板逻辑，新加内容只负责解释口径，不再抢主数字的注意力。ROOT 范围按明确岗位白名单聚合，漏斗取飞书招聘权威报表，当前在岗取飞书通讯录命中名单。</div>' +
       '<div class="scope-chips">' +
       renderScopeChips(data) +
       "</div>" +
       '<div class="info-list">' +
       renderInfoRows(config, data) +
       "</div>" +
+      renderHeadcountNames(data) +
       "</div>" +
-      '<div class="card formula-card">' +
-      '<div class="fc-row"><span class="fc-row-label">简历初筛</span><span class="fc-row-val">' +
+      '<div class="card formula-card compact-formula">' +
+      '<div class="card-kicker">快速参照</div>' +
+      '<div class="formula-inline"><span>简历初筛 <strong>' +
       firstStage.toLocaleString("zh-CN") +
-      "</span></div>" +
-      '<div class="fc-row"><span class="fc-row-label">安排评估</span><span class="fc-row-val">' +
+      '</strong></span><span>安排评估 <strong>' +
       secondStage.toLocaleString("zh-CN") +
-      "</span></div>" +
-      '<div class="fc-proj">左侧 HC 数据已改为自动计算：<strong>current</strong> 来自聚合岗位范围下的已入职状态，<strong>gap</strong> 由目标值自动回推。</div>' +
+      '</strong></span></div>' +
+      '<div class="fc-proj">这里只保留两项总量做左栏快速对焦，详细阶段关系集中放在中间主漏斗。</div>' +
       "</div>" +
       "</aside>" +
       '<section class="fade-in" style="animation-delay:0.1s;display:flex;flex-direction:column;gap:0">' +
@@ -425,7 +462,6 @@
       renderSummaryStages(data) +
       "</div>" +
       "</div>" +
-      '<div class="section-label" style="margin-top:16px">阶段周趋势 <span class="tail">special weekly view</span></div>' +
       renderWeeklyTable(data) +
       '<div class="section-label" style="margin-top:16px">当前候选人 <span class="tail">live pipeline</span></div>' +
       renderPipelineCandidates(data) +
