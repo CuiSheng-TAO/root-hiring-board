@@ -67,10 +67,25 @@
     --gray-soft:   rgba(107, 114, 128, 0.12);
     --purple:      #A78BFA;
     --purple-soft: rgba(167, 139, 250, 0.12);
+    --surface:     rgba(23, 27, 37, 0.88);
+    --surface-strong: rgba(27, 31, 43, 0.94);
+    --shadow-soft: 0 20px 44px rgba(0, 0, 0, 0.34);
+    --shadow-line: inset 0 1px 0 rgba(255,255,255,0.04);
   }
 
   [data-theme="dark"] body {
-    background: linear-gradient(180deg, #0A0C12 0%, var(--bg) 120px), var(--bg);
+    background:
+      radial-gradient(circle at 14% 10%, rgba(96, 165, 250, 0.10), transparent 24%),
+      radial-gradient(circle at 82% 12%, rgba(167, 139, 250, 0.10), transparent 18%),
+      linear-gradient(180deg, #090C13 0%, var(--bg) 180px),
+      repeating-linear-gradient(
+        135deg,
+        rgba(255,255,255,0.02) 0px,
+        rgba(255,255,255,0.02) 1px,
+        transparent 1px,
+        transparent 10px
+      ),
+      var(--bg);
   }
 
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -167,6 +182,11 @@
     border-radius: 999px;
     box-shadow: var(--shadow-soft);
     backdrop-filter: blur(10px);
+  }
+
+  [data-theme="dark"] .header-right {
+    background: rgba(26, 30, 41, 0.88);
+    border-color: rgba(189, 170, 134, 0.24);
   }
 
   .live-badge {
@@ -422,6 +442,11 @@
     box-shadow: var(--shadow-soft), var(--shadow-line);
   }
 
+  [data-theme="dark"] .card {
+    background: linear-gradient(180deg, rgba(23, 27, 37, 0.92), rgba(18, 22, 31, 0.88));
+    border-color: rgba(189, 170, 134, 0.18);
+  }
+
   /* ─── 招聘公式卡片 ─── */
   .formula-card {
     font-size: 13px;
@@ -558,6 +583,11 @@
     transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
   }
 
+  [data-theme="dark"] .funnel-step {
+    background: rgba(255,255,255,0.03);
+    border-color: rgba(189, 170, 134, 0.14);
+  }
+
   .funnel-step:hover {
     transform: translateY(-1px);
     border-color: rgba(41, 86, 215, 0.26);
@@ -666,6 +696,11 @@
     vertical-align: middle;
     transition: background 0.15s, color 0.15s, border-color 0.15s;
   }
+
+  [data-theme="dark"] .name-tag {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(189, 170, 134, 0.18);
+  }
   /* 一面: blue */
   .name-tag.stage-i1 {
     border-color: rgba(37, 99, 235, 0.25);
@@ -768,7 +803,7 @@
   }
 
   .candidate-card {
-    padding: 12px 12px;
+    padding: 10px 11px;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -776,6 +811,11 @@
     border-radius: 14px;
     background: rgba(255,255,255,0.46);
     transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+  }
+
+  [data-theme="dark"] .candidate-card {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(189, 170, 134, 0.16);
   }
 
   .candidate-card:hover {
@@ -811,13 +851,13 @@
   .status-decline .candidate-avatar { border-color: var(--red); color: var(--red); }
 
   .candidate-avatar-inner {
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     flex-shrink: 0;
   }
@@ -830,7 +870,7 @@
   .candidate-body { flex: 1; min-width: 0; }
 
   .candidate-name {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
     color: var(--ink);
     margin-bottom: 1px;
@@ -840,22 +880,27 @@
   .status-decline .candidate-name { color: var(--ink-dim); text-decoration: line-through; }
 
   .candidate-meta {
-    font-size: 10px;
+    font-size: 9px;
     color: var(--ink-dim);
-    letter-spacing: 0.2px;
+    letter-spacing: 0.14px;
   }
 
   /* 状态徽章 — 个人主页风格，小字细边框 */
   .candidate-badge {
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 600;
     color: var(--ink-dim);
     white-space: nowrap;
     flex-shrink: 0;
     border-radius: 999px;
-    padding: 4px 8px;
+    padding: 3px 8px;
     background: rgba(255,255,255,0.8);
     border: 1px solid rgba(189, 170, 134, 0.38);
+  }
+
+  [data-theme="dark"] .candidate-badge {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(189, 170, 134, 0.16);
   }
 
   .status-accept  .candidate-badge { color: var(--green); }
@@ -1076,6 +1121,11 @@
     border: 1px solid rgba(189, 170, 134, 0.36);
     font-size: 11px;
     color: var(--ink-soft);
+  }
+
+  [data-theme="dark"] .matched-name {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(189, 170, 134, 0.16);
   }
 
   .pipe-card {

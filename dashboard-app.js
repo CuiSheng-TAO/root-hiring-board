@@ -364,7 +364,7 @@
     return (
       '<div class="card info-card">' +
       '<div class="card-kicker">发布链路</div>' +
-      '<div class="mini-note">页面壳保持稳定，刷新按钮只重新拉取最新数据，不再用一次部署去制造“实时更新”的错觉。</div>' +
+      '<div class="mini-note">刷新按钮只重新拉取最新数据，不再靠一次部署去制造“实时更新”的错觉。</div>' +
       '<div class="info-list compact">' +
       '<div class="info-row"><span class="info-key">自动同步</span><span class="info-value">' +
       escapeHtml(data.runtime.autoSync) +
@@ -434,7 +434,7 @@
       "</div>" +
       '<div class="card info-card">' +
       '<div class="card-kicker">当前口径</div>' +
-      '<div class="mini-note">整体版式保持原来的简洁战情板逻辑，新加内容只负责解释口径，不再抢主数字的注意力。ROOT 范围按明确岗位白名单聚合，漏斗取飞书招聘权威报表，当前在岗取飞书通讯录命中名单。</div>' +
+      '<div class="mini-note">ROOT 只按岗位白名单聚合。漏斗取飞书招聘权威报表，在岗人数取飞书通讯录命中名单。</div>' +
       '<div class="scope-chips">' +
       renderScopeChips(data) +
       "</div>" +
@@ -450,7 +450,7 @@
       '</strong></span><span>安排评估 <strong>' +
       secondStage.toLocaleString("zh-CN") +
       '</strong></span></div>' +
-      '<div class="fc-proj">这里只保留两项总量做左栏快速对焦，详细阶段关系集中放在中间主漏斗。</div>' +
+      '<div class="fc-proj">这里只留两项总量做左栏参照，详细阶段关系集中在中间主漏斗。</div>' +
       "</div>" +
       "</aside>" +
       '<section class="fade-in" style="animation-delay:0.1s;display:flex;flex-direction:column;gap:0">' +
