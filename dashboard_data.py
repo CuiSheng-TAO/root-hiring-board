@@ -1009,7 +1009,7 @@ def fetch_current_headcount(queries: list[str]) -> dict[str, Any]:
     for query in queries:
         payload = json.loads(
             subprocess.run(
-                ["lark-cli", "contact", "+search-user", "--query", query],
+                ["lark-cli", "contact", "+search-user", "--as", "user", "--query", query],
                 capture_output=True,
                 text=True,
                 check=False,
