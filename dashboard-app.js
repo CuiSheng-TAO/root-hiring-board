@@ -270,6 +270,77 @@
     return set;
   }
 
+  function authoritativeRangeSummary(data, start, end) {
+    const daily = data.funnel.authoritativeDailyEntries || {};
+    if (!hasCustomRange || !start || !end) {
+      return {
+        stages: data.funnel.summaryStages || [],
+        exact: true,
+        missingDates: [],
+      };
+    }
+
+    const requiredDates = [];
+    const cursor = new Date(start);
+    while (cursor <= end) {
+      requiredDates.push(fmtIso(cursor));
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    const missingDates = requiredDates.filter(function (dayKey) {
+      return !daily[dayKey];
+    });
+    if (missingDates.length) {
+      return {
+        stages: null,
+        exact: false,
+        missingDates: missingDates,
+      };
+    }
+
+    const counts = {
+      resume_screening: 0,
+      assigned_evaluation: 0,
+      initial_invite: 0,
+      interview_1: 0,
+      conduct_interview_1: 0,
+      interview_2: 0,
+      hr_interview: 0,
+      onboarded: 0,
+    };
+    requiredDates.forEach(function (dayKey) {
+      const row = daily[dayKey];
+      Object.keys(counts).forEach(function (stageKey) {
+        counts[stageKey] += row[stageKey] || 0;
+      });
+    });
+
+    const labelMap = {};
+    (data.funnel.summaryStages || []).forEach(function (stage) {
+      labelMap[stage.key] = stage.label;
+    });
+
+    return {
+      exact: true,
+      missingDates: [],
+      stages: [
+        "resume_screening",
+        "assigned_evaluation",
+        "initial_invite",
+        "interview_1",
+        "conduct_interview_1",
+        "interview_2",
+        "hr_interview",
+        "onboarded",
+      ].map(function (key) {
+        return {
+          key: key,
+          label: labelMap[key] || key,
+          count: counts[key],
+        };
+      }),
+    };
+  }
+
   function aggregateStageCounts(data, start, end) {
     if (!hasCustomRange || !start || !end) {
       return data.funnel.summaryStages || [];
@@ -334,11 +405,54 @@
   }
 
   function filterWeeklySeries(data, start, end) {
+    const exactDaily = data.funnel.authoritativeDailyEntries || {};
     const weekRanges = getWeekRanges(data);
     const labels = data.funnel.weeklyLabels || weekRanges.map(function (item) { return item.label; });
     if (!hasCustomRange || !start || !end) {
-      return { labels: labels, series: data.funnel.weeklySeries || [] };
+      return { labels: labels, series: data.funnel.weeklySeries || [], exact: true, missingDates: [] };
     }
+    const requiredDates = [];
+    const cursor = new Date(start);
+    while (cursor <= end) {
+      requiredDates.push(fmtIso(cursor));
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    const missingDates = requiredDates.filter(function (dayKey) {
+      return !exactDaily[dayKey];
+    });
+    if (missingDates.length) {
+      return { labels: [], series: [], exact: false, missingDates: missingDates };
+    }
+
+    const customRanges = buildWeekRanges(fmtIso(start), fmtIso(end));
+    const series = [
+      "resume_screening",
+      "assigned_evaluation",
+      "initial_invite",
+      "interview_1",
+      "interview_2",
+      "hr_interview",
+      "onboarded",
+    ].map(function (stageKey) {
+      return {
+        key: stageKey,
+        label:
+          ((data.funnel.summaryStages || []).find(function (stage) {
+            return stage.key === stageKey;
+          }) || {}).label || stageKey,
+        counts: customRanges.map(function (range) {
+          let total = 0;
+          let rangeCursor = parseIsoDate(range.start);
+          const rangeEnd = parseIsoDate(range.end);
+          while (rangeCursor && rangeEnd && rangeCursor <= rangeEnd) {
+            total += (exactDaily[fmtIso(rangeCursor)] || {})[stageKey] || 0;
+            rangeCursor.setDate(rangeCursor.getDate() + 1);
+          }
+          return total;
+        }),
+      };
+    });
+
     const indexes = weekRanges
       .map(function (range, index) {
         const rangeStart = parseIsoDate(range.start);
@@ -347,22 +461,34 @@
         return index;
       })
       .filter(function (value) { return value !== null; });
+    const fallbackLabels = indexes.map(function (index) { return labels[index]; });
+    const fallbackSeries = (data.funnel.weeklySeries || []).map(function (seriesItem) {
+      return {
+        key: seriesItem.key,
+        label: seriesItem.label,
+        counts: indexes.map(function (index) {
+          return (seriesItem.counts || [])[index] || 0;
+        }),
+      };
+    });
 
     return {
-      labels: indexes.map(function (index) { return labels[index]; }),
-      series: (data.funnel.weeklySeries || []).map(function (series) {
-        return {
-          key: series.key,
-          label: series.label,
-          counts: indexes.map(function (index) {
-            return (series.counts || [])[index] || 0;
-          }),
-        };
-      }),
+      labels: customRanges.length ? customRanges.map(function (range) { return range.label; }) : fallbackLabels,
+      series: customRanges.length ? series : fallbackSeries,
+      exact: true,
+      missingDates: [],
     };
   }
 
-  function renderSummaryStages(stages) {
+  function renderSummaryStages(stages, notice) {
+    if (notice) {
+      return (
+        '<div class="funnel-notice">' +
+        '<div class="notice-kicker">权威重算提示</div>' +
+        '<p>' + escapeHtml(notice) + "</p>" +
+        "</div>"
+      );
+    }
     const maxCount = Math.max.apply(
       null,
       (stages || [])
@@ -400,6 +526,19 @@
   }
 
   function renderWeeklyTable(labels, series) {
+    if (!labels.length || !series.length) {
+      return (
+        '<details class="fold-card">' +
+        '<summary class="fold-summary">' +
+        '<div class="fold-copy">' +
+        '<span class="fold-kicker">次级视图</span>' +
+        '<span class="fold-title">阶段周趋势</span>' +
+        '<span class="fold-desc">当前时间范围缺少完整权威日级覆盖，因此不展示趋势表。</span>' +
+        "</div>" +
+        '<span class="fold-arrow">提示</span>' +
+        "</summary></details>"
+      );
+    }
     const stageKeys = [
       "resume_screening",
       "resume_evaluation",
@@ -453,6 +592,9 @@
   }
 
   function renderPipelineCandidates(data, start, end) {
+    if (hasCustomRange) {
+      return '<div class="card empty-state">当前候选人名单暂不支持按任意日期严格对齐飞书报表；本区块已停用近似筛选，避免造假。</div>';
+    }
     const sections = [];
     const stageMap = {
       interview_1: { label: "一面进行中", cls: "stage-i1" },
@@ -508,6 +650,12 @@
   }
 
   function renderHrCandidates(data, start, end) {
+    if (hasCustomRange) {
+      return {
+        html: '<div class="card empty-state">HR 面名单暂不支持按任意日期严格对齐飞书报表；当前只对数值漏斗做权威重算。</div>',
+        total: "—",
+      };
+    }
     const candidates = filterCandidateSet(data.hrInterview.candidates || [], start, end);
     if (!candidates.length) {
       return {
@@ -708,7 +856,8 @@
 
   function renderDashboard(config, data) {
     const defaultRange = getDefaultRange(data);
-    const summaryStages = aggregateStageCounts(data, calStart, calEnd);
+    const summaryView = authoritativeRangeSummary(data, calStart, calEnd);
+    const summaryStages = summaryView.stages || aggregateStageCounts(data, calStart, calEnd);
     const weeklyView = filterWeeklySeries(data, calStart, calEnd);
     const hrView = renderHrCandidates(data, calStart, calEnd);
     const rangeTail = hasCustomRange && calStart && calEnd
@@ -777,14 +926,19 @@
       '<section class="fade-in" style="animation-delay:0.1s;display:flex;flex-direction:column;gap:0">' +
       '<div class="section-label">权威漏斗 <span class="tail">' + escapeHtml(rangeTail) + "</span></div>" +
       '<div class="card" style="padding:0;overflow:hidden"><div class="funnel-steps">' +
-      renderSummaryStages(summaryStages) +
+      renderSummaryStages(
+        summaryStages,
+        summaryView.exact
+          ? ""
+          : "当前选中范围缺少完整的权威日报表快照，无法严格重算这段漏斗。你可以切回权威窗口，或等待下一轮权威快照补齐。"
+      ) +
       "</div></div>" +
       renderWeeklyTable(weeklyView.labels, weeklyView.series) +
       '<div class="section-label" style="margin-top:16px">当前候选人 <span class="tail">live pipeline</span></div>' +
       renderPipelineCandidates(data, calStart, calEnd) +
       "</section>" +
       '<aside class="fade-in" style="animation-delay:0.14s;display:flex;flex-direction:column;gap:0">' +
-      '<div class="section-label">HR 面 · 出口 <span class="tail">' + hrView.total + " 人</span></div>" +
+      '<div class="section-label">HR 面 · 出口 <span class="tail">' + hrView.total + (hrView.total === "—" ? "" : " 人") + "</span></div>" +
       hrView.html +
       '<div class="section-label" style="margin-top:16px">同步说明 <span class="tail">runtime</span></div>' +
       renderRefreshCard(data) +

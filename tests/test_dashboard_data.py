@@ -3,6 +3,8 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from dashboard_data import (
+    build_authoritative_daily_stage_entries,
+    build_authoritative_weekly_series,
     build_daily_stage_entries,
     build_special_series_from_report,
     build_summary_from_report,
@@ -10,6 +12,7 @@ from dashboard_data import (
     build_week_ranges,
     derive_hr_candidates,
     filter_jobs_by_title,
+    summarize_authoritative_range,
     summarize_stage_entries,
 )
 
@@ -182,6 +185,143 @@ class ReportAuthorityMappingTests(unittest.TestCase):
         self.assertEqual([2, 23], series_map["resume_screening"])
         self.assertEqual([0, 30], series_map["resume_evaluation"])
         self.assertEqual([0, 5], series_map["initial_invite"])
+
+    def test_builds_authoritative_daily_entries_from_report_rows(self) -> None:
+        entries = build_authoritative_daily_stage_entries(
+            {
+                "2026-03-23": {
+                    "sumRow": {
+                        "stageName_7483922292361365798": "387",
+                        "appEvaluationCount": "96",
+                        "stageName_7487173396766968091": "36",
+                        "stageName_7483922292361398566": "5",
+                        "interviewRound1Enter": "5",
+                        "stageName_7484986929462872370": "4",
+                        "stageName_7484987042608285962": "5",
+                        "stageName_7483922292361447718": "0",
+                    }
+                }
+            }
+        )
+
+        self.assertEqual(387, entries["2026-03-23"]["resume_screening"])
+        self.assertEqual(96, entries["2026-03-23"]["assigned_evaluation"])
+        self.assertEqual(5, entries["2026-03-23"]["conduct_interview_1"])
+
+    def test_summarize_authoritative_range_reports_missing_days(self) -> None:
+        summary, missing = summarize_authoritative_range(
+            {
+                "2026-03-23": {
+                    "resume_screening": 387,
+                    "assigned_evaluation": 96,
+                    "initial_invite": 36,
+                    "interview_1": 5,
+                    "conduct_interview_1": 5,
+                    "interview_2": 4,
+                    "hr_interview": 5,
+                    "onboarded": 0,
+                }
+            },
+            "2026-03-23",
+            "2026-03-24",
+        )
+
+        self.assertIsNone(summary)
+        self.assertEqual(["2026-03-24"], missing)
+
+    def test_builds_authoritative_weekly_series_from_daily_entries(self) -> None:
+        labels, series, missing = build_authoritative_weekly_series(
+            {
+                "2026-03-01": {
+                    "resume_screening": 2,
+                    "assigned_evaluation": 0,
+                    "initial_invite": 0,
+                    "interview_1": 0,
+                    "conduct_interview_1": 0,
+                    "interview_2": 0,
+                    "hr_interview": 0,
+                    "onboarded": 0,
+                },
+                "2026-03-02": {
+                    "resume_screening": 23,
+                    "assigned_evaluation": 30,
+                    "initial_invite": 5,
+                    "interview_1": 2,
+                    "conduct_interview_1": 2,
+                    "interview_2": 1,
+                    "hr_interview": 0,
+                    "onboarded": 0,
+                },
+                "2026-03-03": {
+                    "resume_screening": 0,
+                    "assigned_evaluation": 0,
+                    "initial_invite": 0,
+                    "interview_1": 0,
+                    "conduct_interview_1": 0,
+                    "interview_2": 0,
+                    "hr_interview": 0,
+                    "onboarded": 0,
+                },
+                "2026-03-04": {
+                    "resume_screening": 0,
+                    "assigned_evaluation": 0,
+                    "initial_invite": 0,
+                    "interview_1": 0,
+                    "conduct_interview_1": 0,
+                    "interview_2": 0,
+                    "hr_interview": 0,
+                    "onboarded": 0,
+                },
+                "2026-03-05": {
+                    "resume_screening": 0,
+                    "assigned_evaluation": 0,
+                    "initial_invite": 0,
+                    "interview_1": 0,
+                    "conduct_interview_1": 0,
+                    "interview_2": 0,
+                    "hr_interview": 0,
+                    "onboarded": 0,
+                },
+                "2026-03-06": {
+                    "resume_screening": 0,
+                    "assigned_evaluation": 0,
+                    "initial_invite": 0,
+                    "interview_1": 0,
+                    "conduct_interview_1": 0,
+                    "interview_2": 0,
+                    "hr_interview": 0,
+                    "onboarded": 0,
+                },
+                "2026-03-07": {
+                    "resume_screening": 0,
+                    "assigned_evaluation": 0,
+                    "initial_invite": 0,
+                    "interview_1": 0,
+                    "conduct_interview_1": 0,
+                    "interview_2": 0,
+                    "hr_interview": 0,
+                    "onboarded": 0,
+                },
+                "2026-03-08": {
+                    "resume_screening": 0,
+                    "assigned_evaluation": 0,
+                    "initial_invite": 0,
+                    "interview_1": 0,
+                    "conduct_interview_1": 0,
+                    "interview_2": 0,
+                    "hr_interview": 0,
+                    "onboarded": 0,
+                },
+            },
+            "2026-03-01",
+            "2026-03-08",
+        )
+
+        self.assertEqual([], missing)
+        self.assertEqual(["03-01 – 03-01", "03-02 – 03-08"], labels)
+        series_map = {item["key"]: item["counts"] for item in series}
+        self.assertEqual([2, 23], series_map["resume_screening"])
+        self.assertEqual([0, 30], series_map["assigned_evaluation"])
 
 
 class DeriveHrCandidatesTests(unittest.TestCase):

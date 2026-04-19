@@ -53,6 +53,16 @@ STAGE_ORDER = [
     "pending_onboard",
     "onboarded",
 ]
+SUMMARY_STAGE_FIELDS = {
+    "resume_screening": "stageName_7483922292361365798",
+    "assigned_evaluation": "appEvaluationCount",
+    "initial_invite": "stageName_7487173396766968091",
+    "interview_1": "stageName_7483922292361398566",
+    "conduct_interview_1": "interviewRound1Enter",
+    "interview_2": "stageName_7484986929462872370",
+    "hr_interview": "stageName_7484987042608285962",
+    "onboarded": "stageName_7483922292361447718",
+}
 HR_STATUS_ORDER = {
     "accept": 1,
     "pending": 2,
@@ -519,6 +529,16 @@ def build_week_ranges(
     return ranges
 
 
+def iter_iso_dates(start_date: str, end_date: str) -> list[str]:
+    current = date.fromisoformat(start_date)
+    end = date.fromisoformat(end_date)
+    values: list[str] = []
+    while current <= end:
+        values.append(current.isoformat())
+        current += timedelta(days=1)
+    return values
+
+
 def to_epoch_ms(
     value: str,
     tz_name: str = DEFAULT_TIMEZONE,
@@ -648,6 +668,109 @@ def build_daily_stage_entries(
         day_key: {stage_key: counts.get(stage_key, 0) for stage_key in STAGE_ORDER}
         for day_key, counts in sorted(daily.items())
     }
+
+
+def build_authoritative_daily_stage_entries(
+    overview_rows_by_date: dict[str, dict[str, Any]]
+) -> dict[str, dict[str, int]]:
+    entries: dict[str, dict[str, int]] = {}
+    for day_key, report_data in overview_rows_by_date.items():
+        sum_row = report_data.get("sumRow", {})
+        entries[day_key] = {
+            stage_key: int(sum_row.get(field_key, 0))
+            for stage_key, field_key in SUMMARY_STAGE_FIELDS.items()
+        }
+    return entries
+
+
+def summarize_authoritative_range(
+    daily_entries: dict[str, dict[str, int]],
+    start_date: str,
+    end_date: str,
+) -> tuple[list[dict[str, Any]] | None, list[str]]:
+    required_dates = iter_iso_dates(start_date, end_date)
+    missing_dates = [day_key for day_key in required_dates if day_key not in daily_entries]
+    if missing_dates:
+        return None, missing_dates
+
+    counts = {stage_key: 0 for stage_key in SUMMARY_STAGE_FIELDS}
+    for day_key in required_dates:
+        row = daily_entries[day_key]
+        for stage_key in counts:
+            counts[stage_key] += row.get(stage_key, 0)
+
+    return [
+        {
+            "key": "resume_screening",
+            "label": "进入「简历初筛」阶段",
+            "count": counts["resume_screening"],
+        },
+        {
+            "key": "assigned_evaluation",
+            "label": "安排评估",
+            "count": counts["assigned_evaluation"],
+        },
+        {
+            "key": "initial_invite",
+            "label": "进入「初面邀约」阶段",
+            "count": counts["initial_invite"],
+        },
+        {
+            "key": "interview_1",
+            "label": "进入「专业一面」阶段",
+            "count": counts["interview_1"],
+        },
+        {
+            "key": "conduct_interview_1",
+            "label": "进行 1 面",
+            "count": counts["conduct_interview_1"],
+        },
+        {
+            "key": "interview_2",
+            "label": "进入「专业二面」阶段",
+            "count": counts["interview_2"],
+        },
+        {
+            "key": "hr_interview",
+            "label": "进入「HR面」阶段",
+            "count": counts["hr_interview"],
+        },
+        {
+            "key": "onboarded",
+            "label": "进入「已入职」阶段",
+            "count": counts["onboarded"],
+        },
+    ], []
+
+
+def build_authoritative_weekly_series(
+    daily_entries: dict[str, dict[str, int]],
+    start_date: str,
+    end_date: str,
+) -> tuple[list[str] | None, list[dict[str, Any]] | None, list[str]]:
+    required_dates = iter_iso_dates(start_date, end_date)
+    missing_dates = [day_key for day_key in required_dates if day_key not in daily_entries]
+    if missing_dates:
+        return None, None, missing_dates
+
+    ranges = build_week_ranges(start_date, end_date)
+    labels = [item["label"] for item in ranges]
+    series = []
+    for stage_key in SUMMARY_STAGE_FIELDS:
+        counts = []
+        for date_range in ranges:
+            total = 0
+            for day_key in iter_iso_dates(date_range["start"], date_range["end"]):
+                total += daily_entries[day_key].get(stage_key, 0)
+            counts.append(total)
+        series.append(
+            {
+                "key": stage_key,
+                "label": STAGE_KEY_LABELS.get(stage_key, stage_key),
+                "counts": counts,
+            }
+        )
+    return labels, series, []
 
 
 def resolve_bucket(timestamp_ms: int, weekly_ranges: list[dict[str, Any]]) -> int | None:
@@ -885,6 +1008,47 @@ class BrowserReportBridge:
         overview = self._widget_fetch(target_id, "table", overview_body)
         special = self._widget_fetch(target_id, "chart", special_body)
         return {"overview": overview, "special": special}
+
+    def fetch_authoritative_daily_overview(
+        self,
+        job_ids: list[str],
+        operation_window: dict[str, str],
+        process_ids: list[str],
+    ) -> dict[str, dict[str, Any]]:
+        target_id = self._ensure_report_target()
+        daily: dict[str, dict[str, Any]] = {}
+        for day_key in iter_iso_dates(operation_window["start"], operation_window["end"]):
+            operation_time = [
+                str(to_epoch_ms(day_key, DEFAULT_TIMEZONE, False)),
+                str(to_epoch_ms(day_key, DEFAULT_TIMEZONE, True)),
+            ]
+            overview_body = {
+                "withAmount": True,
+                "reportKey": "7573581010957828099",
+                "reportType": "user",
+                "widgetKey": OVERVIEW_WIDGET_KEY,
+                "measures": OVERVIEW_MEASURES,
+                "dimensions": [{"key": "appJob"}],
+                "orders": [],
+                "filters": {
+                    "values": {
+                        "jobProcess": process_ids,
+                        "jobRange": ["all"],
+                        "jobStatus": ["1"],
+                        "operationTime": operation_time,
+                        "appJob": job_ids,
+                    },
+                    "meta": [],
+                },
+                "withSum": True,
+                "showZeroRow": False,
+                "shareOwnerData": 1,
+                "fromReportKey": "7573581010957828099",
+                "limit": 50,
+                "offset": 0,
+            }
+            daily[day_key] = self._widget_fetch(target_id, "table", overview_body)
+        return daily
 
     def _ensure_report_target(self) -> str:
         targets = requests.get(f"{CDP_BASE_URL}/targets", timeout=10).json()
@@ -1212,6 +1376,8 @@ def build_dashboard_payload(config: dict[str, Any]) -> dict[str, Any]:
         }
         for key in STAGE_ORDER
     ]
+    authoritative_daily_entries: dict[str, dict[str, int]] = {}
+    authoritative_daily_missing: list[str] = []
 
     try:
         bridge = BrowserReportBridge(config["reportSource"]["widgetUrl"])
@@ -1227,6 +1393,20 @@ def build_dashboard_payload(config: dict[str, Any]) -> dict[str, Any]:
             config["operationWindow"]["end"],
             timezone_name,
         )
+        daily_reports = bridge.fetch_authoritative_daily_overview(
+            [job["id"] for job in matched_jobs],
+            config["operationWindow"],
+            process_ids or ["7483922292361464102"],
+        )
+        authoritative_daily_entries = build_authoritative_daily_stage_entries(daily_reports)
+        authoritative_daily_missing = [
+            day_key
+            for day_key in iter_iso_dates(
+                config["operationWindow"]["start"],
+                config["operationWindow"]["end"],
+            )
+            if day_key not in authoritative_daily_entries
+        ]
         authority_mode = "browser-report"
     except Exception:
         pass
@@ -1290,6 +1470,8 @@ def build_dashboard_payload(config: dict[str, Any]) -> dict[str, Any]:
             ],
             "weeklySeries": weekly_series,
             "dailyStageEntries": daily_stage_entries,
+            "authoritativeDailyEntries": authoritative_daily_entries,
+            "authoritativeMissingDates": authoritative_daily_missing,
         },
         "pipelineCandidates": pipeline_candidates,
         "hrInterview": hr_candidates,
