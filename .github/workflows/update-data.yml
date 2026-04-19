@@ -1,74 +1,41 @@
-name: Update Dashboard Data
+name: Publish Dashboard Data
 
 on:
-  schedule:
-    # 9:00 AM GMT+8 = 01:03 UTC (offset to avoid :00 stampede)
-    - cron: '3 1 * * *'
-    # 9:00 PM GMT+8 = 13:03 UTC
-    - cron: '3 13 * * *'
-  workflow_dispatch: # allow manual trigger
+  push:
+    branches: ["main"]
+    paths:
+      - "data.json"
+      - "dashboard.config.json"
+      - ".github/workflows/update-data.yml"
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: root-dashboard-data
+  cancel-in-progress: true
 
 jobs:
-  update:
+  deploy-data:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Prepare Pages artifact
+        run: |
+          mkdir -p public-data
+          cp data.json public-data/data.json
+          cp dashboard.config.json public-data/dashboard.config.json
+
+      - uses: actions/upload-pages-artifact@v3
         with:
-          node-version: '20'
+          path: public-data
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Install dependencies
-        run: |
-          npm install -g @larksuite/cli
-          sudo apt-get update && sudo apt-get install -y jq bc
-
-      - name: Configure lark-cli
-        run: |
-          mkdir -p ~/.lark-cli
-          echo '{
-            "apps": [{
-              "appId": "${{ secrets.LARK_APP_ID }}",
-              "appSecret": "${{ secrets.LARK_APP_SECRET }}",
-              "brand": "feishu",
-              "lang": "zh",
-              "users": [{
-                "userOpenId": "${{ secrets.LARK_USER_OPEN_ID }}",
-                "userName": "ci-bot"
-              }]
-            }]
-          }' > ~/.lark-cli/config.json
-
-      - name: Run update script
-        run: |
-          chmod +x update.sh
-          ./update.sh
-
-      - name: Commit and push if changed
-        id: commit
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data.js
-          if git diff --cached --quiet; then
-            echo "No data changes detected"
-            echo "changed=false" >> $GITHUB_OUTPUT
-          else
-            git commit -m "chore: auto-update dashboard data $(date -u -d '+8 hours' '+%Y.%m.%d %H:%M')"
-            git push
-            echo "changed=true" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Deploy to Vercel
-        if: steps.commit.outputs.changed == 'true'
-        run: npx vercel --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      - id: deployment
+        uses: actions/deploy-pages@v4

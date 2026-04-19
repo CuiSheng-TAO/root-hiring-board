@@ -1,0 +1,27 @@
+{
+  "goal": 10,
+  "timezone": "Asia/Shanghai",
+  "autoSync": "每 5 分钟",
+  "includedJobTitles": [
+    "ROOT-全栈工程师",
+    "AI 原生全栈工程师（工程-全栈）"
+  ],
+  "operationWindow": {
+    "start": "2026-03-01",
+    "end": "2026-04-07"
+  },
+  "reportSource": {
+    "widgetUrl": "https://deepwisdom.feishu.cn/hire/reports/7573581010957828099/widgets/7573581011003378631",
+    "summaryReference": {
+      "overview": [1397, 343, 90, 18, 21, 9],
+      "special": [1397, 320, 90, 18, 9, 6]
+    }
+  },
+  "currentHeadcountSource": {
+    "queries": ["全栈", "root"]
+  },
+  "runtimeDataUrls": [
+    "https://cuisheng-tao.github.io/root-hiring-board/data.json",
+    "./data.json"
+  ]
+}

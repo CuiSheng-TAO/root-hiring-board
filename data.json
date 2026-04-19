@@ -1,0 +1,462 @@
+{
+  "generatedAt": "2026-04-19 18:21",
+  "reportSource": {
+    "widgetUrl": "https://deepwisdom.feishu.cn/hire/reports/7573581010957828099/widgets/7573581011003378631",
+    "operationWindow": {
+      "start": "2026-03-01",
+      "end": "2026-04-07"
+    },
+    "summaryReference": {
+      "overview": [
+        1397,
+        343,
+        90,
+        18,
+        21,
+        9
+      ],
+      "special": [
+        1397,
+        320,
+        90,
+        18,
+        9,
+        6
+      ]
+    }
+  },
+  "jobScope": {
+    "includedJobTitles": [
+      "ROOT-全栈工程师",
+      "AI 原生全栈工程师（工程-全栈）"
+    ],
+    "matchedJobs": [
+      {
+        "id": "7593964671033100563",
+        "title": "AI 原生全栈工程师（工程-全栈）",
+        "department": "产品工程",
+        "processName": "默认社招流程",
+        "activeStatus": 1
+      },
+      {
+        "id": "7539897631183980810",
+        "title": "ROOT-全栈工程师",
+        "department": "ROOT",
+        "processName": "默认社招流程",
+        "activeStatus": 1
+      }
+    ]
+  },
+  "target": {
+    "goal": 10,
+    "current": 6,
+    "gap": 4
+  },
+  "funnel": {
+    "summaryStages": [
+      {
+        "key": "resume_screening",
+        "label": "进入「简历初筛」阶段",
+        "count": 1397
+      },
+      {
+        "key": "assigned_evaluation",
+        "label": "安排评估",
+        "count": 343
+      },
+      {
+        "key": "initial_invite",
+        "label": "进入「初面邀约」阶段",
+        "count": 90
+      },
+      {
+        "key": "interview_1",
+        "label": "进入「专业一面」阶段",
+        "count": 18
+      },
+      {
+        "key": "conduct_interview_1",
+        "label": "进行 1 面",
+        "count": 21
+      },
+      {
+        "key": "interview_2",
+        "label": "进入「专业二面」阶段",
+        "count": 9
+      },
+      {
+        "key": "hr_interview",
+        "label": "进入「HR面」阶段",
+        "count": 6
+      },
+      {
+        "key": "onboarded",
+        "label": "进入「已入职」阶段",
+        "count": 0
+      }
+    ],
+    "weeklyLabels": [
+      "03-01 – 03-01",
+      "03-02 – 03-08",
+      "03-09 – 03-15",
+      "03-16 – 03-22",
+      "03-23 – 03-29",
+      "03-30 – 04-05",
+      "04-06 – 04-07"
+    ],
+    "weeklySeries": [
+      {
+        "key": "resume_screening",
+        "label": "进入「简历初筛」阶段",
+        "counts": [
+          2,
+          23,
+          108,
+          428,
+          387,
+          382,
+          67
+        ]
+      },
+      {
+        "key": "resume_evaluation",
+        "label": "进入「简历评估」阶段",
+        "counts": [
+          0,
+          30,
+          14,
+          104,
+          96,
+          70,
+          6
+        ]
+      },
+      {
+        "key": "initial_invite",
+        "label": "进入「初面邀约」阶段",
+        "counts": [
+          0,
+          5,
+          7,
+          14,
+          36,
+          18,
+          10
+        ]
+      },
+      {
+        "key": "interview_1",
+        "label": "进入「专业一面」阶段",
+        "counts": [
+          0,
+          2,
+          2,
+          3,
+          5,
+          1,
+          5
+        ]
+      },
+      {
+        "key": "interview_2",
+        "label": "进入「专业二面」阶段",
+        "counts": [
+          0,
+          1,
+          2,
+          1,
+          4,
+          1,
+          0
+        ]
+      },
+      {
+        "key": "hr_interview",
+        "label": "进入「HR面」阶段",
+        "counts": [
+          0,
+          0,
+          0,
+          1,
+          5,
+          0,
+          0
+        ]
+      },
+      {
+        "key": "onboarded",
+        "label": "进入「已入职」阶段",
+        "counts": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ]
+  },
+  "pipelineCandidates": {
+    "interview_1": [
+      {
+        "name": "卢霄晗",
+        "talent_id": "7614094212670195978",
+        "application_id": "7614094256043903242"
+      }
+    ],
+    "interview_2": []
+  },
+  "hrInterview": {
+    "total": 25,
+    "candidates": [
+      {
+        "name": "吴泽艺",
+        "talent_id": "7620773693870623030",
+        "application_id": "7620773654850898239",
+        "status": "pending",
+        "label": "进行中",
+        "role": "HR 面进行中",
+        "date": "04-16"
+      },
+      {
+        "name": "古涛铭",
+        "talent_id": "7626372954221234495",
+        "application_id": "7626372668540127551",
+        "status": "pending",
+        "label": "进行中",
+        "role": "HR 面进行中",
+        "date": "04-19"
+      },
+      {
+        "name": "梁智韬",
+        "talent_id": "7625285614607829267",
+        "application_id": "7629994498601748762",
+        "status": "pending",
+        "label": "进行中",
+        "role": "HR 面进行中",
+        "date": "04-19"
+      },
+      {
+        "name": "张星宇",
+        "talent_id": "7584682092735645971",
+        "application_id": "7584681754524518719",
+        "status": "decline",
+        "label": "已终止",
+        "role": "已终止",
+        "date": "01-20"
+      },
+      {
+        "name": "Li Ruibin",
+        "talent_id": "7596910286994311467",
+        "application_id": "7597050550866430234",
+        "status": "decline",
+        "label": "已终止",
+        "role": "已终止",
+        "date": "01-29"
+      },
+      {
+        "name": "张雪洋",
+        "talent_id": "7596906017489996038",
+        "application_id": "7596905995000449343",
+        "status": "decline",
+        "label": "已终止",
+        "role": "已终止",
+        "date": "02-05"
+      },
+      {
+        "name": "苗静思",
+        "talent_id": "7605124900320495881",
+        "application_id": "7605124896885311771",
+        "status": "decline",
+        "label": "已终止",
+        "role": "已终止",
+        "date": "03-20"
+      },
+      {
+        "name": "张杰",
+        "talent_id": "7601899456342821129",
+        "application_id": "7601899760001730842",
+        "status": "decline",
+        "label": "已终止",
+        "role": "已终止",
+        "date": "03-23"
+      },
+      {
+        "name": "魏弘量",
+        "talent_id": "7615575380410386694",
+        "application_id": "7615617644800215346",
+        "status": "decline",
+        "label": "候选人放弃",
+        "role": "候选人放弃",
+        "date": "03-23"
+      },
+      {
+        "name": "欧聪杰",
+        "talent_id": "7621840248993417514",
+        "application_id": "7621840273866066182",
+        "status": "decline",
+        "label": "已终止",
+        "role": "已终止",
+        "date": "04-13"
+      },
+      {
+        "name": "曹铭哲",
+        "talent_id": "7548655975742556462",
+        "application_id": "7548655945272297755",
+        "status": "decline",
+        "label": "已终止",
+        "role": "已终止",
+        "date": "10-12"
+      },
+      {
+        "name": "曹越",
+        "talent_id": "7561332284869101866",
+        "application_id": "7561332365957417252",
+        "status": "decline",
+        "label": "已终止",
+        "role": "已终止",
+        "date": "10-31"
+      },
+      {
+        "name": "林友相",
+        "talent_id": "7550193432826054931",
+        "application_id": "7550193501495396671",
+        "status": "decline",
+        "label": "已终止",
+        "role": "已终止",
+        "date": "11-02"
+      },
+      {
+        "name": "柯芃丞",
+        "talent_id": "7564708736167921962",
+        "application_id": "7564708762847987987",
+        "status": "decline",
+        "label": "候选人放弃",
+        "role": "候选人放弃",
+        "date": "11-14"
+      },
+      {
+        "name": "汤沁滢",
+        "talent_id": "7566579975711148298",
+        "application_id": "7566580044291492146",
+        "status": "decline",
+        "label": "候选人放弃",
+        "role": "候选人放弃",
+        "date": "11-17"
+      },
+      {
+        "name": "黄梓峰",
+        "talent_id": "7566163786111322377",
+        "application_id": "7566163784189118730",
+        "status": "decline",
+        "label": "已终止",
+        "role": "已终止",
+        "date": "11-17"
+      },
+      {
+        "name": "宓鸿宇",
+        "talent_id": "7564307250232297737",
+        "application_id": "7573518482727340338",
+        "status": "decline",
+        "label": "已终止",
+        "role": "已终止",
+        "date": "11-26"
+      },
+      {
+        "name": "陈双瑞",
+        "talent_id": "7571350893040421174",
+        "application_id": "7571350950036883731",
+        "status": "decline",
+        "label": "已终止",
+        "role": "已终止",
+        "date": "11-29"
+      },
+      {
+        "name": "曾林藩",
+        "talent_id": "7575003734154725695",
+        "application_id": "7575003799761340735",
+        "status": "decline",
+        "label": "已终止",
+        "role": "已终止",
+        "date": "12-04"
+      },
+      {
+        "name": "苏文昊",
+        "talent_id": "7597747641795856646",
+        "application_id": "7597747675622639926",
+        "status": "reject",
+        "label": "已淘汰",
+        "role": "HR 面淘汰",
+        "date": "02-05"
+      },
+      {
+        "name": "张杰",
+        "talent_id": "7601899456342821129",
+        "application_id": "7621085664163563786",
+        "status": "reject",
+        "label": "已淘汰",
+        "role": "HR 面淘汰",
+        "date": "03-25"
+      },
+      {
+        "name": "阮傅浩",
+        "talent_id": "7618999486904338697",
+        "application_id": "7618999656626489650",
+        "status": "reject",
+        "label": "已淘汰",
+        "role": "HR 面淘汰",
+        "date": "03-25"
+      },
+      {
+        "name": "陈宇杰",
+        "talent_id": "7618484688591587593",
+        "application_id": "7618484626588403978",
+        "status": "reject",
+        "label": "已淘汰",
+        "role": "HR 面淘汰",
+        "date": "03-27"
+      },
+      {
+        "name": "王书海",
+        "talent_id": "7562787888791537959",
+        "application_id": "7562787413888108863",
+        "status": "reject",
+        "label": "已淘汰",
+        "role": "HR 面淘汰",
+        "date": "10-28"
+      },
+      {
+        "name": "徐健之",
+        "talent_id": "7568331532134762771",
+        "application_id": "7568331530713696518",
+        "status": "reject",
+        "label": "已淘汰",
+        "role": "HR 面淘汰",
+        "date": "11-19"
+      }
+    ]
+  },
+  "links": {
+    "hireReport": "https://deepwisdom.feishu.cn/hire/reports/7573581010957828099/widgets/7573581011003378631"
+  },
+  "runtime": {
+    "autoSync": "每 5 分钟",
+    "authorityMode": "browser-report"
+  },
+  "headcount": {
+    "queries": [
+      "全栈",
+      "root"
+    ],
+    "matchedNames": [
+      "宓鸿宇",
+      "张星宇",
+      "曹越",
+      "曹铭哲",
+      "李睿彬",
+      "陈双瑞"
+    ]
+  }
+}
