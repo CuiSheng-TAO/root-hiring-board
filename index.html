@@ -1057,7 +1057,7 @@
 
   .weekly-card {
     overflow-x: auto;
-    margin-top: 14px;
+    margin-top: 10px;
   }
 
   .weekly-table {
@@ -1133,7 +1133,11 @@
   }
 
   .fold-card {
-    margin-top: 16px;
+    margin-top: 14px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
   }
 
   .fold-summary {
@@ -1143,14 +1147,20 @@
     align-items: center;
     justify-content: space-between;
     gap: 16px;
+    padding: 6px 0 2px;
+    border-bottom: 1px dashed rgba(189, 170, 134, 0.44);
   }
 
   .fold-summary::-webkit-details-marker { display: none; }
 
+  [data-theme="dark"] .fold-summary {
+    border-bottom-color: rgba(189, 170, 134, 0.18);
+  }
+
   .fold-copy {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
     min-width: 0;
   }
 
@@ -1163,26 +1173,30 @@
   }
 
   .fold-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--ink);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-soft);
   }
 
   .fold-desc {
-    font-size: 11px;
-    line-height: 1.6;
+    font-size: 10px;
+    line-height: 1.55;
     color: var(--ink-dim);
   }
 
   .fold-arrow {
-    font-size: 11px;
-    color: var(--accent);
+    font-size: 10px;
+    color: var(--ink-dim);
     font-family: 'IBM Plex Mono', monospace;
     flex-shrink: 0;
   }
 
   .fold-card[open] .fold-arrow {
-    color: var(--ink-dim);
+    color: var(--accent);
+  }
+
+  .fold-card[open] .fold-summary {
+    border-bottom-color: transparent;
   }
 
   .compact-formula .formula-inline {
@@ -1205,6 +1219,16 @@
     margin-top: 10px;
     font-size: 11px;
     color: var(--ink-dim);
+  }
+
+  .sync-list {
+    margin-top: 2px;
+    padding-top: 4px;
+  }
+
+  .sync-list .info-row {
+    font-size: 11px;
+    line-height: 1.5;
   }
 
   /* ─── Entrance ─── */

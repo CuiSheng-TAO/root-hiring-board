@@ -362,17 +362,13 @@
 
   function renderRefreshCard(data) {
     return (
-      '<div class="card info-card">' +
-      '<div class="card-kicker">发布链路</div>' +
-      '<div class="mini-note">刷新按钮只重新拉取最新数据，不再靠一次部署去制造“实时更新”的错觉。</div>' +
-      '<div class="info-list compact">' +
+      '<div class="info-list compact sync-list">' +
       '<div class="info-row"><span class="info-key">自动同步</span><span class="info-value">' +
       escapeHtml(data.runtime.autoSync) +
       "</span></div>" +
       '<div class="info-row"><span class="info-key">当前数据</span><span class="info-value">' +
       escapeHtml(data.generatedAt) +
       "</span></div>" +
-      "</div>" +
       "</div>"
     );
   }
