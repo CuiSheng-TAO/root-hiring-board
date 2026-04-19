@@ -653,7 +653,12 @@ def derive_hr_candidates(
     applications: list[dict[str, Any]],
     stage_catalog: dict[str, dict[str, Any]],
     talent_names: dict[str, str],
+    start_date: str | None = None,
+    end_date: str | None = None,
+    tz_name: str = DEFAULT_TIMEZONE,
 ) -> dict[str, Any]:
+    start_ms = to_epoch_ms(start_date, tz_name, False) if start_date else None
+    end_ms = to_epoch_ms(end_date, tz_name, True) if end_date else None
     candidates = []
     for application in applications:
         reached = reached_stage_keys(application, stage_catalog)
@@ -673,6 +678,8 @@ def derive_hr_candidates(
             current_key,
         )
         hr_enter_time = find_stage_enter_time(application, stage_catalog, "hr_interview")
+        if start_ms is not None and end_ms is not None and not in_window(hr_enter_time, start_ms, end_ms):
+            continue
         candidates.append(
             {
                 "name": name,
@@ -1180,7 +1187,14 @@ def build_dashboard_payload(config: dict[str, Any]) -> dict[str, Any]:
     talent_names = fetch_talent_names(hr_talent_ids + pipeline_talent_ids)
 
     pipeline_candidates = derive_pipeline_candidates(applications, stage_catalog, talent_names)
-    hr_candidates = derive_hr_candidates(applications, stage_catalog, talent_names)
+    hr_candidates = derive_hr_candidates(
+        applications,
+        stage_catalog,
+        talent_names,
+        config["operationWindow"]["start"],
+        config["operationWindow"]["end"],
+        timezone_name,
+    )
 
     return {
         "generatedAt": datetime.now(ZoneInfo(timezone_name)).strftime("%Y-%m-%d %H:%M"),

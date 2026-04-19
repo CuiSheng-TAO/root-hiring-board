@@ -162,6 +162,10 @@ class ReportAuthorityMappingTests(unittest.TestCase):
 
 class DeriveHrCandidatesTests(unittest.TestCase):
     def test_maps_statuses_from_stage_and_termination(self) -> None:
+        tz = ZoneInfo("Asia/Shanghai")
+        in_window_hr = str(int(datetime(2026, 3, 31, 9, 0, tzinfo=tz).timestamp() * 1000))
+        old_hr = str(int(datetime(2025, 1, 1, 9, 0, tzinfo=tz).timestamp() * 1000))
+
         stage_catalog = {
             "hr": {"key": "hr_interview"},
             "offer": {"key": "offer"},
@@ -176,7 +180,7 @@ class DeriveHrCandidatesTests(unittest.TestCase):
                 "termination_type": 0,
                 "stage": {"id": "offer"},
                 "stage_time_list": [
-                    {"stage_id": "hr", "enter_time": "1774238400000"},
+                    {"stage_id": "hr", "enter_time": in_window_hr},
                     {"stage_id": "offer", "enter_time": "1774324800000"},
                 ],
             },
@@ -187,7 +191,7 @@ class DeriveHrCandidatesTests(unittest.TestCase):
                 "termination_type": 0,
                 "stage": {"id": "pending"},
                 "stage_time_list": [
-                    {"stage_id": "hr", "enter_time": "1774238400000"},
+                    {"stage_id": "hr", "enter_time": in_window_hr},
                     {"stage_id": "pending", "enter_time": "1774411200000"},
                 ],
             },
@@ -198,7 +202,7 @@ class DeriveHrCandidatesTests(unittest.TestCase):
                 "termination_type": 22,
                 "stage": {"id": "hr"},
                 "stage_time_list": [
-                    {"stage_id": "hr", "enter_time": "1774238400000"},
+                    {"stage_id": "hr", "enter_time": in_window_hr},
                 ],
             },
             {
@@ -208,7 +212,17 @@ class DeriveHrCandidatesTests(unittest.TestCase):
                 "termination_type": 1,
                 "stage": {"id": "hr"},
                 "stage_time_list": [
-                    {"stage_id": "hr", "enter_time": "1774238400000"},
+                    {"stage_id": "hr", "enter_time": in_window_hr},
+                ],
+            },
+            {
+                "id": "app-old",
+                "talent_id": "tal-5",
+                "active_status": 2,
+                "termination_type": 1,
+                "stage": {"id": "hr"},
+                "stage_time_list": [
+                    {"stage_id": "hr", "enter_time": old_hr},
                 ],
             },
         ]
@@ -217,9 +231,16 @@ class DeriveHrCandidatesTests(unittest.TestCase):
             "tal-2": "苗静思",
             "tal-3": "阮傅浩",
             "tal-4": "魏弘量",
+            "tal-5": "旧候选人",
         }
 
-        hr = derive_hr_candidates(applications, stage_catalog, talent_names)
+        hr = derive_hr_candidates(
+            applications,
+            stage_catalog,
+            talent_names,
+            "2026-03-01",
+            "2026-04-07",
+        )
 
         self.assertEqual(4, hr["total"])
         labels_by_name = {item["name"]: item["label"] for item in hr["candidates"]}
@@ -227,6 +248,7 @@ class DeriveHrCandidatesTests(unittest.TestCase):
         self.assertEqual("待入职", labels_by_name["苗静思"])
         self.assertEqual("候选人放弃", labels_by_name["阮傅浩"])
         self.assertEqual("已淘汰", labels_by_name["魏弘量"])
+        self.assertNotIn("旧候选人", labels_by_name)
 
 
 if __name__ == "__main__":

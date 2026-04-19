@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-19 18:21",
+  "generatedAt": "2026-04-19 18:32",
   "reportSource": {
     "widgetUrl": "https://deepwisdom.feishu.cn/hire/reports/7573581010957828099/widgets/7573581011003378631",
     "operationWindow": {
@@ -209,62 +209,8 @@
     "interview_2": []
   },
   "hrInterview": {
-    "total": 25,
+    "total": 6,
     "candidates": [
-      {
-        "name": "吴泽艺",
-        "talent_id": "7620773693870623030",
-        "application_id": "7620773654850898239",
-        "status": "pending",
-        "label": "进行中",
-        "role": "HR 面进行中",
-        "date": "04-16"
-      },
-      {
-        "name": "古涛铭",
-        "talent_id": "7626372954221234495",
-        "application_id": "7626372668540127551",
-        "status": "pending",
-        "label": "进行中",
-        "role": "HR 面进行中",
-        "date": "04-19"
-      },
-      {
-        "name": "梁智韬",
-        "talent_id": "7625285614607829267",
-        "application_id": "7629994498601748762",
-        "status": "pending",
-        "label": "进行中",
-        "role": "HR 面进行中",
-        "date": "04-19"
-      },
-      {
-        "name": "张星宇",
-        "talent_id": "7584682092735645971",
-        "application_id": "7584681754524518719",
-        "status": "decline",
-        "label": "已终止",
-        "role": "已终止",
-        "date": "01-20"
-      },
-      {
-        "name": "Li Ruibin",
-        "talent_id": "7596910286994311467",
-        "application_id": "7597050550866430234",
-        "status": "decline",
-        "label": "已终止",
-        "role": "已终止",
-        "date": "01-29"
-      },
-      {
-        "name": "张雪洋",
-        "talent_id": "7596906017489996038",
-        "application_id": "7596905995000449343",
-        "status": "decline",
-        "label": "已终止",
-        "role": "已终止",
-        "date": "02-05"
-      },
       {
         "name": "苗静思",
         "talent_id": "7605124900320495881",
@@ -293,105 +239,6 @@
         "date": "03-23"
       },
       {
-        "name": "欧聪杰",
-        "talent_id": "7621840248993417514",
-        "application_id": "7621840273866066182",
-        "status": "decline",
-        "label": "已终止",
-        "role": "已终止",
-        "date": "04-13"
-      },
-      {
-        "name": "曹铭哲",
-        "talent_id": "7548655975742556462",
-        "application_id": "7548655945272297755",
-        "status": "decline",
-        "label": "已终止",
-        "role": "已终止",
-        "date": "10-12"
-      },
-      {
-        "name": "曹越",
-        "talent_id": "7561332284869101866",
-        "application_id": "7561332365957417252",
-        "status": "decline",
-        "label": "已终止",
-        "role": "已终止",
-        "date": "10-31"
-      },
-      {
-        "name": "林友相",
-        "talent_id": "7550193432826054931",
-        "application_id": "7550193501495396671",
-        "status": "decline",
-        "label": "已终止",
-        "role": "已终止",
-        "date": "11-02"
-      },
-      {
-        "name": "柯芃丞",
-        "talent_id": "7564708736167921962",
-        "application_id": "7564708762847987987",
-        "status": "decline",
-        "label": "候选人放弃",
-        "role": "候选人放弃",
-        "date": "11-14"
-      },
-      {
-        "name": "汤沁滢",
-        "talent_id": "7566579975711148298",
-        "application_id": "7566580044291492146",
-        "status": "decline",
-        "label": "候选人放弃",
-        "role": "候选人放弃",
-        "date": "11-17"
-      },
-      {
-        "name": "黄梓峰",
-        "talent_id": "7566163786111322377",
-        "application_id": "7566163784189118730",
-        "status": "decline",
-        "label": "已终止",
-        "role": "已终止",
-        "date": "11-17"
-      },
-      {
-        "name": "宓鸿宇",
-        "talent_id": "7564307250232297737",
-        "application_id": "7573518482727340338",
-        "status": "decline",
-        "label": "已终止",
-        "role": "已终止",
-        "date": "11-26"
-      },
-      {
-        "name": "陈双瑞",
-        "talent_id": "7571350893040421174",
-        "application_id": "7571350950036883731",
-        "status": "decline",
-        "label": "已终止",
-        "role": "已终止",
-        "date": "11-29"
-      },
-      {
-        "name": "曾林藩",
-        "talent_id": "7575003734154725695",
-        "application_id": "7575003799761340735",
-        "status": "decline",
-        "label": "已终止",
-        "role": "已终止",
-        "date": "12-04"
-      },
-      {
-        "name": "苏文昊",
-        "talent_id": "7597747641795856646",
-        "application_id": "7597747675622639926",
-        "status": "reject",
-        "label": "已淘汰",
-        "role": "HR 面淘汰",
-        "date": "02-05"
-      },
-      {
         "name": "张杰",
         "talent_id": "7601899456342821129",
         "application_id": "7621085664163563786",
@@ -417,24 +264,6 @@
         "label": "已淘汰",
         "role": "HR 面淘汰",
         "date": "03-27"
-      },
-      {
-        "name": "王书海",
-        "talent_id": "7562787888791537959",
-        "application_id": "7562787413888108863",
-        "status": "reject",
-        "label": "已淘汰",
-        "role": "HR 面淘汰",
-        "date": "10-28"
-      },
-      {
-        "name": "徐健之",
-        "talent_id": "7568331532134762771",
-        "application_id": "7568331530713696518",
-        "status": "reject",
-        "label": "已淘汰",
-        "role": "HR 面淘汰",
-        "date": "11-19"
       }
     ]
   },
