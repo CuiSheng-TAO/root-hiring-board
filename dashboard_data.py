@@ -613,11 +613,52 @@ def summarize_stage_entries(
     }
 
 
+def build_daily_stage_entries(
+    applications: list[dict[str, Any]],
+    stage_catalog: dict[str, dict[str, Any]],
+    tz_name: str = DEFAULT_TIMEZONE,
+) -> dict[str, dict[str, int]]:
+    daily: dict[str, Counter[str]] = {}
+
+    def bump(day_key: str, stage_key: str) -> None:
+        bucket = daily.setdefault(day_key, Counter())
+        bucket[stage_key] += 1
+
+    for application in applications:
+        stage_time_list = application.get("stage_time_list", [])
+        seen_screening = False
+        for item in stage_time_list:
+            stage_id = item.get("stage_id")
+            meta = stage_catalog.get(stage_id)
+            if not meta or not item.get("enter_time"):
+                continue
+            stage_key = meta["key"]
+            day_key = to_local_date_key(int(item["enter_time"]), tz_name)
+            bump(day_key, stage_key)
+            if stage_key == "resume_screening":
+                seen_screening = True
+
+        if not seen_screening and application.get("create_time"):
+            bump(
+                to_local_date_key(int(application["create_time"]), tz_name),
+                "resume_screening",
+            )
+
+    return {
+        day_key: {stage_key: counts.get(stage_key, 0) for stage_key in STAGE_ORDER}
+        for day_key, counts in sorted(daily.items())
+    }
+
+
 def resolve_bucket(timestamp_ms: int, weekly_ranges: list[dict[str, Any]]) -> int | None:
     for index, bucket in enumerate(weekly_ranges):
         if bucket["start_ms"] <= timestamp_ms <= bucket["end_ms"]:
             return index
     return None
+
+
+def to_local_date_key(timestamp_ms: int, tz_name: str = DEFAULT_TIMEZONE) -> str:
+    return datetime.fromtimestamp(timestamp_ms / 1000, tz=ZoneInfo(tz_name)).strftime("%Y-%m-%d")
 
 
 def derive_pipeline_candidates(
@@ -643,8 +684,16 @@ def derive_pipeline_candidates(
         current_stage_id = application.get("stage", {}).get("id")
         current_key = stage_catalog.get(current_stage_id, {}).get("key")
         if current_key == "interview_2" or "interview_2" in reached:
+            payload["dateIso"] = format_iso_stage_date(
+                find_stage_enter_time(application, stage_catalog, "interview_2"),
+                stage_catalog,
+            )
             candidates["interview_2"].append(payload)
         elif current_key == "interview_1" or "interview_1" in reached:
+            payload["dateIso"] = format_iso_stage_date(
+                find_stage_enter_time(application, stage_catalog, "interview_1"),
+                stage_catalog,
+            )
             candidates["interview_1"].append(payload)
     return candidates
 
@@ -689,6 +738,7 @@ def derive_hr_candidates(
                 "label": label,
                 "role": role,
                 "date": format_mm_dd(hr_enter_time),
+                "dateIso": format_iso_stage_date(hr_enter_time, stage_catalog),
             }
         )
 
@@ -756,6 +806,13 @@ def format_mm_dd(timestamp_ms: int | None, tz_name: str = DEFAULT_TIMEZONE) -> s
         return ""
     tz = ZoneInfo(tz_name)
     return datetime.fromtimestamp(timestamp_ms / 1000, tz=tz).strftime("%m-%d")
+
+
+def format_iso_stage_date(timestamp_ms: int | None, stage_catalog: dict[str, dict[str, Any]] | None = None, tz_name: str = DEFAULT_TIMEZONE) -> str:
+    if not timestamp_ms:
+        return ""
+    tz = ZoneInfo(tz_name)
+    return datetime.fromtimestamp(timestamp_ms / 1000, tz=tz).strftime("%Y-%m-%d")
 
 
 class BrowserReportBridge:
@@ -1085,7 +1142,8 @@ def build_special_series_from_report(
     tz_name: str = DEFAULT_TIMEZONE,
 ) -> tuple[list[str], list[dict[str, Any]]]:
     rows = report_data.get("rows", [])
-    labels = [item["label"] for item in build_week_ranges(start_date, end_date, tz_name)]
+    week_ranges = build_week_ranges(start_date, end_date, tz_name)
+    labels = [item["label"] for item in week_ranges]
     key_map = {
         "resume_screening": "stageName_7483922292361365798",
         "resume_evaluation": "stageName_7483922292361382182",
@@ -1124,6 +1182,12 @@ def build_dashboard_payload(config: dict[str, Any]) -> dict[str, Any]:
     stage_summary = summarize_stage_entries(
         applications,
         stage_catalog,
+        config["operationWindow"]["start"],
+        config["operationWindow"]["end"],
+        timezone_name,
+    )
+    daily_stage_entries = build_daily_stage_entries(applications, stage_catalog, timezone_name)
+    week_ranges = build_week_ranges(
         config["operationWindow"]["start"],
         config["operationWindow"]["end"],
         timezone_name,
@@ -1220,7 +1284,12 @@ def build_dashboard_payload(config: dict[str, Any]) -> dict[str, Any]:
         "funnel": {
             "summaryStages": summary_counts,
             "weeklyLabels": weekly_labels,
+            "weeklyRanges": [
+                {"label": item["label"], "start": item["start"], "end": item["end"]}
+                for item in week_ranges
+            ],
             "weeklySeries": weekly_series,
+            "dailyStageEntries": daily_stage_entries,
         },
         "pipelineCandidates": pipeline_candidates,
         "hrInterview": hr_candidates,

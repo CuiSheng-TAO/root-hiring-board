@@ -3,6 +3,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from dashboard_data import (
+    build_daily_stage_entries,
     build_special_series_from_report,
     build_summary_from_report,
     build_target_summary,
@@ -94,6 +95,29 @@ class SummarizeStageEntriesTests(unittest.TestCase):
         self.assertEqual(2, summary["totals"]["resume_screening"])
         self.assertEqual(2, summary["totals"]["resume_evaluation"])
         self.assertEqual(0, summary["totals"]["initial_invite"])
+
+    def test_builds_daily_stage_entries(self) -> None:
+        tz = ZoneInfo("Asia/Shanghai")
+        march_1 = str(int(datetime(2026, 3, 1, 9, 0, tzinfo=tz).timestamp() * 1000))
+        march_3 = str(int(datetime(2026, 3, 3, 9, 0, tzinfo=tz).timestamp() * 1000))
+        stage_catalog = {
+            "screen": {"key": "resume_screening"},
+            "eval": {"key": "resume_evaluation"},
+        }
+        applications = [
+            {
+                "create_time": march_1,
+                "stage_time_list": [
+                    {"stage_id": "screen", "enter_time": march_1},
+                    {"stage_id": "eval", "enter_time": march_3},
+                ],
+            }
+        ]
+
+        daily = build_daily_stage_entries(applications, stage_catalog)
+
+        self.assertEqual(1, daily["2026-03-01"]["resume_screening"])
+        self.assertEqual(1, daily["2026-03-03"]["resume_evaluation"])
 
 
 class BuildTargetSummaryTests(unittest.TestCase):
