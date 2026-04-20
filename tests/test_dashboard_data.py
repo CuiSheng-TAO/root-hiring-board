@@ -12,6 +12,7 @@ from dashboard_data import (
     build_week_ranges,
     derive_hr_candidates,
     filter_jobs_by_title,
+    parse_devtools_active_port,
     summarize_authoritative_range,
     summarize_stage_entries,
 )
@@ -53,6 +54,19 @@ class BuildWeekRangesTests(unittest.TestCase):
                 "04-06 – 04-07",
             ],
             labels,
+        )
+
+
+class ParseDevToolsActivePortTests(unittest.TestCase):
+    def test_parses_port_and_websocket_path(self) -> None:
+        port, ws_path = parse_devtools_active_port(
+            "9222\n/devtools/browser/758b8b09-4d46-48ac-bc7e-6ca90c517d94\n"
+        )
+
+        self.assertEqual(9222, port)
+        self.assertEqual(
+            "/devtools/browser/758b8b09-4d46-48ac-bc7e-6ca90c517d94",
+            ws_path,
         )
 
 

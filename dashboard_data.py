@@ -1,16 +1,20 @@
 from __future__ import annotations
 
+import base64
 import concurrent.futures
+import hashlib
 import json
+import secrets
+import socket
+import struct
 import subprocess
 import time as time_module
 from collections import Counter
 from datetime import date, datetime, time, timedelta
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
-
-import requests
 
 
 DEFAULT_TIMEZONE = "Asia/Shanghai"
@@ -70,7 +74,6 @@ HR_STATUS_ORDER = {
     "reject": 4,
 }
 
-CDP_BASE_URL = "http://localhost:3456"
 OVERVIEW_WIDGET_KEY = "7573581011003378631"
 SPECIAL_WIDGET_KEY = "7621814275148876744"
 OVERVIEW_MEASURES = [
@@ -938,9 +941,281 @@ def format_iso_stage_date(timestamp_ms: int | None, stage_catalog: dict[str, dic
     return datetime.fromtimestamp(timestamp_ms / 1000, tz=tz).strftime("%Y-%m-%d")
 
 
+def parse_devtools_active_port(content: str) -> tuple[int, str]:
+    lines = [line.strip() for line in content.splitlines() if line.strip()]
+    if len(lines) < 2:
+        raise ValueError("DevToolsActivePort 内容不完整")
+
+    port = int(lines[0])
+    ws_path = lines[1]
+    if not ws_path.startswith("/"):
+        ws_path = f"/{ws_path}"
+    return port, ws_path
+
+
+class ChromeDevToolsClient:
+    def __init__(self) -> None:
+        self._socket: socket.socket | None = None
+        self._recv_buffer = b""
+        self._next_id = 0
+        self._sessions: dict[str, str] = {}
+
+    def close(self) -> None:
+        if self._socket is None:
+            return
+        try:
+            self._socket.close()
+        finally:
+            self._socket = None
+            self._recv_buffer = b""
+            self._sessions.clear()
+
+    def get_targets(self) -> list[dict[str, Any]]:
+        response = self.send_command("Target.getTargets")
+        return response.get("result", {}).get("targetInfos", [])
+
+    def create_target(self, url: str, background: bool = True) -> str:
+        response = self.send_command(
+            "Target.createTarget",
+            {"url": url, "background": background},
+        )
+        return response["result"]["targetId"]
+
+    def ensure_session(self, target_id: str) -> str:
+        if target_id in self._sessions:
+            return self._sessions[target_id]
+
+        response = self.send_command(
+            "Target.attachToTarget",
+            {"targetId": target_id, "flatten": True},
+        )
+        session_id = response["result"]["sessionId"]
+        self._sessions[target_id] = session_id
+        return session_id
+
+    def evaluate(
+        self,
+        session_id: str,
+        expression: str,
+        await_promise: bool = True,
+        return_by_value: bool = True,
+    ) -> dict[str, Any]:
+        return self.send_command(
+            "Runtime.evaluate",
+            {
+                "expression": expression,
+                "awaitPromise": await_promise,
+                "returnByValue": return_by_value,
+            },
+            session_id=session_id,
+        )
+
+    def send_command(
+        self,
+        method: str,
+        params: dict[str, Any] | None = None,
+        session_id: str | None = None,
+        timeout: float = 30.0,
+    ) -> dict[str, Any]:
+        self._ensure_connected()
+
+        self._next_id += 1
+        request_id = self._next_id
+        payload: dict[str, Any] = {
+            "id": request_id,
+            "method": method,
+            "params": params or {},
+        }
+        if session_id:
+            payload["sessionId"] = session_id
+        self._send_frame(json.dumps(payload).encode("utf-8"))
+
+        deadline = time_module.monotonic() + timeout
+        while time_module.monotonic() < deadline:
+            remaining = max(deadline - time_module.monotonic(), 0.1)
+            message = self._read_message(remaining)
+            if message.get("id") == request_id:
+                if message.get("error"):
+                    raise RuntimeError(f"CDP 命令失败 {method}: {message['error']}")
+                return message
+            self._handle_event(message)
+
+        raise TimeoutError(f"CDP 命令超时: {method}")
+
+    def _handle_event(self, message: dict[str, Any]) -> None:
+        if message.get("method") == "Target.attachedToTarget":
+            params = message.get("params", {})
+            target_info = params.get("targetInfo", {})
+            target_id = target_info.get("targetId")
+            session_id = params.get("sessionId")
+            if target_id and session_id:
+                self._sessions[target_id] = session_id
+        elif message.get("method") == "Target.detachedFromTarget":
+            params = message.get("params", {})
+            detached_session = params.get("sessionId")
+            stale_targets = [
+                target_id
+                for target_id, session_id in self._sessions.items()
+                if session_id == detached_session
+            ]
+            for target_id in stale_targets:
+                self._sessions.pop(target_id, None)
+
+    def _ensure_connected(self) -> None:
+        if self._socket is not None:
+            return
+
+        port, ws_path = self._discover_browser_endpoint()
+        websocket_key = base64.b64encode(secrets.token_bytes(16)).decode("ascii")
+        accept_key = base64.b64encode(
+            hashlib.sha1(
+                (websocket_key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").encode(
+                    "ascii"
+                )
+            ).digest()
+        ).decode("ascii")
+
+        sock = socket.create_connection(("127.0.0.1", port), timeout=10)
+        request = (
+            f"GET {ws_path} HTTP/1.1\r\n"
+            f"Host: 127.0.0.1:{port}\r\n"
+            "Upgrade: websocket\r\n"
+            "Connection: Upgrade\r\n"
+            f"Sec-WebSocket-Key: {websocket_key}\r\n"
+            "Sec-WebSocket-Version: 13\r\n"
+            "\r\n"
+        ).encode("ascii")
+        sock.sendall(request)
+
+        response = b""
+        while b"\r\n\r\n" not in response:
+            chunk = sock.recv(4096)
+            if not chunk:
+                sock.close()
+                raise RuntimeError("Chrome 调试连接在握手阶段被关闭")
+            response += chunk
+
+        header_block, self._recv_buffer = response.split(b"\r\n\r\n", 1)
+        header_text = header_block.decode("utf-8", errors="replace")
+        status_line = header_text.splitlines()[0]
+        if "101" not in status_line:
+            sock.close()
+            raise RuntimeError(f"Chrome 调试握手失败: {status_line}")
+        if accept_key not in header_text:
+            sock.close()
+            raise RuntimeError("Chrome 调试握手返回的校验值不匹配")
+
+        self._socket = sock
+
+    def _discover_browser_endpoint(self) -> tuple[int, str]:
+        possible_paths = [
+            Path.home()
+            / "Library/Application Support/Google/Chrome/DevToolsActivePort",
+            Path.home()
+            / "Library/Application Support/Google/Chrome Canary/DevToolsActivePort",
+            Path.home() / "Library/Application Support/Chromium/DevToolsActivePort",
+        ]
+        for path in possible_paths:
+            if not path.exists():
+                continue
+            try:
+                return parse_devtools_active_port(path.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                continue
+
+        raise RuntimeError(
+            "未找到 Chrome DevToolsActivePort。请先在 chrome://inspect/#remote-debugging 中启用当前浏览器实例的远程调试。"
+        )
+
+    def _read_message(self, timeout: float) -> dict[str, Any]:
+        while True:
+            opcode, payload = self._read_frame(timeout)
+            if opcode == 0x1:
+                return json.loads(payload.decode("utf-8"))
+            if opcode == 0x8:
+                self.close()
+                raise RuntimeError("Chrome 调试连接已关闭")
+            if opcode == 0x9:
+                self._send_frame(payload, opcode=0xA)
+                continue
+            if opcode == 0xA:
+                continue
+
+    def _read_frame(self, timeout: float) -> tuple[int, bytes]:
+        first = self._recv_exact(1, timeout)
+        second = self._recv_exact(1, timeout)
+
+        opcode = first[0] & 0x0F
+        masked = (second[0] & 0x80) != 0
+        length = second[0] & 0x7F
+        if length == 126:
+            length = struct.unpack("!H", self._recv_exact(2, timeout))[0]
+        elif length == 127:
+            length = struct.unpack("!Q", self._recv_exact(8, timeout))[0]
+
+        mask_key = self._recv_exact(4, timeout) if masked else b""
+        payload = self._recv_exact(length, timeout)
+        if masked:
+            payload = bytes(
+                value ^ mask_key[index % 4] for index, value in enumerate(payload)
+            )
+        return opcode, payload
+
+    def _recv_exact(self, size: int, timeout: float) -> bytes:
+        if self._socket is None:
+            raise RuntimeError("Chrome 调试连接尚未建立")
+
+        chunks = []
+        remaining = size
+        if self._recv_buffer:
+            take = self._recv_buffer[:remaining]
+            chunks.append(take)
+            self._recv_buffer = self._recv_buffer[remaining:]
+            remaining -= len(take)
+
+        self._socket.settimeout(timeout)
+        try:
+            while remaining > 0:
+                chunk = self._socket.recv(remaining)
+                if not chunk:
+                    raise RuntimeError("Chrome 调试连接已断开")
+                chunks.append(chunk)
+                remaining -= len(chunk)
+        finally:
+            self._socket.settimeout(None)
+
+        return b"".join(chunks)
+
+    def _send_frame(self, payload: bytes, opcode: int = 0x1) -> None:
+        if self._socket is None:
+            raise RuntimeError("Chrome 调试连接尚未建立")
+
+        mask_key = secrets.token_bytes(4)
+        masked_payload = bytes(
+            value ^ mask_key[index % 4] for index, value in enumerate(payload)
+        )
+
+        header = bytearray([0x80 | opcode])
+        length = len(masked_payload)
+        if length <= 125:
+            header.append(0x80 | length)
+        elif length <= 0xFFFF:
+            header.append(0x80 | 126)
+            header.extend(struct.pack("!H", length))
+        else:
+            header.append(0x80 | 127)
+            header.extend(struct.pack("!Q", length))
+
+        self._socket.sendall(bytes(header) + mask_key + masked_payload)
+
+
 class BrowserReportBridge:
     def __init__(self, report_url: str) -> None:
         self.report_url = report_url
+        self._cdp = ChromeDevToolsClient()
+
+    def close(self) -> None:
+        self._cdp.close()
 
     def fetch_authoritative_data(
         self,
@@ -1051,39 +1326,64 @@ class BrowserReportBridge:
         return daily
 
     def _ensure_report_target(self) -> str:
-        targets = requests.get(f"{CDP_BASE_URL}/targets", timeout=10).json()
+        targets = self._cdp.get_targets()
         for target in targets:
             if target.get("url") == self.report_url:
+                self._wait_for_target_ready(target["targetId"])
                 return target["targetId"]
-        response = requests.get(
-            f"{CDP_BASE_URL}/new",
-            params={"url": self.report_url},
-            timeout=10,
-        ).json()
-        return response["targetId"]
+        target_id = self._cdp.create_target(self.report_url, background=True)
+        self._wait_for_target_ready(target_id)
+        return target_id
 
     def _widget_fetch(self, target_id: str, widget_type: str, body: dict[str, Any]) -> dict[str, Any]:
+        session_id = self._cdp.ensure_session(target_id)
+        report_origin = urlparse(self.report_url)._replace(path="", params="", query="", fragment="").geturl().rstrip("/")
         js = f"""
 (async () => {{
-  const res = await fetch('/atsx/api/report/selfhelp/widget/data?type={widget_type}', {{
+  const res = await fetch('{report_origin}/atsx/api/report/selfhelp/widget/data?type={widget_type}', {{
     method: 'POST',
     credentials: 'include',
     headers: {{'Content-Type': 'application/json'}},
     body: {json.dumps(json.dumps(body), ensure_ascii=False)}
   }});
-  return await res.json();
+  return JSON.stringify(await res.json());
 }})()
 """
-        payload = requests.post(
-            f"{CDP_BASE_URL}/eval",
-            params={"target": target_id},
-            data=js,
-            timeout=30,
-        ).json()
-        result = payload.get("value")
+        payload = self._cdp.evaluate(session_id, js)
+        result = payload.get("result", {}).get("result", {}).get("value")
+        if payload.get("result", {}).get("exceptionDetails"):
+            raise RuntimeError(
+                f"Browser widget fetch failed for {widget_type}: {payload['result']['exceptionDetails']}"
+            )
+        if isinstance(result, str):
+            result = json.loads(result)
         if not isinstance(result, dict) or not result.get("success"):
             raise RuntimeError(f"Browser widget fetch failed for {widget_type}: {result}")
         return result["data"]
+
+    def _wait_for_target_ready(self, target_id: str, timeout: float = 30.0) -> None:
+        session_id = self._cdp.ensure_session(target_id)
+        deadline = time_module.monotonic() + timeout
+        while time_module.monotonic() < deadline:
+            try:
+                payload = self._cdp.evaluate(
+                    session_id,
+                    "JSON.stringify({readyState: document.readyState, href: location.href})",
+                )
+                result = payload.get("result", {}).get("result", {}).get("value")
+                state = json.loads(result) if isinstance(result, str) else {}
+                if (
+                    isinstance(state, dict)
+                    and state.get("readyState") == "complete"
+                    and isinstance(state.get("href"), str)
+                    and state["href"].startswith(self.report_url)
+                ):
+                    return
+            except Exception:
+                pass
+            time_module.sleep(0.5)
+
+        raise TimeoutError(f"报表页面加载超时: {self.report_url}")
 
 
 def run_lark_json(*args: str, max_attempts: int = 5) -> dict[str, Any]:
@@ -1129,8 +1429,8 @@ def fetch_job_processes() -> list[dict[str, Any]]:
 
 
 def fetch_application_ids(job_ids: list[str]) -> list[str]:
-    ids: list[str] = []
-    for job_id in job_ids:
+    def fetch_job_application_ids(job_id: str) -> list[str]:
+        job_ids_for_one_role: list[str] = []
         page_token = ""
         while True:
             params = {"job_id": job_id, "page_size": "200"}
@@ -1145,16 +1445,27 @@ def fetch_application_ids(job_ids: list[str]) -> list[str]:
                 "--params",
                 json.dumps(params, ensure_ascii=False),
             )
-            ids.extend(payload.get("data", {}).get("items", []))
+            job_ids_for_one_role.extend(payload.get("data", {}).get("items", []))
             if not payload.get("data", {}).get("has_more"):
                 break
             page_token = payload.get("data", {}).get("page_token", "")
-    return ids
+        return job_ids_for_one_role
+
+    if len(job_ids) <= 1:
+        return fetch_job_application_ids(job_ids[0]) if job_ids else []
+
+    collected_ids: list[str] = []
+    with concurrent.futures.ThreadPoolExecutor(
+        max_workers=min(len(job_ids), 4)
+    ) as executor:
+        for ids_for_job in executor.map(fetch_job_application_ids, job_ids):
+            collected_ids.extend(ids_for_job)
+    return collected_ids
 
 
 def fetch_application_details(
     application_ids: list[str],
-    max_workers: int = 6,
+    max_workers: int = 18,
 ) -> list[dict[str, Any]]:
     def fetch_one(app_id: str) -> dict[str, Any] | None:
         payload = run_lark_json(
@@ -1200,7 +1511,7 @@ def fetch_application_details(
 
 def fetch_talent_names(
     talent_ids: list[str],
-    max_workers: int = 4,
+    max_workers: int = 12,
 ) -> dict[str, str]:
     unique_ids = sorted({talent_id for talent_id in talent_ids if talent_id})
 
@@ -1381,33 +1692,36 @@ def build_dashboard_payload(config: dict[str, Any]) -> dict[str, Any]:
 
     try:
         bridge = BrowserReportBridge(config["reportSource"]["widgetUrl"])
-        authority = bridge.fetch_authoritative_data(
-            [job["id"] for job in matched_jobs],
-            config["operationWindow"],
-            process_ids or ["7483922292361464102"],
-        )
-        summary_counts = build_summary_from_report(authority["overview"])
-        weekly_labels, weekly_series = build_special_series_from_report(
-            authority["special"],
-            config["operationWindow"]["start"],
-            config["operationWindow"]["end"],
-            timezone_name,
-        )
-        daily_reports = bridge.fetch_authoritative_daily_overview(
-            [job["id"] for job in matched_jobs],
-            config["operationWindow"],
-            process_ids or ["7483922292361464102"],
-        )
-        authoritative_daily_entries = build_authoritative_daily_stage_entries(daily_reports)
-        authoritative_daily_missing = [
-            day_key
-            for day_key in iter_iso_dates(
+        try:
+            authority = bridge.fetch_authoritative_data(
+                [job["id"] for job in matched_jobs],
+                config["operationWindow"],
+                process_ids or ["7483922292361464102"],
+            )
+            summary_counts = build_summary_from_report(authority["overview"])
+            weekly_labels, weekly_series = build_special_series_from_report(
+                authority["special"],
                 config["operationWindow"]["start"],
                 config["operationWindow"]["end"],
+                timezone_name,
             )
-            if day_key not in authoritative_daily_entries
-        ]
-        authority_mode = "browser-report"
+            daily_reports = bridge.fetch_authoritative_daily_overview(
+                [job["id"] for job in matched_jobs],
+                config["operationWindow"],
+                process_ids or ["7483922292361464102"],
+            )
+            authoritative_daily_entries = build_authoritative_daily_stage_entries(daily_reports)
+            authoritative_daily_missing = [
+                day_key
+                for day_key in iter_iso_dates(
+                    config["operationWindow"]["start"],
+                    config["operationWindow"]["end"],
+                )
+                if day_key not in authoritative_daily_entries
+            ]
+            authority_mode = "browser-report"
+        finally:
+            bridge.close()
     except Exception:
         pass
 
